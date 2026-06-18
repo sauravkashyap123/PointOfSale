@@ -1,0 +1,389 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "/Views/Shared/_SideLayout.cshtml";
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="~/css/homedashboard.css" rel="stylesheet" />
+
+
+<div class="dash">
+    <div class="dash-content">
+        <div class="welcome-banner">
+            <div class="welcome-left">
+                <h2 id="welcomeGreeting">Good morning, Admin 👋</h2>
+                <p>Here's what's happening with your business today.</p>
+            </div>
+            <div class="welcome-meta">
+                <div class="meta-pill">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <strong id="todayDate">—</strong>
+                </div>
+                <div class="meta-pill">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <span id="todayTime">—</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI STATS -->
+        <div>
+            <div class="sec-head">
+                <h3>Key Metrics</h3>
+                <a href="#">View full report →</a>
+            </div>
+            <div class="stats-row">
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon ic-blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23" />
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                            </svg>
+                        </div>
+                        <span class="stat-badge badge-up">↑ 12.4%</span>
+                    </div>
+                    <div class="stat-value">₹2.4L</div>
+                    <div class="stat-label">Total Revenue</div>
+                    <div class="stat-sub">vs ₹2.1L last month</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" style="width:72%;background:var(--blue)"></div></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon ic-green">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                                <line x1="3" y1="6" x2="21" y2="6" />
+                                <path d="M16 10a4 4 0 0 1-8 0" />
+                            </svg>
+                        </div>
+                        <span class="stat-badge badge-up">↑ 8.1%</span>
+                    </div>
+                    <div class="stat-value">1,284</div>
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-sub">284 pending fulfilment</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" style="width:64%;background:var(--green)"></div></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon ic-amber">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                <polyline points="9 22 9 12 15 12 15 22" />
+                            </svg>
+                        </div>
+                        <span class="stat-badge badge-flat">→ 0%</span>
+                    </div>
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">Warehouses</div>
+                    <div class="stat-sub">4 active · 2 maintenance</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--amber)"></div></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon ic-purple">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                <line x1="8" y1="21" x2="16" y2="21" />
+                                <line x1="12" y1="17" x2="12" y2="21" />
+                            </svg>
+                        </div>
+                        <span class="stat-badge badge-down">↓ 3.2%</span>
+                    </div>
+                    <div class="stat-value">3,491</div>
+                    <div class="stat-label">Products</div>
+                    <div class="stat-sub">48 low stock alerts</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" style="width:88%;background:var(--purple)"></div></div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- MODULES / APPS -->
+        <div>
+            <div class="sec-head">
+                <h3>Modules</h3>
+                <a href="#">Browse all →</a>
+            </div>
+            <div class="apps-grid">
+
+                <a class="app-card" href="/Home/Dashboard">
+                    <div class="app-icon-wrap ic-blue">📊</div>
+                    <div class="app-title">Dashboard</div>
+                    <div class="app-sub">Reports & Insights</div>
+                </a>
+
+                <a class="app-card" href="/Home/AddWarehouse">
+                    <div class="app-icon-wrap ic-green">🏭</div>
+                    <div class="app-title">Warehouse</div>
+                    <div class="app-sub">Storage & Locations</div>
+                </a>
+
+                <a class="app-card" href="/Home/AddShop">
+                    <div class="app-icon-wrap ic-amber">🏪</div>
+                    <div class="app-title">Shops</div>
+                    <div class="app-sub">Manage Stores</div>
+                </a>
+
+                <a class="app-card" href="/Home/AddCategory">
+                    <div class="app-icon-wrap ic-purple">📂</div>
+                    <div class="app-title">Categories</div>
+                    <div class="app-sub">Product Groups</div>
+                </a>
+
+                <a class="app-card" href="/Home/AddProduct">
+                    <div class="app-icon-wrap ic-cyan">📦</div>
+                    <div class="app-title">Add Product</div>
+                    <div class="app-sub">New Inventory</div>
+                </a>
+
+                <a class="app-card" href="/Home/ProductList">
+                    <div class="app-icon-wrap ic-teal">📋</div>
+                    <div class="app-title">Product List</div>
+                    <div class="app-sub">All Products</div>
+                </a>
+
+                <a class="app-card" href="/Home/AddProduction">
+                    <div class="app-icon-wrap ic-orange">⚙️</div>
+                    <div class="app-title">Add Production</div>
+                    <div class="app-sub">Manufacturing</div>
+                </a>
+
+                <a class="app-card" href="/Home/ProductionList">
+                    <div class="app-icon-wrap ic-pink">🗂️</div>
+                    <div class="app-title">Production List</div>
+                    <div class="app-sub">Batches & Runs</div>
+                </a>
+
+                <a class="app-card" href="#">
+                    <div class="app-icon-wrap ic-red">📈</div>
+                    <div class="app-title">Sales Report</div>
+                    <div class="app-sub">Revenue Analytics</div>
+                </a>
+
+                <a class="app-card" href="#">
+                    <div class="app-icon-wrap ic-indigo" style="background:rgba(120,100,255,.12);color:#7864ff;">💳</div>
+                    <div class="app-title">Billing</div>
+                    <div class="app-sub">Invoices & Plans</div>
+                </a>
+
+                <a class="app-card" href="#">
+                    <div class="app-icon-wrap" style="background:rgba(150,230,50,.12);color:#6abf0e;">🤖</div>
+                    <div class="app-title">Automation</div>
+                    <div class="app-sub">Workflows & Bots</div>
+                </a>
+
+                <a class="app-card" href="#">
+                    <div class="app-icon-wrap" style="background:rgba(6,182,212,.12);color:#06b6d4;">🔒</div>
+                    <div class="app-title">Security</div>
+                    <div class="app-sub">Access & Threats</div>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- BOTTOM PANELS -->
+        <div class="bottom-grid">
+
+            <!-- RECENT ACTIVITY -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h4>Recent Activity</h4>
+                    <a href="#">View all →</a>
+                </div>
+                <div class="panel-body">
+
+                    <div class="activity-item">
+                        <div class="act-icon ic-green">✅</div>
+                        <div class="act-body">
+                            <div class="act-title">Order #ORD-2841 fulfilled</div>
+                            <div class="act-desc">Dispatched from Warehouse WH-001 · Mumbai</div>
+                        </div>
+                        <div class="act-time">2m ago</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="act-icon ic-blue">👤</div>
+                        <div class="act-body">
+                            <div class="act-title">New user registered</div>
+                            <div class="act-desc">sarah.k@example.com joined as Operator</div>
+                        </div>
+                        <div class="act-time">14m ago</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="act-icon ic-amber">⚠️</div>
+                        <div class="act-body">
+                            <div class="act-title">Low stock alert — SKU #P-0094</div>
+                            <div class="act-desc">Only 12 units remaining · Reorder suggested</div>
+                        </div>
+                        <div class="act-time">1h ago</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="act-icon ic-purple">🏭</div>
+                        <div class="act-body">
+                            <div class="act-title">Production batch #PB-441 completed</div>
+                            <div class="act-desc">1,200 units added to inventory</div>
+                        </div>
+                        <div class="act-time">3h ago</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="act-icon ic-red">❌</div>
+                        <div class="act-body">
+                            <div class="act-title">Payment failed — Order #ORD-2835</div>
+                            <div class="act-desc">Gateway timeout · Retry pending</div>
+                        </div>
+                        <div class="act-time">5h ago</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- QUICK TASKS -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h4>Quick Tasks</h4>
+                    <a href="#">Manage →</a>
+                </div>
+                <div class="panel-body">
+
+                    <div class="task-item done" onclick="this.classList.toggle('done')">
+                        <div class="task-cb">✓</div>
+                        <div class="task-text">Review Q3 financial report</div>
+                        <span class="task-tag badge-up">Done</span>
+                    </div>
+
+                    <div class="task-item" onclick="this.classList.toggle('done')">
+                        <div class="task-cb"></div>
+                        <div class="task-text">Update product catalogue</div>
+                        <span class="task-tag" style="background:var(--amber-light);color:var(--amber)">Pending</span>
+                    </div>
+
+                    <div class="task-item" onclick="this.classList.toggle('done')">
+                        <div class="task-cb"></div>
+                        <div class="task-text">Approve 3 supplier invoices</div>
+                        <span class="task-tag" style="background:var(--red-light);color:var(--red)">Urgent</span>
+                    </div>
+
+                    <div class="task-item done" onclick="this.classList.toggle('done')">
+                        <div class="task-cb">✓</div>
+                        <div class="task-text">Verify new warehouse WH-007</div>
+                        <span class="task-tag badge-up">Done</span>
+                    </div>
+
+                    <div class="task-item" onclick="this.classList.toggle('done')">
+                        <div class="task-cb"></div>
+                        <div class="task-text">Configure tax rules for FY2025</div>
+                        <span class="task-tag" style="background:var(--blue-light);color:var(--blue)">Dev</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- QUICK STATS -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h4>Live Snapshot</h4>
+                    <a href="#">Refresh →</a>
+                </div>
+                <div class="panel-body">
+
+                    <div class="quick-stat-row">
+                        <div class="qs-label"><div class="qs-dot" style="background:var(--green)"></div>Active Shops</div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span class="qs-value">14</span>
+                            <span class="qs-change badge-up">+2</span>
+                        </div>
+                    </div>
+
+                    <div class="quick-stat-row">
+                        <div class="qs-label"><div class="qs-dot" style="background:var(--blue)"></div>Today's Sales</div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span class="qs-value">₹48,210</span>
+                            <span class="qs-change badge-up">↑9%</span>
+                        </div>
+                    </div>
+
+                    <div class="quick-stat-row">
+                        <div class="qs-label"><div class="qs-dot" style="background:var(--amber)"></div>Pending Orders</div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span class="qs-value">284</span>
+                            <span class="qs-change badge-down">↑18</span>
+                        </div>
+                    </div>
+
+                    <div class="quick-stat-row">
+                        <div class="qs-label"><div class="qs-dot" style="background:var(--purple)"></div>Stock Value</div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span class="qs-value">₹9.2L</span>
+                            <span class="qs-change badge-flat">→</span>
+                        </div>
+                    </div>
+
+                    <div class="quick-stat-row">
+                        <div class="qs-label"><div class="qs-dot" style="background:var(--red)"></div>Low Stock Items</div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span class="qs-value">48</span>
+                            <span class="qs-change badge-down">+5</span>
+                        </div>
+                    </div>
+
+                    <div class="quick-stat-row">
+                        <div class="qs-label"><div class="qs-dot" style="background:var(--cyan)"></div>Active Users</div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span class="qs-value">7</span>
+                            <span class="qs-change badge-up">online</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div><!-- /dash-content -->
+    <!-- FOOTER -->
+    <div class="dash-footer">
+        POSPro &nbsp;·&nbsp; <span>v3.2.1</span> &nbsp;·&nbsp; All systems operational &nbsp;·&nbsp; Last sync <span id="lastSync">—</span>
+    </div>
+
+</div><!-- /dash -->
+
+<script>
+    // Greeting
+    (function(){
+        var h = new Date().getHours();
+        var g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+        document.getElementById('welcomeGreeting').textContent = g + ', Admin 👋';
+    })();
+
+    // Date & Time
+    function tick(){
+        var d = new Date();
+        var days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        document.getElementById('todayDate').textContent =
+            days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+        document.getElementById('todayTime').textContent =
+            d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('lastSync').textContent =
+            d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    }
+    tick();
+    setInterval(tick, 1000);
+</script>

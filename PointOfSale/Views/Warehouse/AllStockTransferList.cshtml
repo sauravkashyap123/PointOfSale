@@ -1,0 +1,595 @@
+﻿@{
+    ViewData["Title"] = "Stock Transfer List";
+    Layout = "~/Views/Shared/_SideLayout.cshtml";
+}
+
+<link href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    .st-page {
+        font-family: 'DM Sans', sans-serif;
+        background: #f4f3ef;
+        min-height: 100vh;
+        padding: 2rem 1.5rem;
+        color: #1a1a18;
+    }
+
+    /* ── Card ── */
+    .st-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #e2e0d8;
+        overflow: hidden;
+        max-width: 1400px;
+        margin: 0 auto;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    /* ── Card Header ── */
+    .st-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 1.4rem 1.8rem;
+        border-bottom: 1px solid #e2e0d8;
+        background: #fafaf8;
+    }
+
+        .st-card-header h4 {
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            color: #1a1a18;
+        }
+
+    .st-header-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: #1a1a18;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .st-header-icon svg {
+            width: 17px;
+            height: 17px;
+            stroke: #ffffff;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+    /* ── Card Body ── */
+    .st-card-body {
+        padding: 1.6rem 1.8rem;
+    }
+
+    /* ── Filter Bar ── */
+    .st-filter-bar {
+        display: flex;
+        align-items: flex-end;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 1.8rem;
+        padding: 1.2rem 1.4rem;
+        background: #f4f3ef;
+        border-radius: 10px;
+        border: 1px solid #e2e0d8;
+    }
+
+    .st-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex: 1;
+        min-width: 160px;
+    }
+
+        .st-field label {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #6b6b65;
+        }
+
+    .st-input {
+        height: 40px;
+        padding: 0 12px;
+        border: 1px solid #d6d4cc;
+        border-radius: 8px;
+        background: #ffffff;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        color: #1a1a18;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        width: 100%;
+    }
+
+        .st-input:focus {
+            border-color: #1a1a18;
+            box-shadow: 0 0 0 3px rgba(26,26,24,0.08);
+        }
+
+    /* ── Buttons ── */
+    .st-btn-group {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+    }
+
+    .st-btn {
+        height: 40px;
+        padding: 0 20px;
+        border: none;
+        border-radius: 8px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s, opacity 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+    }
+
+        .st-btn svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+    .st-btn-primary {
+        background: #1a1a18;
+        color: #ffffff;
+    }
+
+        .st-btn-primary:hover {
+            background: #2e2e2b;
+        }
+
+        .st-btn-primary:active {
+            transform: scale(0.98);
+        }
+
+    .st-btn-secondary {
+        background: #ebebeb;
+        color: #3a3a38;
+    }
+
+        .st-btn-secondary:hover {
+            background: #deded8;
+        }
+
+        .st-btn-secondary:active {
+            transform: scale(0.98);
+        }
+
+    /* ── DataTable Overrides ── */
+    #tblTransfer_wrapper {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13.5px;
+    }
+
+    /* Search + Length row */
+    .dataTables_length,
+    .dataTables_filter {
+        margin-bottom: 12px;
+        color: #6b6b65;
+        font-size: 13px;
+    }
+
+        .dataTables_length select,
+        .dataTables_filter input {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            padding: 5px 10px;
+            border: 1px solid #d6d4cc;
+            border-radius: 7px;
+            outline: none;
+            background: #fafaf8;
+            color: #1a1a18;
+        }
+
+            .dataTables_filter input:focus {
+                border-color: #1a1a18;
+                box-shadow: 0 0 0 3px rgba(26,26,24,0.08);
+            }
+
+    /* Table */
+    table#tblTransfer {
+        width: 100% !important;
+        border-collapse: collapse;
+    }
+
+        table#tblTransfer thead tr {
+            background: #f4f3ef;
+        }
+
+        table#tblTransfer thead th {
+            padding: 11px 14px;
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #6b6b65;
+            border-bottom: 2px solid #e2e0d8;
+            border-top: none;
+            white-space: nowrap;
+        }
+
+        table#tblTransfer tbody td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #f0eeea;
+            color: #1a1a18;
+            font-family: 'DM Sans', sans-serif;
+            vertical-align: middle;
+        }
+
+        table#tblTransfer tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        table#tblTransfer tbody tr:hover td {
+            background: #fafaf8;
+        }
+
+        /* Serial number cell */
+        table#tblTransfer tbody td:first-child {
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            color: #9c9c96;
+            width: 48px;
+        }
+
+    /* Type badge */
+    .badge-type {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    .badge-in {
+        background: #eaf3de;
+        color: #3b6d11;
+    }
+
+    .badge-out {
+        background: #fcebeb;
+        color: #a32d2d;
+    }
+
+    .badge-default {
+        background: #ebebeb;
+        color: #3a3a38;
+    }
+
+    /* Qty cell */
+    .qty-cell {
+        font-family: 'DM Mono', monospace;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    /* Date cell */
+    .date-cell {
+        font-size: 13px;
+        color: #4a4a48;
+    }
+
+    /* DataTable buttons (Excel export) */
+    .dt-buttons {
+        margin-bottom: 14px;
+    }
+
+    .dt-button {
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        padding: 7px 16px !important;
+        border-radius: 8px !important;
+        border: 1px solid #d6d4cc !important;
+        background: #ffffff !important;
+        color: #3a3a38 !important;
+        cursor: pointer;
+        box-shadow: none !important;
+        transition: background 0.15s, border-color 0.15s;
+    }
+
+        .dt-button:hover {
+            background: #f4f3ef !important;
+            border-color: #b8b6ae !important;
+        }
+
+    /* Pagination */
+    .dataTables_paginate {
+        font-size: 13px;
+        color: #6b6b65;
+        margin-top: 12px;
+    }
+
+        .dataTables_paginate .paginate_button {
+            padding: 5px 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            border: none !important;
+            background: transparent !important;
+            color: #3a3a38 !important;
+            transition: background 0.12s;
+        }
+
+            .dataTables_paginate .paginate_button:hover {
+                background: #ebebeb !important;
+                color: #1a1a18 !important;
+            }
+
+            .dataTables_paginate .paginate_button.current,
+            .dataTables_paginate .paginate_button.current:hover {
+                background: #1a1a18 !important;
+                color: #ffffff !important;
+                border-radius: 7px;
+            }
+
+            .dataTables_paginate .paginate_button.disabled,
+            .dataTables_paginate .paginate_button.disabled:hover {
+                opacity: 0.35;
+                cursor: default;
+            }
+
+    .dataTables_info {
+        font-size: 13px;
+        color: #9c9c96;
+        padding-top: 14px;
+    }
+
+    /* Empty state */
+    table#tblTransfer tbody td.dataTables_empty {
+        text-align: center;
+        padding: 3rem;
+        color: #9c9c96;
+        font-size: 14px;
+    }
+
+    /* Loading indicator */
+    .dataTables_processing {
+        border: 1px solid #e2e0d8 !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 13px !important;
+        color: #6b6b65 !important;
+        background: #ffffff !important;
+    }
+
+    /* Responsive */
+    @@media (max-width: 720px) {
+        .st-filter-bar {
+            flex-direction: column;
+        }
+
+        .st-field {
+            min-width: 100%;
+        }
+
+        .st-btn-group {
+            width: 100%;
+        }
+
+        .st-btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="st-page">
+    <div class="st-card">
+
+        <div class="st-card-header">
+            <div class="st-header-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                    <path d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01" />
+                </svg>
+            </div>
+            <h4>Stock Transfer List</h4>
+        </div>
+
+        <div class="st-card-body">
+
+            <div class="st-filter-bar" role="search" aria-label="Filter transfers">
+                <div class="st-field">
+                    <label for="fromDate">From Date</label>
+                    <input type="date" id="fromDate" class="st-input" />
+                </div>
+                <div class="st-field">
+                    <label for="toDate">To Date</label>
+                    <input type="date" id="toDate" class="st-input" />
+                </div>
+                <div class="st-btn-group">
+                    <button class="st-btn st-btn-primary" id="btnSearch" type="button">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                        Search
+                    </button>
+                    <button class="st-btn st-btn-secondary" id="btnReset" type="button">
+                        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-4.6" /></svg>
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <table id="tblTransfer" class="w-100" aria-label="Stock Transfer Records">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Warehouse</th>
+                        <th>Shop</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Unit</th>
+                        <th>Qty</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+@* <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script> *@
+
+<script>
+    var table;
+
+    $(document).ready(function () {
+
+    loadDataTable();
+
+    $("#btnSearch").on("click", function () {
+    // Validate date range before reload
+    var from = $("#fromDate").val();
+    var to   = $("#toDate").val();
+
+    if (from && to && from > to) {
+    alert("'From Date' cannot be later than 'To Date'.");
+    return;
+    }
+
+    table.ajax.reload();
+    });
+
+    $("#btnReset").on("click", function () {
+    $("#fromDate").val('');
+    $("#toDate").val('');
+    table.ajax.reload();
+    });
+    });
+
+    function loadDataTable() {
+
+    // Destroy existing instance safely before re-init
+    if ($.fn.DataTable && $.fn.DataTable.isDataTable && $.fn.DataTable.isDataTable("#tblTransfer")) {
+        $("#tblTransfer").DataTable().destroy();
+    }
+
+    table = $("#tblTransfer").DataTable({
+
+    ajax: {
+    url:  '/Warehouse/GetAllStockTransferList',
+    type: 'GET',
+    data: function (d) {
+    d.fromDate = $("#fromDate").val();
+    d.toDate   = $("#toDate").val();
+    },
+    error: function (xhr, error, thrown) {
+    console.error("DataTable AJAX error:", error, thrown);
+    }
+    },
+
+    dom: 'Blfrtip',   // B = buttons, l = length, f = filter, r = processing, t = table, i = info, p = pagination
+
+    buttons: [
+    {
+    extend:    'excelHtml5',
+    text:      '&#8595; Export Excel',
+    className: '',
+    title:     'Stock Transfer List'
+    }
+    ],
+
+    processing: true,
+    serverSide: false,
+    ordering:   true,
+    pageLength: 25,
+
+    language: {
+    processing: "Loading transfers…",
+    emptyTable: "No transfer records found.",
+    zeroRecords: "No records match the selected filter."
+    },
+
+    columns: [
+    {
+    // Serial number — not sortable, not from data
+    data: null,
+    orderable: false,
+    searchable: false,
+    render: function (data, type, row, meta) {
+    return meta.row + 1;
+    }
+    },
+    { data: 'warehousename', defaultContent: '—' },
+    { data: 'shopName',      defaultContent: '—' },
+    { data: 'productName',   defaultContent: '—' },
+    { data: 'categoryName',  defaultContent: '—' },
+    { data: 'unitName',      defaultContent: '—' },
+    {
+    data: 'quantity',
+    defaultContent: '0',
+    className: 'qty-cell',
+    render: function (data, type) {
+    if (type === 'display') {
+    return '<span class="qty-cell">' + (parseFloat(data) || 0).toLocaleString('en-IN') + '</span>';
+    }
+    return data;
+    }
+    },
+    {
+    data: 'transactionType',
+    defaultContent: '—',
+    render: function (data, type) {
+    if (type === 'display') {
+    var d = (data || '').toString().toLowerCase();
+    var cls = d === 'in'  ? 'badge-type badge-in'  :
+    d === 'out' ? 'badge-type badge-out' :
+    'badge-type badge-default';
+    return '<span class="' + cls + '">' + (data || '—') + '</span>';
+    }
+    return data;
+    }
+    },
+    {
+    data: 'transferDate',
+    defaultContent: '—',
+    render: function (data, type) {
+    if (!data) return '—';
+    var date = new Date(data);
+    if (isNaN(date.getTime())) return data; // guard invalid dates
+    if (type === 'display') {
+    return '<span class="date-cell">' + date.toLocaleDateString('en-GB') + '</span>';
+    }
+    // For sorting use ISO string
+    return date.toISOString();
+    }
+    }
+    ]
+    });
+    }
+</script>

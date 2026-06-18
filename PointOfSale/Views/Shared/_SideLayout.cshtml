@@ -1,0 +1,759 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Responsive Sidebar</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        /* =============================================
+           CSS VARIABLES — change these to retheme
+           ============================================= */
+        :root {
+            --sb-bg: #1e1e2e; /* sidebar background */
+            --sb-accent: #7c3aed; /* active / badge color */
+            --sb-accent-lt: #a78bfa; /* active text / icon */
+            --sb-text: #e2e8f0; /* primary text */
+            --sb-muted: #94a3b8; /* muted text */
+            --sb-hover: rgba(124,58,237,0.15);
+            --sb-border: rgba(255,255,255,0.07);
+            --sb-width: 260px; /* expanded width */
+            --sb-mini: 56px; /* collapsed width (desktop) */
+            --topbar-h: 56px;
+            --radius: 8px;
+        }
+
+        /* =============================================
+           RESET
+           ============================================= */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        #sidebarlogo{
+            height: 34px;
+            border: 2px solid red;
+            border-radius: 7px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* =============================================
+           LAYOUT
+           ============================================= */
+        .layout {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* =============================================
+           SIDEBAR
+           ============================================= */
+        .sidebar {
+            width: var(--sb-width);
+            background: var(--sb-bg);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 100;
+            transition: width 0.3s cubic-bezier(.4,0,.2,1);
+            overflow: hidden;
+        }
+
+            /* --- Collapsed state (desktop) --- */
+            .sidebar.collapsed {
+                width: var(--sb-mini);
+            }
+
+                .sidebar.collapsed .sb-logo-text,
+                .sidebar.collapsed .nav-label,
+                .sidebar.collapsed .nav-badge,
+                .sidebar.collapsed .section-label,
+                .sidebar.collapsed .chevron,
+                .sidebar.collapsed .dropdown-body,
+                .sidebar.collapsed .color-row {
+                    opacity: 0;
+                    pointer-events: none;
+                }
+
+                .sidebar.collapsed .nav-item {
+                    justify-content: center;
+                }
+
+        /* --- Logo / Brand --- */
+        .sb-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 16px 14px;
+            border-bottom: 0.5px solid var(--sb-border);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .sb-logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius);
+            background: var(--sb-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+            .sb-logo-icon i {
+                color: #fff;
+                font-size: 17px;
+            }
+
+        .sb-logo-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* --- Color Picker Row --- */
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            border-bottom: 0.5px solid var(--sb-border);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+            .color-row span {
+                font-size: 11px;
+                color: var(--sb-muted);
+                margin-right: 2px;
+            }
+
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            flex-shrink: 0;
+            border: 2px solid transparent;
+            transition: border-color 0.15s, transform 0.15s;
+        }
+
+            .color-dot:hover {
+                transform: scale(1.2);
+            }
+
+            .color-dot.active {
+                border-color: #fff;
+            }
+
+        /* --- Nav --- */
+        .sb-nav {
+            flex: 1;
+            padding: 10px 8px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+            /* scrollbar */
+            .sb-nav::-webkit-scrollbar {
+                width: 4px;
+            }
+
+            .sb-nav::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            .sb-nav::-webkit-scrollbar-thumb {
+                background: var(--sb-border);
+                border-radius: 2px;
+            }
+
+        .section-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--sb-muted);
+            padding: 14px 10px 6px;
+            white-space: nowrap;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            color: var(--sb-muted);
+            transition: background 0.14s, color 0.14s;
+            white-space: nowrap;
+            overflow: hidden;
+            user-select: none;
+        }
+
+            .nav-item:hover {
+                background: var(--sb-hover);
+                color: var(--sb-text);
+            }
+
+            .nav-item.active {
+                background: var(--sb-hover);
+                color: var(--sb-accent-lt);
+            }
+
+            .nav-item i.icon {
+                font-size: 18px;
+                flex-shrink: 0;
+            }
+
+        .nav-label {
+            font-size: 13.5px;
+            flex: 1;
+        }
+
+        .nav-badge {
+            font-size: 11px;
+            background: var(--sb-accent);
+            color: #fff;
+            padding: 1px 7px;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+
+        /* --- Dropdown --- */
+        .dropdown-toggle .chevron {
+            transition: transform 0.25s;
+            flex-shrink: 0;
+            font-size: 14px;
+            margin-left: auto;
+        }
+
+        .dropdown-toggle.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(.4,0,.2,1);
+        }
+
+            .dropdown-body.open {
+                max-height: 300px;
+            }
+
+        .sub-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px 7px 38px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--sb-muted);
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+
+            .sub-item::before {
+                content: '';
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                background: currentColor;
+                flex-shrink: 0;
+                opacity: 0.55;
+            }
+
+            .sub-item:hover {
+                background: var(--sb-hover);
+                color: var(--sb-text);
+            }
+
+            .sub-item.active {
+                color: var(--sb-accent-lt);
+            }
+
+        /* --- Footer --- */
+        .sb-footer {
+            padding: 10px 8px;
+            border-top: 0.5px solid var(--sb-border);
+        }
+
+        /* =============================================
+           MAIN CONTENT
+           ============================================= */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            min-width: 0;
+        }
+
+        /* --- Top Bar --- */
+        .topbar {
+            height: var(--topbar-h);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 20px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .topbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-toggle {
+            background: none;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 5px 8px;
+            cursor: pointer;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            transition: background 0.12s;
+        }
+
+            .btn-toggle:hover {
+                background: #f8fafc;
+            }
+
+            .btn-toggle i {
+                font-size: 16px;
+            }
+
+        /* hamburger — only visible on mobile */
+        .btn-hamburger {
+            display: none;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--sb-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* --- Content Area --- */
+        .content-area {
+            flex: 1;
+            /* padding: 28px 32px; */
+        }
+
+            .content-area h1 {
+                font-size: 22px;
+                font-weight: 500;
+                margin-bottom: 6px;
+            }
+
+            .content-area p.lead {
+                font-size: 14px;
+                color: #64748b;
+                line-height: 1.7;
+                margin-bottom: 24px;
+            }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border-radius: var(--radius);
+            padding: 16px;
+        }
+
+            .stat-card .lbl {
+                font-size: 12px;
+                color: #94a3b8;
+                margin-bottom: 8px;
+            }
+
+            .stat-card .val {
+                font-size: 22px;
+                font-weight: 500;
+            }
+
+        /* =============================================
+           OVERLAY (mobile)
+           ============================================= */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
+        }
+
+            .overlay.show {
+                display: block;
+            }
+
+        /* =============================================
+           MOBILE  ( ≤ 640px )
+           ============================================= */
+        @@media (max-width: 640px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+                width: var(--sb-width) !important; /* override collapsed */
+            }
+
+                .sidebar.mobile-open {
+                    transform: translateX(0);
+                }
+            /* show hamburger, hide desktop collapse btn */
+            .btn-hamburger {
+                display: flex;
+            }
+
+            .btn-collapse {
+                display: none;
+            }
+
+            .content-area {
+                padding: 20px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="layout">
+
+        <!-- OVERLAY (mobile tap-to-close) -->
+        <div class="overlay" id="overlay" onclick="closeMobile()"></div>
+
+        <!-- ===================== SIDEBAR ===================== -->
+        <aside class="sidebar" id="sidebar">
+
+            <!-- Logo -->
+            <div class="sb-logo">
+                <div class="sb-logo-icon">
+                    <img src="~/images/srisaisweets.jpg" id="sidebarlogo"  />@* <i class="ti ti-bolt"></i> *@
+                </div>
+                <span class="sb-logo-text">Sri Sai Sweets</span>
+            </div>
+
+            <!-- Color Switcher -->
+            <div class="color-row">
+                <span>Theme</span>
+                <div class="color-dot active"
+                     style="background:#1e1e2e"
+                     data-bg="#1e1e2e" data-accent="#7c3aed" data-alight="#a78bfa"
+                     title="Dark Purple" onclick="setColor(this)"></div>
+                <div class="color-dot"
+                     style="background:#0f1f38"
+                     data-bg="#0f1f38" data-accent="#2563eb" data-alight="#60a5fa"
+                     title="Dark Blue" onclick="setColor(this)"></div>
+                <div class="color-dot"
+                     style="background:#0d2416"
+                     data-bg="#0d2416" data-accent="#16a34a" data-alight="#4ade80"
+                     title="Dark Green" onclick="setColor(this)"></div>
+                <div class="color-dot"
+                     style="background:#1a1212"
+                     data-bg="#1a1212" data-accent="#dc2626" data-alight="#f87171"
+                     title="Dark Red" onclick="setColor(this)"></div>
+                <div class="color-dot"
+                     style="background:#1c1500"
+                     data-bg="#1c1500" data-accent="#d97706" data-alight="#fbbf24"
+                     title="Dark Amber" onclick="setColor(this)"></div>
+                <div class="color-dot"
+                     style="background:#f1f5f9; border: 1px solid #cbd5e1;"
+                     data-bg="#f1f5f9" data-accent="#7c3aed" data-alight="#6d28d9"
+                     data-text="#1e1b4b" data-muted="#64748b" data-border="rgba(0,0,0,0.08)"
+                     title="Light" onclick="setColor(this)"></div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="sb-nav" aria-label="Main navigation">
+
+                <div class="section-label">Main</div>
+
+                <a href="/Home/Index">
+                    <div class="nav-item active" onclick="setActive(this)">
+                    <i class="ti ti-layout-dashboard icon"></i>
+                    <span class="nav-label">Dashboard</span>
+                    </div>
+                </a>
+
+                <div class="nav-item" onclick="setActive(this)">
+                    <i class="ti ti-chart-bar icon"></i>
+                    <span class="nav-label">Analytics</span>
+                    <span class="nav-badge">5</span>
+                </div>
+
+                <!-- Dropdown: Projects -->
+                <div class="nav-item dropdown-toggle" id="dd1-toggle" onclick="toggleDropdown('dd1')">
+                    <i class="ti ti-folder icon"></i>
+                    <span class="nav-label">Master key</span>
+                    <i class="ti ti-chevron-down chevron"></i>
+                </div>
+                <div class="dropdown-body" id="dd1">
+                    <a href="/Home/AddShop"><div class="sub-item" onclick="setActive(this)">Add Shop</div></a>
+                    <a href="/Home/AddWarehouse"><div class="sub-item" onclick="setActive(this)">Add Warehouse</div></a>
+                    <a href="/Home/AddCategory"><div class="sub-item" onclick="setActive(this)">Add Category</div></a>
+                    <a href="/Home/AddUnit"><div class="sub-item" onclick="setActive(this)">Add Unit</div></a>
+                </div>
+
+                <!-- Dropdown: Team -->
+                <div class="nav-item dropdown-toggle" id="dd2-toggle" onclick="toggleDropdown('dd2')">
+                    <i class="ti ti-users icon"></i>
+                    <span class="nav-label">Products</span>
+                    <i class="ti ti-chevron-down chevron"></i>
+                </div>
+                <div class="dropdown-body" id="dd2">
+                    <a href="/Home/Addproduct"><div class="sub-item" onclick="setActive(this)">Add Product</div></a>
+                    <a href="/Home/ProductList"><div class="sub-item" onclick="setActive(this)">Product List</div></a>
+                    @* <a href="/Home/AddProductionUnit"><div class="sub-item" onclick="setActive(this)">Add production Unit</div></a> *@
+                    <a href="/Home/AddProduction"><div class="sub-item" onclick="setActive(this)">Add Production</div></a>
+                    <a href="/Home/ProductionList"><div class="sub-item" onclick="setActive(this)">Production List</div></a>
+                </div>
+
+                <div class="nav-item dropdown-toggle" id="dd3-toggle" onclick="toggleDropdown('dd3')">
+                    <i class="ti ti-users icon"></i>
+                    <span class="nav-label">Purchase Entry Master</span>
+                    <i class="ti ti-chevron-down chevron"></i>
+                </div>
+                <div class="dropdown-body" id="dd3">
+                    <a href="/Purchase/AddPurchaseProduct"><div class="sub-item" onclick="setActive(this)">Add Purchase Product</div></a>
+                    <a href="/Purchase/PurchaseProductList"><div class="sub-item" onclick="setActive(this)">Purchase Product List</div></a>
+                    @* <a href="/Home/AddProductionUnit"><div class="sub-item" onclick="setActive(this)">Add production Unit</div></a> *@
+                    <a href="/Purchase/PurchaseEntry"><div class="sub-item" onclick="setActive(this)">Purchase Entry</div></a>
+                    <a href="/Purchase/PurchaseEntryList"><div class="sub-item" onclick="setActive(this)">Purchase Entry List</div></a>
+                   
+                </div>
+                <div class="nav-item dropdown-toggle" id="dd5-toggle" onclick="toggleDropdown('dd4')">
+                    <i class="ti ti-users icon"></i>
+                    <span class="nav-label">Staff</span>
+                    <i class="ti ti-chevron-down chevron"></i>
+                </div>
+                <div class="dropdown-body" id="dd4">
+                    <a href="/Home/CreateStaff"><div class="sub-item" onclick="setActive(this)">Create Staff</div></a>
+                    <a href="/Home/StaffList"><div class="sub-item" onclick="setActive(this)">Staff List</div></a>
+                    
+                </div>
+                <div class="nav-item dropdown-toggle" id="dd5-toggle" onclick="toggleDropdown('dd5')">
+                    <i class="ti ti-users icon"></i>
+                    <span class="nav-label">Manage Stock</span>
+                    <i class="ti ti-chevron-down chevron"></i>
+                </div>
+                <div class="dropdown-body" id="dd5">
+                    <a href="/Billing/ViewStock"><div class="sub-item" onclick="setActive(this)">View Stock</div></a>
+                    <a href="/Warehouse/StockTransfer"><div class="sub-item" onclick="setActive(this)">Stock Transfer</div></a>
+                    <a href="/Warehouse/AllStockTransferList"><div class="sub-item" onclick="setActive(this)">All Stock Transfer List</div></a>
+                    <a href="/Warehouse/StockAdjustment"><div class="sub-item" onclick="setActive(this)">Stock Adjustment</div></a>
+                </div>
+                <div class="nav-item dropdown-toggle" id="dd6-toggle" onclick="toggleDropdown('dd6')">
+                    <i class="ti ti-users icon"></i>
+                    <span class="nav-label">Sale</span>
+                    <i class="ti ti-chevron-down chevron"></i>
+                </div>
+                <div class="dropdown-body" id="dd6">
+                    <a href="/Billing/ShopAllSaleList"><div class="sub-item" onclick="setActive(this)">Shop Wise SaleList</div></a>
+                   
+                </div>
+
+                <div class="section-label">Manage</div>
+
+                <div class="nav-item" onclick="setActive(this)">
+                    <i class="ti ti-file-invoice icon"></i>
+                    <span class="nav-label">Billing</span>
+                </div>
+
+                <!-- Dropdown: Settings -->
+                <div class="nav-item dropdown-toggle" id="dd7-toggle" onclick="toggleDropdown('dd7')">
+                    <i class="ti ti-settings icon"></i>
+                    <span class="nav-label">Settings</span>
+                    <i class="ti ti-chevron-down chevron"></i>
+                </div>
+                <div class="dropdown-body" id="dd7">
+                    <a href="/Billing/PrintBilllData"><div class="sub-item" onclick="setActive(this)">Save Bill Data</div></a>
+                    <a href="/Billing/AllPrintDataContent"><div class="sub-item" onclick="setActive(this)">All Print Data Content</div></a>
+                    <div class="sub-item" onclick="setActive(this)">Notifications</div>
+                    <div class="sub-item" onclick="setActive(this)">Security</div>
+                    <div class="sub-item" onclick="setActive(this)">Integrations</div>
+                </div>
+
+            </nav>
+
+            <!-- Footer links -->
+            <div class="sb-footer">
+                <div class="nav-item" onclick="setActive(this)">
+                    <i class="ti ti-help-circle icon"></i>
+                    <span class="nav-label">Help &amp; Support</span>
+                </div>
+                <a href="/Account/Logout">
+                    <div class="nav-item" onclick="setActive(this)">
+                        <i class="ti ti-logout icon"></i>
+                        <span class="nav-label">Log out</span>
+                    </div>
+                </a>
+            </div>
+
+        </aside>
+        <!-- ================== END SIDEBAR ================== -->
+        <!-- =================== MAIN CONTENT =================== -->
+        <div class="main-content">
+
+            <!-- Top Bar -->
+            <header class="topbar">
+                <!-- Mobile hamburger -->
+                <button class="btn-toggle btn-hamburger" onclick="openMobile()" aria-label="Open menu">
+                    <i class="ti ti-menu-2"></i>
+                </button>
+                <!-- Desktop collapse -->
+                <button class="btn-toggle btn-collapse" onclick="toggleCollapse()" id="collapseBtn" aria-label="Toggle sidebar">
+                    <i class="ti ti-layout-sidebar"></i>
+                </button>
+
+                <span class="topbar-title">Dashboard</span>
+
+                <div class="topbar-right">
+                    <i class="ti ti-bell" style="font-size:20px;color:#64748b;cursor:pointer;"></i>
+                    <div class="avatar">JD</div>
+                </div>
+            </header>
+
+            <!-- Page Body -->
+            <main class="content-area">
+                @* <h1>Good morning, John 👋</h1>
+                <p class="lead">Here's an overview of your workspace activity today.</p>
+
+                <div class="card-grid">
+                    <div class="stat-card"><div class="lbl">Projects</div><div class="val">24</div></div>
+                    <div class="stat-card"><div class="lbl">Tasks</div><div class="val">138</div></div>
+                    <div class="stat-card"><div class="lbl">Team Members</div><div class="val">12</div></div>
+                    <div class="stat-card"><div class="lbl">Revenue</div><div class="val">$9.4k</div></div>
+                </div>
+
+                <p style="font-size:14px;color:#64748b;">
+                    Main content goes here. The sidebar collapses on desktop via the button in the top bar,
+                    and slides in as a drawer on mobile via the hamburger menu.
+                </p> *@
+
+                @RenderBody()
+            </main>
+
+        </div>
+        <!-- ================ END MAIN CONTENT ================ -->
+
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        let isCollapsed = false;
+
+        /* ---- Desktop: collapse / expand ---- */
+        function toggleCollapse() {
+          isCollapsed = !isCollapsed;
+          document.getElementById('sidebar').classList.toggle('collapsed', isCollapsed);
+        }
+
+        /* ---- Mobile: open / close drawer ---- */
+        function openMobile() {
+          document.getElementById('sidebar').classList.add('mobile-open');
+          document.getElementById('overlay').classList.add('show');
+        }
+        function closeMobile() {
+          document.getElementById('sidebar').classList.remove('mobile-open');
+          document.getElementById('overlay').classList.remove('show');
+        }
+
+        /* ---- Dropdown toggle ---- */
+        function toggleDropdown(id) {
+          const body   = document.getElementById(id);
+          const toggle = document.getElementById(id + '-toggle');
+          const isOpen = body.classList.contains('open');
+
+          // Close all
+          document.querySelectorAll('.dropdown-body').forEach(b => b.classList.remove('open'));
+          document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('open'));
+
+          // Open clicked one if it was closed
+          if (!isOpen) {
+            body.classList.add('open');
+            toggle.classList.add('open');
+          }
+        }
+
+        /* ---- Active state ---- */
+        function setActive(el) {
+          document.querySelectorAll('.nav-item:not(.dropdown-toggle), .sub-item')
+                  .forEach(i => i.classList.remove('active'));
+          el.classList.add('active');
+        }
+
+        /* ---- Color theme switcher ---- */
+        function setColor(dot) {
+          document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+          dot.classList.add('active');
+
+          const sb = document.getElementById('sidebar');
+          sb.style.setProperty('--sb-bg',     dot.dataset.bg);
+          sb.style.setProperty('--sb-accent', dot.dataset.accent);
+          sb.style.setProperty('--sb-accent-lt', dot.dataset.alight || dot.dataset.accent);
+          sb.style.setProperty('--sb-text',   dot.dataset.text   || '#e2e8f0');
+          sb.style.setProperty('--sb-muted',  dot.dataset.muted  || '#94a3b8');
+          sb.style.setProperty('--sb-border', dot.dataset.border || 'rgba(255,255,255,0.07)');
+          sb.style.setProperty('--sb-hover',  dot.dataset.hover  || 'rgba(124,58,237,0.15)');
+
+          // Update badge colors
+          document.querySelectorAll('.nav-badge').forEach(b => b.style.background = dot.dataset.accent);
+        }
+    </script>
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>

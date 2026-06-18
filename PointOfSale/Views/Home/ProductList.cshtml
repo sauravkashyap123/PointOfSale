@@ -1,0 +1,930 @@
+﻿@model POSModels.Models.MithaiShop.Product
+
+@{
+    ViewData["Title"] = "Product List";
+    Layout = "/Views/Shared/_SideLayout.cshtml";
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+<style>
+    .pl-page {
+        padding: 1.5rem 1rem;
+    }
+
+    /* ── Header ── */
+    .pl-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .pl-title-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .pl-icon-box {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #0C447C;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .pl-icon-box i {
+            font-size: 21px;
+            color: #fff;
+        }
+
+    .pl-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0C447C;
+        margin: 0;
+    }
+
+    .pl-subtitle {
+        font-size: 12px;
+        color: #888780;
+        margin: 0;
+    }
+
+    .btn-add-prod {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #0C447C;
+        color: #fff;
+        border: none;
+        border-radius: 9px;
+        padding: 10px 18px;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity .2s;
+    }
+
+        .btn-add-prod:hover {
+            opacity: .85;
+            color: #fff;
+        }
+
+    /* ── Stat Cards ── */
+    .pl-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        margin-bottom: 1.25rem;
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 11px;
+        padding: 13px 15px;
+        border: 0.5px solid #e2e8f0;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: #888780;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        margin-bottom: 4px;
+    }
+
+    .stat-val {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0C447C;
+    }
+
+    .stat-sub {
+        font-size: 11px;
+        color: #5DCAA5;
+        margin-top: 2px;
+    }
+
+    /* ── Main Card ── */
+    .pl-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 0.5px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    /* ── Toolbar ── */
+    .pl-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 13px 16px;
+        border-bottom: 0.5px solid #e9ecef;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .search-wrap {
+        position: relative;
+    }
+
+        .search-wrap i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            color: #888780;
+            pointer-events: none;
+        }
+
+        .search-wrap input {
+            border: 0.5px solid #dde3ea;
+            border-radius: 8px;
+            padding: 7px 10px 7px 32px;
+            font-size: 13px;
+            width: 240px;
+            color: #2c3e50;
+            background: #f8fafd;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+            .search-wrap input:focus {
+                border-color: #185FA5;
+                box-shadow: 0 0 0 3px rgba(24,95,165,.1);
+            }
+
+    .entries-label {
+        font-size: 13px;
+        color: #888780;
+    }
+
+        .entries-label select {
+            border: 0.5px solid #dde3ea;
+            border-radius: 7px;
+            padding: 5px 8px;
+            font-size: 13px;
+            color: #2c3e50;
+            background: #f8fafd;
+            outline: none;
+            margin-left: 4px;
+        }
+
+    /* ════════════════════════════
+           DESKTOP TABLE
+        ════════════════════════════ */
+    .desktop-table-wrap {
+        overflow-x: auto;
+    }
+
+    #productTable {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+        #productTable thead {
+            background: #0C447C;
+        }
+
+            #productTable thead th {
+                color: #E6F1FB;
+                font-size: 11.5px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                padding: 12px 13px;
+                border: none;
+                white-space: nowrap;
+            }
+
+        #productTable tbody td {
+            font-size: 13px;
+            color: #2c3e50;
+            padding: 10px 13px;
+            border-bottom: 0.5px solid #f0f3f7;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        #productTable tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        #productTable tbody tr:hover {
+            background: #f7fbff;
+        }
+
+    /* Badges & Pills */
+    .sno-badge {
+        display: inline-flex;
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        background: #E6F1FB;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #0C447C;
+    }
+
+    .code-pill {
+        font-family: monospace;
+        font-size: 12px;
+        font-weight: 700;
+        color: #185FA5;
+        background: #E6F1FB;
+        padding: 2px 8px;
+        border-radius: 5px;
+    }
+
+    .prod-name {
+        font-weight: 600;
+        color: #1a202c;
+    }
+
+    .cat-pill {
+        display: inline-block;
+        background: #EEEDFE;
+        color: #3C3489;
+        border-radius: 20px;
+        padding: 2px 10px;
+        font-size: 11.5px;
+    }
+
+    .rate-buy {
+        color: #27500A;
+        font-weight: 600;
+    }
+
+    .rate-sell {
+        color: #0C447C;
+        font-weight: 700;
+    }
+
+    .gst-badge {
+        display: inline-block;
+        background: #FAEEDA;
+        color: #633806;
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-yes {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #EAF3DE;
+        color: #27500A;
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+        .badge-yes i {
+            font-size: 13px;
+        }
+
+    .no-img-lbl {
+        font-size: 11px;
+        color: #B4B2A9;
+        background: #F1EFE8;
+        border-radius: 5px;
+        padding: 2px 7px;
+    }
+
+    .tbl-thumb {
+        width: 40px;
+        height: 40px;
+        border-radius: 7px;
+        object-fit: cover;
+        border: 0.5px solid #e2e8f0;
+    }
+
+    /* Action Buttons */
+    .btn-edit-sm {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 5px 11px;
+        border-radius: 7px;
+        text-decoration: none;
+        border: 0.5px solid #EF9F27;
+        background: #FAEEDA;
+        color: #633806;
+        transition: opacity .15s;
+        margin-right: 4px;
+    }
+
+    .btn-del-sm {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 5px 11px;
+        border-radius: 7px;
+        text-decoration: none;
+        border: 0.5px solid #F09595;
+        background: #FCEBEB;
+        color: #A32D2D;
+        transition: opacity .15s;
+        cursor: pointer;
+    }
+
+        .btn-edit-sm:hover, .btn-del-sm:hover {
+            opacity: .8;
+        }
+
+    /* DataTables overrides */
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_length {
+        display: none;
+    }
+
+    .dataTables_wrapper .dataTables_info {
+        font-size: 12.5px;
+        color: #888780;
+        padding: 10px 16px;
+    }
+
+    .dataTables_wrapper .dataTables_paginate {
+        padding: 8px 16px;
+    }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border: 0.5px solid #dde3ea !important;
+            border-radius: 7px !important;
+            padding: 4px 10px !important;
+            font-size: 13px !important;
+            color: #0C447C !important;
+            background: #fff !important;
+            margin: 0 2px;
+        }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+                background: #0C447C !important;
+                color: #fff !important;
+                border-color: #0C447C !important;
+            }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+                background: #E6F1FB !important;
+                color: #0C447C !important;
+            }
+
+    /* ════════════════════════════
+           MOBILE CARD LAYOUT
+        ════════════════════════════ */
+    .mobile-card-list {
+        display: none;
+        padding: 10px;
+    }
+
+    .pm-card {
+        background: #fff;
+        border: 0.5px solid #e2e8f0;
+        border-radius: 13px;
+        margin-bottom: 10px;
+        overflow: hidden;
+    }
+
+    .pm-card-head {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 12px 13px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .pm-thumb {
+        width: 48px;
+        height: 48px;
+        border-radius: 9px;
+        object-fit: cover;
+        border: 0.5px solid #e2e8f0;
+        flex-shrink: 0;
+    }
+
+    .pm-no-img {
+        width: 48px;
+        height: 48px;
+        border-radius: 9px;
+        background: #F1EFE8;
+        border: 0.5px dashed #D3D1C7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .pm-no-img i {
+            font-size: 22px;
+            color: #B4B2A9;
+        }
+
+    .pm-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .pm-name {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #1a202c;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .pm-code {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #185FA5;
+        font-family: monospace;
+        margin-top: 1px;
+    }
+
+    .pm-cat {
+        font-size: 11.5px;
+        color: #888780;
+        margin-top: 1px;
+    }
+
+    .pm-rate-wrap {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .pm-rate {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0C447C;
+    }
+
+    .pm-rate-lbl {
+        font-size: 10.5px;
+        color: #B4B2A9;
+    }
+
+    .pm-chevron {
+        font-size: 18px;
+        color: #B4B2A9;
+        transition: transform .25s;
+        flex-shrink: 0;
+    }
+
+    .pm-card.open .pm-chevron {
+        transform: rotate(180deg);
+    }
+
+    .pm-body {
+        display: none;
+        border-top: 0.5px solid #f0f3f7;
+    }
+
+    .pm-card.open .pm-body {
+        display: block;
+    }
+
+    .pm-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 12px 13px 0;
+    }
+
+    .pm-stat {
+        background: #F7FBFF;
+        border-radius: 8px;
+        padding: 9px 11px;
+        border: 0.5px solid #E6F1FB;
+    }
+
+    .pm-stat-lbl {
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: #888780;
+        font-weight: 600;
+        margin-bottom: 3px;
+    }
+
+    .pm-stat-val {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0C447C;
+    }
+
+    .pm-badge-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        padding: 10px 13px 0;
+    }
+
+    .pm-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+
+    .pm-badge-blue {
+        background: #E6F1FB;
+        color: #0C447C;
+        border: 0.5px solid #B5D4F4;
+    }
+
+    .pm-badge-green {
+        background: #EAF3DE;
+        color: #27500A;
+        border: 0.5px solid #C0DD97;
+    }
+
+    .pm-badge-amber {
+        background: #FAEEDA;
+        color: #633806;
+        border: 0.5px solid #FAC775;
+    }
+
+    .pm-badge-gray {
+        background: #F1EFE8;
+        color: #444441;
+        border: 0.5px solid #D3D1C7;
+    }
+
+    .pm-actions {
+        display: flex;
+        gap: 8px;
+        padding: 12px 13px;
+    }
+
+    .pm-btn-edit {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 0.5px solid #EF9F27;
+        background: #FAEEDA;
+        color: #633806;
+        transition: opacity .15s;
+    }
+
+    .pm-btn-del {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 0.5px solid #F09595;
+        background: #FCEBEB;
+        color: #A32D2D;
+        cursor: pointer;
+        transition: opacity .15s;
+    }
+
+        .pm-btn-edit:hover, .pm-btn-del:hover {
+            opacity: .8;
+        }
+
+    .no-data-cell {
+        text-align: center;
+        padding: 3rem;
+        color: #888780;
+        font-size: 14px;
+    }
+
+        .no-data-cell i {
+            font-size: 36px;
+            display: block;
+            margin-bottom: 8px;
+            color: #D3D1C7;
+        }
+
+    /* ════════════════════════════
+           RESPONSIVE
+        ════════════════════════════ */
+    @@media (max-width: 768px) {
+        .desktop-table-wrap {
+            display: none !important;
+        }
+
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            display: none;
+        }
+
+        .mobile-card-list {
+            display: block;
+        }
+
+        .pl-stats {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .search-wrap input {
+            width: 100%;
+        }
+
+        .pl-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .pl-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-add-prod {
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="pl-page">
+
+    <!-- ── Page Header ── -->
+    <div class="pl-header">
+        <div class="pl-title-row">
+            <div class="pl-icon-box"><i class="ti ti-package"></i></div>
+            <div>
+                <p class="pl-title">Product List</p>
+                <p class="pl-subtitle">Manage all products</p>
+            </div>
+        </div>
+        <a href="/Product/Add" class="btn-add-prod">
+            <i class="ti ti-plus"></i> Add Product
+        </a>
+    </div>
+
+    <!-- ── Stat Cards ── -->
+    <div class="pl-stats">
+        <div class="stat-card">
+            <div class="stat-label">Total Products</div>
+            <div class="stat-val">@(Model?.productList?.Count ?? 0)</div>
+            <div class="stat-sub">All categories</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Weight Machine</div>
+            <div class="stat-val">@(Model?.productList?.Count(x => x.IsWeightMachine) ?? 0)</div>
+            <div class="stat-sub">Weight based</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Piece Wise</div>
+            <div class="stat-val">@(Model?.productList?.Count(x => x.IsPieceWise) ?? 0)</div>
+            <div class="stat-sub">Count based</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Avg. Sale Rate</div>
+            <div class="stat-val">
+                @(Model?.productList?.Count > 0
+                    ? "₹" + ((int)Model.productList.Average(x => x.SaleRate)).ToString()
+                    : "—")
+            </div>
+            <div class="stat-sub">Per unit</div>
+        </div>
+    </div>
+
+    <!-- ── Main Card ── -->
+    <div class="pl-card">
+
+        <div class="pl-toolbar">
+            <div class="search-wrap">
+                <i class="ti ti-search"></i>
+                <input type="text" id="liveSearch" placeholder="Search product, code, category…" />
+            </div>
+            <span class="entries-label">
+                Show
+                <select id="entriesSelect">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select> entries
+            </span>
+        </div>
+
+        <!-- DESKTOP TABLE -->
+        <div class="desktop-table-wrap">
+            <table id="productTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>S.No.</th>
+                        <th>Code</th>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Unit</th>
+                        <th>Purchase ₹</th>
+                        <th>Sale ₹</th>
+                        <th>GST %</th>
+                        <th>Expiry</th>
+                        <th>Wt. Machine</th>
+                        <th>Piece Wise</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.productList.Count > 0)
+                    {
+                        int i = 1;
+                        foreach (var item in Model.productList)
+                        {
+                            <tr>
+                                <td><span class="sno-badge">@i</span></td>
+                                <td><span class="code-pill">@item.ProductCode</span></td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" class="tbl-thumb" alt="@item.ProductName" />
+                                    }
+                                    else
+                                    {
+                                        <span class="no-img-lbl"><i class="ti ti-photo-off" style="font-size:13px;vertical-align:-2px"></i> None</span>
+                                    }
+                                </td>
+                                <td class="prod-name">@item.ProductName</td>
+                                <td><span class="cat-pill">@item.CategoryName</span></td>
+                                <td style="color:#5F5E5A">@item.UnitName</td>
+                                <td class="rate-buy">₹@item.PurchaseRate</td>
+                                <td class="rate-sell">₹@item.SaleRate</td>
+                                <td><span class="gst-badge">@item.GSTPercent%</span></td>
+                                <td style="color:#5F5E5A">@item.ExpiryDays days</td>
+                                <td>
+                                    @if (item.IsWeightMachine)
+                                    {
+                                        <span class="badge-yes"><i class="ti ti-check"></i> Yes</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.IsPieceWise)
+                                    {
+                                        <span class="badge-yes"><i class="ti ti-check"></i> Yes</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a href="/Home/AddProduct/@item.Id" class="btn-edit-sm"><i class="ti ti-edit" style="font-size:13px"></i> Edit</a>
+                                    <a href="/Home/Delete/@item.Id"
+                                       class="btn-del-sm"
+                                       onclick="return confirm('Delete this product?')">
+                                        <i class="ti ti-trash" style="font-size:13px"></i> Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            @(i++)
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="13" class="no-data-cell">
+                                <i class="ti ti-database-off"></i>
+                                No products found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MOBILE CARD LIST -->
+        <div class="mobile-card-list">
+            @if (Model != null && Model.productList.Count > 0)
+            {
+                int j = 1;
+                foreach (var item in Model.productList)
+                {
+                    <div class="pm-card">
+                        <div class="pm-card-head" onclick="toggleCard(this)">
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" class="pm-thumb" alt="@item.ProductName" />
+                            }
+                            else
+                            {
+                                <div class="pm-no-img"><i class="ti ti-photo-off"></i></div>
+                            }
+                            <div class="pm-info">
+                                <div class="pm-name">@item.ProductName</div>
+                                <div class="pm-code">@item.ProductCode</div>
+                                <div class="pm-cat">@item.CategoryName &bull; @item.UnitName</div>
+                            </div>
+                            <div class="pm-rate-wrap">
+                                <div class="pm-rate">₹@item.SaleRate</div>
+                                <div class="pm-rate-lbl">Sale rate</div>
+                            </div>
+                            <i class="ti ti-chevron-down pm-chevron"></i>
+                        </div>
+
+                        <div class="pm-body">
+                            <div class="pm-grid">
+                                <div class="pm-stat">
+                                    <div class="pm-stat-lbl">Purchase</div>
+                                    <div class="pm-stat-val">₹@item.PurchaseRate</div>
+                                </div>
+                                <div class="pm-stat">
+                                    <div class="pm-stat-lbl">Sale Rate</div>
+                                    <div class="pm-stat-val">₹@item.SaleRate</div>
+                                </div>
+                                <div class="pm-stat">
+                                    <div class="pm-stat-lbl">GST %</div>
+                                    <div class="pm-stat-val">@item.GSTPercent%</div>
+                                </div>
+                                <div class="pm-stat">
+                                    <div class="pm-stat-lbl">Expiry</div>
+                                    <div class="pm-stat-val">@item.ExpiryDays days</div>
+                                </div>
+                            </div>
+
+                            <div class="pm-badge-row">
+                                @if (item.IsWeightMachine)
+                                {
+                                    <span class="pm-badge pm-badge-blue"><i class="ti ti-weight" style="font-size:12px;vertical-align:-1px"></i> Weight Machine</span>
+                                }
+                                @if (item.IsPieceWise)
+                                {
+                                    <span class="pm-badge pm-badge-green"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px"></i> Piece Wise</span>
+                                }
+                                <span class="pm-badge pm-badge-amber">Expiry @item.ExpiryDays d</span>
+                                <span class="pm-badge pm-badge-gray">GST @item.GSTPercent%</span>
+                            </div>
+
+                            <div class="pm-actions">
+                                <a href="/Product/AddProduct/@item.Id" class="pm-btn-edit">
+                                    <i class="ti ti-edit" style="font-size:15px"></i> Edit
+                                </a>
+                                <a href="/Product/Delete/@item.Id"
+                                   class="pm-btn-del"
+                                   onclick="return confirm('Delete this product?')">
+                                    <i class="ti ti-trash" style="font-size:15px"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    @(j++)
+                }
+            }
+            else
+            {
+                <div class="no-data-cell">
+                    <i class="ti ti-database-off"></i>
+                    No products found
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+<!-- JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+<script>
+    var dt = $('#productTable').DataTable({
+    paging: true, searching: true,
+    ordering: true, pageLength: 10,
+    order: [[1, 'asc']]
+    });
+
+    document.getElementById('liveSearch').addEventListener('input', function () {
+    dt.search(this.value).draw();
+    });
+    document.getElementById('entriesSelect').addEventListener('change', function () {
+    dt.page.len(parseInt(this.value)).draw();
+    });
+
+    function toggleCard(row) {
+    var card = row.closest('.pm-card');
+    var wasOpen = card.classList.contains('open');
+    document.querySelectorAll('.pm-card.open').forEach(function (c) {
+    c.classList.remove('open');
+    });
+    if (!wasOpen) card.classList.add('open');
+    }
+</script>

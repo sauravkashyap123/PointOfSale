@@ -1,0 +1,482 @@
+﻿@{
+    Layout = "~/Views/Shared/_SideLayout.cshtml";
+}
+@model POSModels.Models.ShopSettingModel
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css" />
+
+<style>
+    .container.mt-4 {
+        max-width: 860px;
+        margin-inline: auto;
+        padding: 2rem 1rem;
+        animation: fadeUp 0.45s ease both;
+    }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card.shadow-sm {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0,0,0,.06), 0 12px 28px rgba(0,0,0,.08);
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .card-header.bg-primary {
+        background: linear-gradient(135deg, #1a3a6b 0%, #2563b0 100%) !important;
+        padding: 1.1rem 1.6rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: none;
+    }
+
+        .card-header.bg-primary::before {
+            content: "🏪";
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .card-header.bg-primary h5 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            color: #ffffff;
+        }
+
+            .card-header.bg-primary h5::after {
+                content: "Configuration";
+                display: inline-block;
+                margin-left: 10px;
+                font-size: 11px;
+                font-weight: 400;
+                background: rgba(255,255,255,0.18);
+                color: #d8eaff;
+                padding: 2px 10px;
+                border-radius: 20px;
+                border: 0.5px solid rgba(255,255,255,0.3);
+                vertical-align: middle;
+                letter-spacing: 0.3px;
+            }
+
+    .card-body {
+        padding: 2rem 1.8rem;
+        background: #fafbfd;
+    }
+
+    .form-label {
+        font-size: 11.5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.65px;
+        color: #5a6a85;
+        margin-bottom: 7px;
+        display: block;
+    }
+
+    .form-control {
+        height: 42px;
+        padding: 0 14px;
+        font-size: 14px;
+        color: #1a2b45;
+        background: #ffffff;
+        border: 1.5px solid #dde3ee;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,.04) inset;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        outline: none;
+        width: 100%;
+    }
+
+        .form-control:hover {
+            border-color: #b0bfd8;
+        }
+
+        .form-control:focus {
+            border-color: #2563b0;
+            box-shadow: 0 0 0 3.5px rgba(37,99,176,0.14);
+            background: #f5f8ff;
+        }
+
+        .form-control::placeholder {
+            color: #aab4c8;
+            font-size: 13.5px;
+        }
+
+    textarea.form-control {
+        height: auto;
+        padding: 12px 14px;
+        resize: vertical;
+        min-height: 90px;
+        line-height: 1.6;
+    }
+
+    .form-select {
+        height: 42px;
+        padding: 0 38px 0 14px;
+        font-size: 14px;
+        color: #1a2b45;
+        background-color: #ffffff;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235a6a85' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        appearance: none;
+        -webkit-appearance: none;
+        border: 1.5px solid #dde3ee;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,.04) inset;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        outline: none;
+        width: 100%;
+        cursor: pointer;
+    }
+
+        .form-select:hover {
+            border-color: #b0bfd8;
+        }
+
+        .form-select:focus {
+            border-color: #2563b0;
+            box-shadow: 0 0 0 3.5px rgba(37,99,176,0.14);
+            background-color: #f5f8ff;
+        }
+
+    .mb-3 {
+        margin-bottom: 1.3rem !important;
+    }
+
+    .text-end {
+        padding-top: 1rem;
+        border-top: 1px solid #e8ecf4;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    /* FIX: Cancel/Reset button added */
+    .btn.btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 20px;
+        height: 43px;
+        background: #e2e8f4;
+        color: #3a4a65;
+        font-size: 14px;
+        font-weight: 600;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+        .btn.btn-secondary:hover {
+            background: #d0d8ed;
+        }
+
+    .btn.btn-success {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 26px;
+        height: 43px;
+        background: linear-gradient(135deg, #1a6b3a 0%, #22a85a 100%);
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow: 0 3px 10px rgba(26,107,58,0.28);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+        .btn.btn-success::before {
+            content: "💾";
+            font-size: 15px;
+        }
+
+        .btn.btn-success:hover {
+            filter: brightness(1.08);
+            box-shadow: 0 5px 16px rgba(26,107,58,0.36);
+            transform: translateY(-1px);
+        }
+
+        .btn.btn-success:active {
+            transform: scale(0.97) translateY(0);
+            box-shadow: 0 2px 6px rgba(26,107,58,0.22);
+        }
+
+    /* Edit mode indicator */
+    #editBadge {
+        display: none;
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 767px) {
+        .card-body {
+            padding: 1.3rem 1rem;
+        }
+
+        .col-md-6 {
+            width: 100%;
+        }
+
+        .container.mt-4 {
+            padding: 1rem 0.5rem;
+        }
+    }
+
+    /* ---- DataTable Styles ---- */
+    #tblPrintData {
+        width: 100% !important;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+        #tblPrintData thead th {
+            background: #0d6efd;
+            color: #fff;
+            font-weight: 600;
+            text-align: center;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        #tblPrintData tbody td {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        #tblPrintData tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        #tblPrintData tbody tr:hover {
+            background-color: #e9f3ff;
+            transition: 0.2s;
+        }
+
+        #tblPrintData .btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+
+    .dataTables_filter input {
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 6px 10px;
+        margin-left: 5px;
+    }
+
+    .dataTables_length select {
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 4px 8px;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 4px !important;
+        margin: 0 2px;
+        padding: 4px 10px !important;
+    }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #0d6efd !important;
+            color: #fff !important;
+            border: 1px solid #0d6efd !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #0b5ed7 !important;
+            color: #fff !important;
+            border: 1px solid #0b5ed7 !important;
+        }
+
+    .dataTables_info {
+        font-size: 13px;
+        color: #6c757d;
+    }
+
+    .dataTables_processing {
+        background: white;
+        border-radius: 5px;
+        padding: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.1);
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Store Settings</h5>
+        </div>
+
+        <div class="card-body">
+
+        
+            <form id="storeSettingsForm">
+
+                <div class="row">
+                
+                    <input type="hidden" id="Id" name="Id" value="0" />
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Store Name</label>
+                        <input type="text"
+                               id="StoreName"
+                               name="StoreName"
+                               class="form-control"
+                               placeholder="Enter Store Name" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Shop</label>
+                        <select id="ShopId"
+                                name="ShopId"
+                                asp-items="Model.selectshoplist"
+                                class="form-select">
+                            <option value="">-- Select Shop --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">GST Number</label>
+                        <input type="text"
+                               id="GSTNumber"
+                               name="GSTNumber"
+                               class="form-control"
+                               placeholder="Enter GST Number" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Mobile Number</label>
+                        <input type="text"
+                               id="MobileNo"
+                               name="MobileNo"
+                               class="form-control"
+                               maxlength="10"
+                               placeholder="Enter Mobile Number" />
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Address</label>
+                        <textarea id="Address"
+                                  name="Address"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Enter Store Address"></textarea>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                  
+                    <span id="editBadge">✏️ Edit Mode</span>
+
+                    
+                    <button type="button" class="btn btn-secondary ms-auto" id="btnCancel">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="btn btn-success">
+                        Save Settings
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+        <hr />
+
+       
+
+    </div>
+</div>
+
+ <script src="~/lib/jquery/dist/jquery.min.js"></script> 
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+
+<script>
+
+   
+
+    $("#storeSettingsForm").on("submit", function (e) {
+        e.preventDefault();
+
+        // Basic client-side validation
+        var storeName = $.trim($("#StoreName").val());
+        var shopId    = $("#ShopId").val();
+
+        if (!storeName) {
+            alert("Store Name is required.");
+            return;
+        }
+        if (!shopId) {
+            alert("Please select a Shop.");
+            return;
+        }
+
+        var formData = $(this).serialize();
+
+        $.ajax({
+            url: '/Billing/SaveBillData',
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                if (response.status) {
+                    alert(response.message);
+                    resetForm();                    // FIX: full reset including Id
+                    fetchAndFillTable();            // API se fresh data lo aur table refill karo
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function (xhr) {
+                alert("Something went wrong. Status: " + xhr.status);
+            }
+        });
+    });
+
+    $("#btnCancel").on("click", function () {
+        resetForm();
+    });
+
+    function resetForm() {
+        $("#storeSettingsForm")[0].reset();
+        $("#Id").val("0");              // Reset hidden Id to 0 (new record mode)
+        $("#editBadge").hide();         // Hide edit badge
+        $("#btnCancel").hide();         // Hide cancel button
+    }
+
+  
+
+</script>

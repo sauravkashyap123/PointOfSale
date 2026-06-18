@@ -1,0 +1,201 @@
+﻿@using POSModels.Models.MithaiShop
+@model List<StockHistoryVM>
+
+@{
+    ViewData["Title"] = "Stock History";
+    Layout = "~/Views/Shared/_SideLayout.cshtml";
+}
+
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<style>
+    body {
+        background: #f4f6f9;
+    }
+
+    .card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0,0,0,.08);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg,#0d6efd,#084298) !important;
+        border: none;
+        padding: 18px 25px;
+    }
+
+        .card-header h4 {
+            font-weight: 600;
+            letter-spacing: .5px;
+        }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table thead th {
+            background: #1f2937;
+            color: #fff;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+            padding: 14px;
+        }
+
+        .table tbody td {
+            vertical-align: middle;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f8fafc;
+    }
+
+    .table tbody tr:hover {
+        background: #eef6ff;
+        transition: .3s;
+    }
+
+    .badge {
+        padding: 7px 14px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-in {
+        background: #198754;
+        color: #fff;
+    }
+
+    .badge-out {
+        background: #dc3545;
+        color: #fff;
+    }
+
+    /* Search Box */
+    div.dataTables_filter {
+        margin-bottom: 15px;
+    }
+
+        div.dataTables_filter input {
+            border: 1px solid #d1d5db !important;
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            margin-left: 8px !important;
+        }
+
+    /* Show Entries Dropdown */
+    div.dataTables_length select {
+        border-radius: 8px !important;
+        border: 1px solid #d1d5db !important;
+        padding: 5px 10px !important;
+    }
+
+    /* Pagination */
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border-radius: 8px !important;
+        margin: 0 3px;
+    }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #0d6efd !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #0b5ed7 !important;
+            color: white !important;
+            border: none !important;
+        }
+
+    .dataTables_info {
+        font-weight: 500;
+        color: #6c757d;
+    }
+
+    .stock-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .stock-title i {
+            font-size: 28px;
+        }
+</style>
+<div class="container-fluid mt-3">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Stock History</h4>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="stockHistoryTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Product Name</th>
+                            <th>Product Code</th>
+                            <th>Category</th>
+                            <th>Type</th>
+                            <th>Quantity</th>
+                            <th>Entry Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int sr = 1;
+                        }
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@sr</td>
+                                <td>@item.ProductName</td>
+                                <td>@item.ProductCode</td>
+                                <td>@item.CategoryName</td>
+                                <td>
+                                   
+                                        <span class="badge bg-success">@item.Type</span>
+                                   
+                                </td>
+                                <td>@item.Quantity</td>
+                                <td>
+                                    @Convert.ToDateTime(item.EntryDate).ToString("dd-MM-yyyy hh:mm tt")
+                                </td>
+                            </tr>
+
+                            sr++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            $('#stockHistoryTable').DataTable({
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "pageLength": 10,
+                "lengthMenu": [[10, 25, 50, 100], [10, 25, 50, 100]]
+            });
+
+        });
+    </script>

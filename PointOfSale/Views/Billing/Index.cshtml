@@ -1,0 +1,484 @@
+﻿@using System.Text.Json
+@{
+    ViewData["Title"] = "Billing";
+    var allproducts = ViewBag.Products as List<POSModels.Models.MithaiShop.Product> ?? new ();
+    var categories = ViewBag.Categories as List<POSModels.Models.MithaiShop.CategoryModel> ?? new ();
+    Layout = null;
+
+    var productList = allproducts.Select(p => new {
+        id    = p.Id,
+        name  = p.ProductName ?? "",
+        price = p.SaleRate,
+        stock = p.StockQuantity,
+        cat   = p.CategoryId.ToString(),
+        sku   = p.ProductCode ?? ""
+    }).ToList();
+
+    var jsonOpt = new JsonSerializerOptions {
+    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+};
+var productsJson = JsonSerializer.Serialize(productList, jsonOpt);
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopFlow POS</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --or:#F97316;--or2:#EA580C;--or-light:#FFF7ED;--or-mid:#FED7AA;
+  --bg:#F4F2EE;--white:#FFFFFF;--dark:#1A1714;--text:#2D2A27;
+  --muted:#8A8480;--border:#E2DED8;--red:#EF4444;--green:#16A34A;
+  --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;overflow:hidden;font-size:14px}
+
+/* ══ HEADER ══ */
+header{background:var(--dark);padding:0 20px;height:58px;display:flex;align-items:center;gap:12px;flex-shrink:0;border-bottom:2px solid var(--or)}
+.logo-wrap{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.logo-icon{width:36px;height:36px;background:var(--or);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-icon i{color:#fff;font-size:20px}
+.logo-name{font-size:18px;font-weight:700;color:#fff;white-space:nowrap}
+.logo-name span{color:var(--or)}
+.h-div{width:1px;height:26px;background:#3A3630;flex-shrink:0}
+.store-chip{display:flex;align-items:center;gap:6px;background:#2A2724;border:1px solid #3A3630;border-radius:8px;padding:5px 11px;white-space:nowrap;flex-shrink:0}
+.store-chip i{color:var(--or);font-size:15px}
+.store-chip span{font-size:12px;font-weight:600;color:#D6D3D0}
+.h-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.h-btn{display:flex;align-items:center;gap:5px;background:#2A2724;border:1px solid #3A3630;border-radius:8px;padding:6px 11px;cursor:pointer;color:#D6D3D0;font-size:12px;font-weight:600;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.h-btn:hover,.h-btn.active{background:var(--or);color:#fff;border-color:var(--or)}
+.h-btn i{font-size:15px}
+.datetime{display:flex;flex-direction:column;align-items:flex-end}
+.clock{font-size:14px;font-weight:700;color:#fff;font-family:var(--mono);white-space:nowrap}
+.dateline{font-size:10px;color:var(--muted);white-space:nowrap}
+.acc-wrap{display:flex;align-items:center;gap:7px;background:#2A2724;border:1px solid #3A3630;border-radius:8px;padding:5px 10px;cursor:pointer;transition:border .15s}
+.acc-wrap:hover{border-color:var(--or)}
+.acc-av{width:26px;height:26px;background:var(--or);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.acc-name{font-size:12px;font-weight:600;color:#D6D3D0}
+
+/* mobile header extras */
+.mob-menu-btn{display:none;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px}
+
+/* ══ SEARCH ROW ══ */
+.search-row{background:var(--white);padding:8px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0}
+.search-box{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:0 12px;height:40px;transition:border .15s;min-width:0}
+.search-box:focus-within{border-color:var(--or);background:#fff}
+.search-box i{font-size:17px;color:var(--muted);flex-shrink:0}
+.search-box input{flex:1;border:none;background:none;outline:none;font-family:var(--font);font-size:13px;color:var(--text);min-width:0}
+.search-box input::placeholder{color:var(--muted)}
+.scan-btn{display:flex;align-items:center;gap:5px;background:var(--dark);color:#fff;border:none;border-radius:9px;padding:0 13px;height:40px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;white-space:nowrap}
+.scan-btn i{font-size:16px}
+.filter-btn{display:flex;align-items:center;gap:5px;background:var(--white);color:var(--muted);border:1.5px solid var(--border);border-radius:9px;padding:0 13px;height:40px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;transition:all .15s;white-space:nowrap}
+.filter-btn.active,.filter-btn:hover{background:var(--or);color:#fff;border-color:var(--or)}
+.filter-btn i{font-size:16px}
+
+/* ══ CATEGORIES ══ */
+.cat-row{background:var(--white);padding:8px 16px;display:flex;gap:7px;overflow-x:auto;border-bottom:1px solid var(--border);flex-shrink:0}
+.cat-row::-webkit-scrollbar{height:3px}
+.cat-row::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.cat-pill{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:50px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;white-space:nowrap;font-size:12px;font-weight:600;color:var(--muted);transition:all .15s;flex-shrink:0}
+.cat-pill i{font-size:16px}
+.cat-pill:hover{border-color:var(--or-mid);color:var(--or2);background:var(--or-light)}
+.cat-pill.active{background:var(--or);border-color:var(--or);color:#fff}
+
+/* ══ BODY 70/30 ══ */
+.body-row{flex:1;display:flex;overflow:hidden}
+
+/* ══ PRODUCT AREA ══ */
+.product-area{flex:0 0 70%;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
+.product-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:14px;align-content:start}
+.product-grid::-webkit-scrollbar{width:4px}
+.product-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+.prod-card{background:var(--white);border:1.5px solid var(--border);border-radius:13px;overflow:hidden;cursor:pointer;transition:all .18s;display:flex;flex-direction:column}
+.prod-card:hover{border-color:var(--or);transform:translateY(-2px);box-shadow:0 5px 18px rgba(249,115,22,.13)}
+.prod-card.in-cart{border-color:var(--or);background:var(--or-light)}
+.img-wrap{position:relative;height:110px;background:#FAF8F5;display:flex;align-items:center;justify-content:center;font-size:46px}
+.stock-badge{position:absolute;top:7px;right:7px;border-radius:6px;padding:2px 7px;font-size:10px;font-weight:700;font-family:var(--mono);border:1px solid transparent}
+.stock-badge.ok{background:#DCFCE7;color:#166534;border-color:#BBF7D0}
+.stock-badge.low{background:#FEF9C3;color:#854D0E;border-color:#FDE68A}
+.stock-badge.out{background:#FEE2E2;color:#991B1B;border-color:#FECACA}
+.card-body{padding:10px 11px;flex:1;display:flex;flex-direction:column;gap:3px}
+.prod-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prod-price{font-size:15px;font-weight:700;color:var(--or);font-family:var(--mono);margin-top:3px}
+.prod-sku{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:3px}
+.prod-sku i{font-size:11px}
+.add-btn{margin-top:7px;background:var(--or-light);border:none;border-radius:8px;padding:7px;font-size:11px;font-weight:700;color:var(--or2);cursor:pointer;font-family:var(--font);transition:all .15s;width:100%;display:flex;align-items:center;justify-content:center;gap:5px}
+.add-btn:hover{background:var(--or);color:#fff}
+.add-btn i{font-size:14px}
+
+/* ══ ORDER SIDEBAR ══ */
+.order-sidebar{flex:0 0 30%;display:flex;flex-direction:column;background:var(--white);overflow:hidden;min-width:260px}
+.order-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.order-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:7px}
+.order-title i{color:var(--or);font-size:19px}
+.order-count{background:var(--or);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--mono)}
+.clear-btn{background:none;border:1px solid var(--border);border-radius:7px;padding:5px 9px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:4px}
+.clear-btn:hover{border-color:var(--red);color:var(--red)}
+.clear-btn i{font-size:13px}
+
+.order-items{flex:1;overflow-y:auto;padding:8px 12px;display:flex;flex-direction:column;gap:7px}
+.order-items::-webkit-scrollbar{width:3px}
+.order-items::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.empty-order{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:10px;text-align:center}
+.empty-order i{font-size:42px;color:var(--border)}
+.empty-order p{font-size:13px}
+.empty-order small{font-size:11px;color:var(--border)}
+
+.order-item{background:var(--bg);border-radius:10px;padding:9px 11px;display:flex;gap:9px;align-items:flex-start;border:1px solid var(--border)}
+.oi-emoji{font-size:22px;flex-shrink:0;margin-top:2px}
+.oi-info{flex:1;min-width:0}
+.oi-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oi-line{font-size:12px;font-weight:700;color:var(--or);font-family:var(--mono);margin-top:2px}
+.qty-ctrl{display:flex;align-items:center;gap:5px;margin-top:5px}
+.q-btn{width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text);font-weight:700;transition:all .12s;flex-shrink:0}
+.q-btn:hover{background:var(--or);color:#fff;border-color:var(--or)}
+.q-num{font-size:13px;font-weight:700;min-width:20px;text-align:center;font-family:var(--mono)}
+.q-unit{font-size:10px;color:var(--muted)}
+.oi-remove{background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;border-radius:5px;flex-shrink:0}
+.oi-remove:hover{color:var(--red)}
+.oi-remove i{font-size:16px}
+
+/* ══ TOTALS ══ */
+.order-totals{border-top:1px solid var(--border);padding:10px 14px;flex-shrink:0}
+.tot-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:13px}
+.tot-row .lbl{color:var(--muted);display:flex;align-items:center;gap:5px}
+.tot-row .lbl i{font-size:14px}
+.tot-row .val{font-family:var(--mono);font-weight:600}
+.disc-row{display:flex;align-items:center;gap:7px;padding:5px 0}
+.disc-lbl{color:var(--muted);font-size:13px;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.disc-lbl i{font-size:14px}
+.disc-right{display:flex;align-items:center;gap:5px;flex:1;justify-content:flex-end}
+.disc-input{border:1px solid var(--border);border-radius:7px;padding:4px 8px;font-size:12px;font-family:var(--mono);width:58px;outline:none;color:var(--text);text-align:center;background:var(--bg)}
+.disc-input:focus{border-color:var(--or);background:#fff}
+.disc-type{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.disc-type button{padding:4px 9px;font-size:11px;font-weight:700;border:none;background:none;cursor:pointer;font-family:var(--font);color:var(--muted);transition:all .12s}
+.disc-type button.active{background:var(--or);color:#fff}
+.disc-saved{font-size:11px;color:var(--green);font-family:var(--mono);font-weight:600}
+.tot-divider{border:none;border-top:1.5px dashed var(--border);margin:5px 0}
+.grand-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0}
+.grand-lbl{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.grand-lbl i{font-size:16px;color:var(--or)}
+.grand-val{font-size:19px;font-weight:700;color:var(--or);font-family:var(--mono)}
+
+/* ══ PAY BUTTON ══ */
+.pay-section{padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.pay-btn{width:100%;background:var(--or);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:9px;transition:all .15s}
+.pay-btn:hover{background:var(--or2);transform:translateY(-1px)}
+.pay-btn:active{transform:translateY(0)}
+.pay-btn i{font-size:19px}
+
+/* ══ BILL MODAL ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.bill-modal{background:#fff;border-radius:16px;width:380px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.bill-modal::-webkit-scrollbar{width:4px}
+.bill-modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.bill-print{padding:26px 22px;font-family:var(--mono)}
+.bill-top{text-align:center;padding-bottom:14px;border-bottom:2px dashed #DDD;margin-bottom:14px}
+.bill-logo{font-size:22px;font-weight:700;color:var(--dark)}
+.bill-logo span{color:var(--or)}
+.bill-store{font-size:11px;color:var(--muted);margin-top:2px}
+.bill-meta{font-size:10px;color:var(--muted);margin-top:7px;line-height:1.6}
+.bill-items-head{display:flex;font-size:10px;font-weight:700;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border);margin-bottom:6px}
+.bill-items-head .bh-item{flex:1}
+.bill-items-head .bh-qty{width:34px;text-align:center}
+.bill-items-head .bh-amt{width:72px;text-align:right}
+.bill-item-row{display:flex;font-size:11px;padding:5px 0;border-bottom:1px dotted #EEE;align-items:center}
+.bi-name{flex:1;color:var(--text);line-height:1.3}
+.bi-qty{width:34px;text-align:center;color:var(--muted)}
+.bi-amt{width:72px;text-align:right;font-weight:700}
+.bill-tots{padding-top:10px;margin-top:4px;border-top:1px dashed #DDD}
+.bill-tot-row{display:flex;justify-content:space-between;font-size:11px;padding:3px 0}
+.bill-tot-row.grand{font-size:14px;font-weight:700;border-top:2px dashed #DDD;margin-top:6px;padding-top:8px;color:var(--or)}
+.bill-footer{text-align:center;margin-top:14px;padding-top:12px;border-top:2px dashed #DDD;font-size:10px;color:var(--muted);line-height:1.7}
+.bill-actions{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border)}
+.bill-actions button{flex:1;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px}
+.bill-actions button i{font-size:16px}
+.btn-close-bill{background:none;border:1.5px solid var(--border);color:var(--muted)}
+.btn-close-bill:hover{border-color:var(--red);color:var(--red)}
+.btn-print-bill{background:var(--or);border:none;color:#fff}
+.btn-print-bill:hover{background:var(--or2)}
+
+/* ══ MOBILE CART OVERLAY ══ */
+.cart-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500}
+.cart-overlay.open{display:block}
+.cart-drawer{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-radius:20px 20px 0 0;max-height:85vh;display:flex;flex-direction:column;z-index:501;transform:translateY(100%);transition:transform .3s ease}
+.cart-drawer.open{transform:translateY(0)}
+.drawer-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 8px}
+.mob-cart-btn{display:none;position:fixed;bottom:20px;right:20px;z-index:400;background:var(--or);color:#fff;border:none;border-radius:50%;width:58px;height:58px;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(249,115,22,.4);display:none;align-items:center;justify-content:center}
+.mob-cart-count{position:absolute;top:-4px;right:-4px;background:var(--dark);color:#fff;font-size:10px;font-weight:700;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
+
+/* ══ RESPONSIVE ══ */
+
+/* Tablet (≤900px) */
+@@media(max-width:900px){
+  .logo-name{font-size:16px}
+  .h-btn span{display:none}
+  .h-btn{padding:6px 9px}
+  .h-btn i{font-size:17px}
+  .acc-name{display:none}
+  .store-chip span{display:none}
+  .h-div{display:none}
+  .product-area{flex:0 0 65%}
+  .order-sidebar{flex:0 0 35%;min-width:220px}
+  .product-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding:10px}
+  .img-wrap{height:95px;font-size:38px}
+  .scan-btn span{display:none}
+  .filter-btn span{display:none}
+  header{padding:0 14px;gap:8px}
+  .search-row{padding:8px 12px;gap:7px}
+  .cat-row{padding:8px 12px;gap:6px}
+}
+
+/* Phone (≤600px) */
+@@media(max-width:600px){
+  body{overflow:auto}
+  header{height:52px;padding:0 12px;gap:8px}
+  .logo-name{font-size:15px}
+  .datetime{display:none}
+  .h-btn{display:none}
+  .store-chip{display:none}
+  .mob-menu-btn{display:flex;align-items:center}
+  .body-row{flex-direction:column;overflow:auto;height:auto}
+  .product-area{flex:none;border-right:none;border-bottom:1px solid var(--border)}
+  .order-sidebar{display:none}
+  .product-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding:10px;overflow-y:visible}
+  .mob-cart-btn{display:flex}
+  .cart-overlay{display:none}
+  .cat-pill{font-size:11px;padding:6px 10px}
+  .cat-pill i{font-size:14px}
+  .search-row{gap:6px;padding:7px 10px}
+  .scan-btn{padding:0 10px;font-size:11px}
+  .filter-btn{padding:0 9px}
+  .img-wrap{height:100px;font-size:40px}
+  .prod-name{font-size:11px}
+  .prod-price{font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <button class="mob-menu-btn"><i class="ti ti-menu-2"></i></button>
+  <div class="logo-wrap">
+    <div class="logo-icon"><i class="ti ti-shopping-bag"></i></div>
+    <div class="logo-name">Sri<span>Sai Sweets</span></div>
+  </div>
+  <div class="h-div"></div>
+  <div class="store-chip">
+    <i class="ti ti-building-store"></i>
+    <span>My Sweet &amp; Retail Store</span>
+  </div>
+
+  <div class="h-right">
+    <button class="h-btn" title="Bulk Order" onclick="alert('Bulk Order module')">
+      <i class="ti ti-truck-delivery"></i><span>Bulk Order</span>
+    </button>
+    <button class="h-btn" title="Stock" onclick="alert('Stock module')">
+      <i class="ti ti-packages"></i><span>Stock</span>
+    </button>
+    <div class="h-div"></div>
+    <div class="datetime">
+      <div class="clock" id="clock">--:-- --</div>
+      <div class="dateline" id="dateDisplay">-- --- ----</div>
+    </div>
+    <div class="h-div"></div>
+    <div class="acc-wrap">
+      <div class="acc-av">@ViewBag.StaffShortName</div>
+                <span class="acc-name">@ViewBag.StaffName</span>
+      <i class="ti ti-chevron-down" style="font-size:12px;color:var(--muted);margin-left:2px"></i>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ SEARCH ROW ═══ -->
+<div class="search-row">
+  <div class="search-box">
+    <i class="ti ti-search"></i>
+    <input type="text" id="searchInput" placeholder="Search products by name or SKU..." oninput="filterProducts()">
+    <i class="ti ti-x" style="cursor:pointer;font-size:15px;color:var(--muted)" onclick="clearSearch()" title="Clear"></i>
+  </div>
+  <button class="scan-btn" title="Scan Barcode">
+    <i class="ti ti-barcode"></i><span>Scan</span>
+  </button>
+  <button class="filter-btn active" id="catBtn" onclick="toggleFilter('cat')" title="Categories">
+    <i class="ti ti-layout-grid"></i><span>Categories</span>
+  </button>
+  <button class="filter-btn" id="brandBtn" onclick="toggleFilter('brand')" title="Brands">
+    <i class="ti ti-tag"></i><span>Brands</span>
+  </button>
+</div>
+
+<!-- ═══ CATEGORIES ═══ -->
+<div class="cat-row" id="catRow">
+  <div class="cat-pill active" onclick="selectCat(this,'all')"><i class="ti ti-layout-grid"></i> All Items</div>
+   @if(categories.Count()>0)
+            {
+                  @foreach(var k in categories)
+                  {
+                    <div class="cat-pill" onclick="selectCat(this,'@k.Id')"><i class="ti ti-candy"></i> @k.CategoryName</div>
+                  }
+
+            } 
+          
+ @*   <div class="cat-pill" onclick="selectCat(this,'sweets')"><i class="ti ti-candy"></i> Sweets</div>
+  <div class="cat-pill" onclick="selectCat(this,'mithai')"><i class="ti ti-cake"></i> Mithai</div>
+  <div class="cat-pill" onclick="selectCat(this,'snacks')"><i class="ti ti-bowl"></i> Snacks</div>
+  <div class="cat-pill" onclick="selectCat(this,'drinks')"><i class="ti ti-bottle"></i> Drinks</div>
+  <div class="cat-pill" onclick="selectCat(this,'cameras')"><i class="ti ti-camera"></i> Cameras</div>
+  <div class="cat-pill" onclick="selectCat(this,'computers')"><i class="ti ti-device-laptop"></i> Computers</div>
+  <div class="cat-pill" onclick="selectCat(this,'gaming')"><i class="ti ti-device-gamepad-2"></i> Gaming</div>
+  <div class="cat-pill" onclick="selectCat(this,'headphones')"><i class="ti ti-headphones"></i> Headphones</div>
+  <div class="cat-pill" onclick="selectCat(this,'mobile')"><i class="ti ti-device-mobile"></i> Mobile</div>
+  <div class="cat-pill" onclick="selectCat(this,'furniture')"><i class="ti ti-armchair"></i> Furniture</div>
+  <div class="cat-pill" onclick="selectCat(this,'speakers')"><i class="ti ti-speakerphone"></i> Speakers</div>
+  <div class="cat-pill" onclick="selectCat(this,'jewellery')"><i class="ti ti-diamond"></i> Jewellery</div>
+  <div class="cat-pill" onclick="selectCat(this,'toys')"><i class="ti ti-puzzle"></i> Kids Toys</div>  *@
+</div>
+
+<!-- ═══ BODY ═══ -->
+<div class="body-row">
+
+  <!-- PRODUCT AREA 70% -->
+  <div class="product-area">
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+
+  <!-- ORDER SIDEBAR 30% -->
+  <div class="order-sidebar" id="orderSidebar">
+    <div class="order-header">
+      <div class="order-title">
+        <i class="ti ti-receipt-2"></i> Order
+        <span class="order-count" id="orderCount">0</span>
+      </div>
+      <button class="clear-btn" onclick="clearOrder()">
+        <i class="ti ti-trash"></i> Clear
+      </button>
+    </div>
+
+    <div class="order-items" id="orderItems">
+      <div class="empty-order" id="emptyOrder">
+        <i class="ti ti-shopping-cart-plus"></i>
+        <p>No items added yet</p>
+        <small>Click a product to add</small>
+      </div>
+    </div>
+
+    <div class="order-totals">
+      <div class="tot-row">
+        <span class="lbl"><i class="ti ti-receipt"></i> Subtotal</span>
+        <span class="val" id="subtotalVal">Rs0.00</span>
+      </div>
+      <div class="disc-row">
+        <span class="disc-lbl"><i class="ti ti-discount-2"></i> Discount</span>
+        <div class="disc-right">
+          <input class="disc-input" type="number" id="discountVal" value="0" min="0" oninput="recalc()">
+          <div class="disc-type">
+            <button id="discPct" class="active" onclick="setDiscType('pct')">%</button>
+            <button id="discFlat" onclick="setDiscType('flat')">Rs</button>
+          </div>
+          <span class="disc-saved" id="discSaved"></span>
+        </div>
+      </div>
+      <div class="tot-row">
+        <span class="lbl"><i class="ti ti-file-invoice"></i> Tax (0%)</span>
+        <span class="val">Rs0.00</span>
+      </div>
+      <hr class="tot-divider">
+      <div class="grand-row">
+        <span class="grand-lbl"><i class="ti ti-circle-check"></i> Total</span>
+        <span class="grand-val" id="grandTotal">Rs0.00</span>
+      </div>
+    </div>
+
+    <div class="pay-section">
+      <button class="pay-btn" onclick="openBill()">
+        <i class="ti ti-credit-card"></i>
+        Pay Bill &nbsp;<span id="payAmt">Rs0.00</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MOBILE CART BUTTON ═══ -->
+<button class="mob-cart-btn" id="mobCartBtn" onclick="openCartDrawer()" title="View Order">
+  <i class="ti ti-shopping-cart"></i>
+  <span class="mob-cart-count" id="mobCartCount">0</span>
+</button>
+
+<!-- ═══ MOBILE CART DRAWER ═══ -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCartDrawer()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-handle"></div>
+  <div class="order-header" style="padding:8px 14px">
+    <div class="order-title">
+      <i class="ti ti-receipt-2"></i> Order
+      <span class="order-count" id="orderCountMob">0</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="clear-btn" onclick="clearOrder()"><i class="ti ti-trash"></i> Clear</button>
+      <button class="clear-btn" onclick="closeCartDrawer()"><i class="ti ti-x"></i></button>
+    </div>
+  </div>
+  <div class="order-items" id="orderItemsMob" style="max-height:40vh"></div>
+  <div class="order-totals" id="orderTotalsMob">
+    <div class="tot-row">
+      <span class="lbl"><i class="ti ti-receipt"></i> Subtotal</span>
+      <span class="val" id="subtotalMob">Rs0.00</span>
+    </div>
+    <hr class="tot-divider">
+    <div class="grand-row">
+      <span class="grand-lbl"><i class="ti ti-circle-check"></i> Total</span>
+      <span class="grand-val" id="grandMob">Rs0.00</span>
+    </div>
+  </div>
+  <div class="pay-section">
+    <button class="pay-btn" onclick="openBill()">
+      <i class="ti ti-credit-card"></i>
+      Pay Bill &nbsp;<span id="payAmtMob">Rs0.00</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══ BILL MODAL ═══ -->
+<div class="modal-overlay" id="billModal" style="display:none" onclick="closeBillOutside(event)">
+  <div class="bill-modal">
+    <div class="bill-print" id="billPrint">
+      <div class="bill-top">
+        <div class="bill-logo">Shop<span>Flow</span></div>
+        <div class="bill-store">My Sweet &amp; Retail Store</div>
+        <div class="bill-store">123 Market Street · Tel: +91 98765 43210</div>
+        <div class="bill-meta" id="billMeta"></div>
+      </div>
+      <div class="bill-items-head">
+        <span class="bh-item">Item</span>
+        <span class="bh-qty">Qty</span>
+        <span class="bh-amt">Amount</span>
+      </div>
+      <div id="billItemsBody"></div>
+      <div class="bill-tots" id="billTots"></div>
+      <div class="bill-footer">
+        <div>🙏 Thank you for shopping with us!</div>
+        <div>Please visit again</div>
+        <div style="margin-top:6px;font-size:9px">Powered by ShopFlow POS</div>
+      </div>
+    </div>
+    <div class="bill-actions">
+      <button class="btn-close-bill" onclick="closeBill()"><i class="ti ti-x"></i> Close</button>
+      <button class="btn-print-bill" onclick="printBill()"><i class="ti ti-printer"></i> Print Bill</button>
+    </div>
+  </div>
+</div>
+ 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="~/js/product1.js"></script>
+
+</body>
+</html>

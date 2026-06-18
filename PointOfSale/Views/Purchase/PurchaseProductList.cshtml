@@ -1,0 +1,218 @@
+﻿@{
+    ViewData["Title"] = "Purchase Product List";
+    Layout = "/Views/Shared/_SideLayout.cshtml";
+}
+
+<style>
+    body {
+        background: #f4f6f9;
+    }
+
+    .page-header {
+        background: #ffffff;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        margin-bottom: 18px;
+    }
+
+        .page-header h3 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+    .table-wrapper {
+        background: #fff;
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    }
+
+    table.dataTable {
+        border-collapse: collapse !important;
+    }
+
+        table.dataTable thead {
+            background: #f1f3f6;
+        }
+
+        table.dataTable th {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        table.dataTable td {
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+    /* BUTTONS */
+    .btn-action {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .btn-edit {
+        background: #0d6efd;
+        color: #fff;
+    }
+
+        .btn-edit:hover {
+            background: #084298;
+            color: #fff;
+        }
+
+    /* MOBILE CARD */
+    .mobile-card {
+        display: none;
+    }
+
+    .card-box {
+        background: #fff;
+        padding: 14px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    .card-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .card-sub {
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 4px;
+    }
+
+    .card-actions {
+        margin-top: 10px;
+    }
+
+    @@media (max-width:768px) {
+        .desktop-table {
+            display: none;
+        }
+
+        .mobile-card {
+            display: block;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h3>Purchase Product List</h3>
+        <a href="/Purchase/Add" class="btn btn-primary">+ Add Purchase</a>
+    </div>
+
+    <!-- DESKTOP TABLE -->
+    <div class="table-wrapper desktop-table">
+        <table id="purchaseTable" class="display table table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th>S.No.</th>
+                    <th>Product Name</th>
+                    <th>Product Code</th>
+                    <th>Category</th>
+                    <th>Warehouse</th>
+                    <th>Created Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tblBody"></tbody>
+        </table>
+    </div>
+
+    <!-- MOBILE CARD -->
+    <div class="mobile-card" id="mobileList"></div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        $.ajax({
+            url: '/Purchase/AllPurchaseProductList',
+            type: 'GET',
+            success: function (res) {
+
+                let rows = '';
+                let cards = '';
+                let i = 1;
+
+                res.data.forEach(function (item) {
+
+                    let date = item.createdDate
+                        ? new Date(item.createdDate).toLocaleDateString()
+                        : '';
+
+                    let warehouse = item.warehouseName ?? '';
+
+                    // ================= DESKTOP =================
+                    rows += `
+                        <tr>
+                            <td>${i}</td>
+                            <td>${item.productName ?? ''}</td>
+                            <td>${item.purchaseProductCode ?? ''}</td>
+                            <td>${item.categoryName ?? ''}</td>
+                            <td>${warehouse}</td>
+                            <td>${date}</td>
+                            <td>
+                                <a href="/Purchase/AddPurchaseProduct/${item.id}" class="btn-action btn-edit">
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+
+                    // ================= MOBILE =================
+                    cards += `
+                        <div class="card-box">
+                            <div class="card-title">${item.productName ?? ''}</div>
+
+                            <div class="card-sub"><b>Code:</b> ${item.purchaseProductCode ?? ''}</div>
+                            <div class="card-sub"><b>Category:</b> ${item.categoryName ?? ''}</div>
+                            <div class="card-sub"><b>Warehouse:</b> ${warehouse}</div>
+                            <div class="card-sub"><b>Date:</b> ${date}</div>
+
+                            <div class="card-actions">
+                                <a href="/Purchase/AddPurchaseProduct/${item.id}" class="btn-action btn-edit">
+                                    Edit
+                                </a>
+                            </div>
+                        </div>
+                    `;
+
+                    i++;
+                });
+
+                $('#tblBody').html(rows);
+                $('#mobileList').html(cards);
+
+                // DataTable safe init
+                if ($.fn.DataTable.isDataTable('#purchaseTable')) {
+                    $('#purchaseTable').DataTable().destroy();
+                }
+
+                $('#purchaseTable').DataTable({
+                    paging: true,
+                    searching: true,
+                    ordering: true,
+                    pageLength: 10
+                });
+            }
+        });
+
+    });
+</script>

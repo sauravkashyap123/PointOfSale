@@ -1,0 +1,252 @@
+﻿@model POSModels.Models.WarehouseModel
+
+@{
+    ViewData["Title"] = "Warehouse";
+    Layout = "/Views/Shared/_SideLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css" />
+<link href="~/css/warehouse.css" rel="stylesheet" />
+
+<div class="pos-page">
+
+    <!-- PAGE HEADER -->
+    <div class="pos-page-header">
+        <div class="page-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9.5L12 4l9 5.5V20H3V9.5z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20v-6h6v6" />
+            </svg>
+        </div>
+        <div>
+            <h1>Warehouse Management</h1>
+            <p>Add, update and manage all warehouses</p>
+        </div>
+    </div>
+
+    <!-- EDIT BANNER -->
+    <div class="edit-banner" id="editBanner">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        <span>You are currently editing a warehouse. Update the details and click <strong>Update Warehouse</strong>.</span>
+        <button class="btn-cancel-edit" onclick="cancelEdit()">✕ Cancel Edit</button>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="wh-card">
+        <div class="wh-card-header">
+            <div class="header-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+            </div>
+            <h4 id="formCardTitle">Add / Update Warehouse</h4>
+        </div>
+        <div class="wh-card-body">
+            <form id="warehouseForm" autocomplete="off">
+
+                <input type="hidden" id="Id" name="Id" />
+
+                <div class="form-grid">
+
+                    <!-- SECTION: Basic Info -->
+                    <div class="form-section-label">Basic Information</div>
+
+                    <!-- Warehouse Name -->
+                    <div class="form-group col-6">
+                        <label for="WarehouseName">Warehouse Name <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9.5L12 4l9 5.5V20H3V9.5z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20v-6h6v6" />
+                            </svg>
+                            <input type="text" id="WarehouseName" name="WarehouseName" class="form-control" placeholder="e.g. Central Hub Delhi" required />
+                        </div>
+                    </div>
+
+                    <!-- Warehouse Code -->
+                    <div class="form-group col-6">
+                        <label for="WarehouseCode">Warehouse Code <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                            </svg>
+                            <input type="text" id="WarehouseCode" name="WarehouseCode" class="form-control" placeholder="e.g. WH-001" required />
+                        </div>
+                    </div>
+
+                    <!-- No Of Shops -->
+                    <div class="form-group col-4">
+                        <label for="NoOfShop">No. of Shops</label>
+                        <div class="input-wrap">
+                            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <input type="number" id="NoOfShop" name="NoOfShop" class="form-control" placeholder="1 – 5" min="1" max="5" />
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Location -->
+                    <div class="form-section-label">Location Details</div>
+
+                    <!-- Address -->
+                    <div class="form-group col-12">
+                        <label for="Address">Address</label>
+                        <div class="input-wrap">
+                            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <input type="text" id="Address" name="Address" class="form-control" placeholder="Street / Building name" />
+                        </div>
+                    </div>
+
+                    <!-- City -->
+                    <div class="form-group col-4">
+                        <label for="City">City</label>
+                        <input type="text" id="City" name="City" class="form-control" placeholder="e.g. Mumbai" />
+                    </div>
+
+                    <!-- State -->
+                    <div class="form-group col-4">
+                        <label for="State">State</label>
+                        <input type="text" id="State" name="State" class="form-control" placeholder="e.g. Maharashtra" />
+                    </div>
+
+                    <!-- Pincode -->
+                    <div class="form-group col-4">
+                        <label for="Pincode">Pincode</label>
+                        <input type="text" id="Pincode" name="Pincode" class="form-control" placeholder="6-digit code" />
+                    </div>
+
+                    <!-- SECTION: Contact -->
+                    <div class="form-section-label">Contact Information</div>
+
+                    <!-- Contact Number -->
+                    <div class="form-group col-6">
+                        <label for="ContactNumber">Contact Number</label>
+                        <div class="input-wrap">
+                            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <input type="text" id="ContactNumber" name="ContactNumber" class="form-control" placeholder="+91 XXXXX XXXXX" />
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group col-6">
+                        <label for="Email">Email Address</label>
+                        <div class="input-wrap">
+                            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <input type="email" id="Email" name="Email" class="form-control" placeholder="warehouse@company.com" />
+                        </div>
+                    </div>
+
+                    <!-- SECTION: Security -->
+                    <div class="form-section-label">Security</div>
+
+                    <!-- Password -->
+                    <div class="form-group col-12">
+                        <label for="Password">Password <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            <input type="password" id="Password" name="Password" class="form-control" placeholder="Min 8 chars · Aa · 1 number · 1 special character" />
+                        </div>
+                        <span class="hint">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            Must contain 1 uppercase, 1 lowercase, 1 number and 1 special character
+                        </span>
+                    </div>
+
+                    <!-- SECTION: Notes -->
+                    <div class="form-section-label">Additional Notes</div>
+
+                    <!-- Description -->
+                    <div class="form-group col-12">
+                        <label for="Description">Description</label>
+                        <textarea id="Description" name="Description" class="form-control" placeholder="Optional notes about this warehouse…"></textarea>
+                    </div>
+
+                </div>
+
+                <!-- FORM ACTIONS -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-save" id="btnSave">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                        <span id="btnSaveText">Save Warehouse</span>
+                    </button>
+                    <button type="button" class="btn-clear" onclick="cancelEdit()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Clear Form
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="wh-card">
+        <div class="wh-card-header">
+            <div class="header-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+            </div>
+            <h4>Warehouse List</h4>
+            <span class="badge" id="rowCountBadge">Loading…</span>
+            <div class="wh-table-search">
+                <div class="search-wrap" id="customSearch" style="display:none">
+                    <svg class="s-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" id="tableSearch" placeholder="Search warehouses…"
+                           oninput="$('#warehouseTable').DataTable().search(this.value).draw()" />
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table id="warehouseTable" class="table display nowrap" width="100%">
+                <thead>
+                    <tr>
+                        <th></th><!-- dtr-control (+ toggle) -->
+                        <th>#</th>
+                        <th>Warehouse</th>
+                        <th>Code</th>
+                        <th>Address</th>
+                        <th>City</th>
+                        <th>Shops</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                        <th>Pincode</th>
+                        <th>Password</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="~/js/warehouse.js"></script>

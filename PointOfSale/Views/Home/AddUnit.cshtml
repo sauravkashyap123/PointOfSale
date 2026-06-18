@@ -1,0 +1,135 @@
+﻿@model POSModels.Models.MithaiShop.Unit
+@{
+    ViewData["Title"] = "Unit Management";
+    Layout = "/Views/Shared/_SideLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<link href="~/css/unit.css" rel="stylesheet" />
+
+<div class="pg-wrap">
+
+    <!-- ── Page Header ── -->
+    <div class="pg-header">
+        <div class="pg-title-row">
+            <div class="pg-icon"><i class="ti ti-ruler-2"></i></div>
+            <div>
+                <p class="pg-title">Unit Management</p>
+                <p class="pg-sub">Add and manage measurement units</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════
+         FORM CARD
+    ════════════════════════════ -->
+    <div class="au-card">
+        <div class="au-card-head">
+            <div class="au-head-icon blue"><i class="ti ti-plus"></i></div>
+            <div class="au-head-text">
+                <h4 id="formHeading">Add New Unit</h4>
+                <p>Fill in the details and save</p>
+            </div>
+        </div>
+        <div class="au-card-body">
+
+            <div class="edit-bar" id="editBar">
+                <i class="ti ti-pencil"></i>
+                Editing existing unit — make changes and click Update
+                <button class="edit-cancel" type="button" onclick="cancelEdit()">✕ Cancel</button>
+            </div>
+
+            <form id="unitForm">
+                <input type="hidden" id="Id" asp-for="Id" />
+
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label class="field-label" for="UnitName">Unit Name</label>
+                        <div class="field-wrap">
+                            <i class="ti ti-ruler-2 field-icon"></i>
+                            <input asp-for="UnitName" type="text" id="UnitName"
+                                   class="field-input" placeholder="e.g. Kilogram" />
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="ShortName">Short Name</label>
+                        <div class="field-wrap">
+                            <i class="ti ti-tag field-icon"></i>
+                            <input asp-for="ShortName" type="text" id="ShortName"
+                                   class="field-input" placeholder="e.g. Kg" />
+                        </div>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="btn-row">
+                            <button type="submit" class="btn-save" id="btnSave">
+                                <i class="ti ti-device-floppy"></i>
+                                <span id="saveBtnText">Save Unit</span>
+                            </button>
+                            <button type="button" class="btn-reset" onclick="cancelEdit()">
+                                <i class="ti ti-refresh"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="form-alert" id="formAlert">
+                <i class="ti ti-circle-check" id="alertIcon"></i>
+                <span id="alertText">Unit saved successfully!</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ════════════════════════════
+         TABLE CARD
+    ════════════════════════════ -->
+    <div class="au-card">
+        <div class="au-card-head">
+            <div class="au-head-icon dark"><i class="ti ti-list"></i></div>
+            <div class="au-head-text">
+                <h4 style="color:#444441">Unit List</h4>
+                <p>All measurement units</p>
+            </div>
+            <div style="margin-left:auto">
+                <span class="unit-count-badge" id="unitCountBadge">0 Units</span>
+            </div>
+        </div>
+
+        <div class="tbl-toolbar">
+            <div class="search-wrap">
+                <i class="ti ti-search"></i>
+                <input type="text" id="liveSearch" placeholder="Search unit…" />
+            </div>
+            <span class="entries-lbl">
+                Show
+                <select id="entriesSelect">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select> entries
+            </span>
+        </div>
+
+        <div class="tbl-scroll">
+            <table id="tblUnit" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>S.No.</th>
+                        <th>Unit Name</th>
+                        <th>Short Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="~/js/unit.js"></script>

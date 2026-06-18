@@ -1,0 +1,278 @@
+﻿@model POSModels.Models.InvoicePrintModel
+
+@{
+    Layout = null;
+}
+
+
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 80mm;
+            margin: 0 auto;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            color: #000;
+        }
+
+        .receipt {
+            padding: 8px;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .shop-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .line {
+            border-top: 1px dashed #000;
+            margin: 6px 0;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 2px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        th {
+            border-bottom: 1px dashed #000;
+            padding-bottom: 4px;
+            text-align: left;
+        }
+
+        td {
+            padding: 4px 0;
+            vertical-align: top;
+        }
+
+        .qty {
+            width: 12%;
+            text-align: center;
+        }
+
+        .rate {
+            width: 20%;
+            text-align: right;
+        }
+
+        .amt {
+            width: 22%;
+            text-align: right;
+        }
+
+        .total-section {
+            margin-top: 5px;
+        }
+
+        .grand-total {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .print-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            border: none;
+            background: #000;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        @@media print {
+
+            .print-btn {
+                display: none;
+            }
+
+            body {
+                width: 80mm;
+            }
+
+            @@page {
+                margin: 0;
+                size: 80mm auto;
+            }
+        }
+    </style>
+
+
+    <div class="receipt">
+
+        <!-- Shop Header -->
+
+    <div class="center">
+        @{
+            string shopName = ViewBag.ShopName as string;
+            string address = ViewBag.Address as string;
+            string mobileNo = ViewBag.Mobileno as string;
+            string gstNumber = ViewBag.Gstnumber as string;
+        }
+
+        <div class="shop-name">
+            @(string.IsNullOrWhiteSpace(shopName) ? "Sri Sai Store" : shopName)
+        </div>
+
+        <div>
+            @(string.IsNullOrWhiteSpace(address) ? "Main Road, Jamshedpur" : address)
+        </div>
+
+        <div>
+            Mob : @(string.IsNullOrWhiteSpace(mobileNo) ? "+91 0000000000" : mobileNo)
+        </div>
+
+        <div>
+            GSTIN : @(string.IsNullOrWhiteSpace(gstNumber) ? "20XXXXXXXXXX" : gstNumber)
+        </div>
+    </div>
+        <div class="line"></div>
+
+        <!-- Invoice Info -->
+
+        <div class="row">
+            <span>Bill No</span>
+            <span>@Model.InvoiceNumber</span>
+        </div>
+
+        <div class="row">
+            <span>Date</span>
+            <span>@Model.InvoiceDate.ToString("dd-MM-yyyy hh:mm tt")</span>
+        </div>
+
+        <div class="row">
+            <span>Customer</span>
+            <span>@Model.CustomerName</span>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.MobileNo))
+        {
+            <div class="row">
+                <span>Mobile</span>
+                <span>@Model.MobileNo</span>
+            </div>
+        }
+
+        <div class="row">
+            <span>Payment</span>
+            <span>@Model.PaymentMethod</span>
+        </div>
+
+        <div class="line"></div>
+
+        <!-- Item Table -->
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="qty">Qty</th>
+                    <th class="rate">Rate</th>
+                    <th class="amt">Amt</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            @item.ProductName
+                            <br />
+                            <small>@item.UnitName</small>
+                        </td>
+
+                        <td class="qty">
+                            @item.Quantity
+                        </td>
+
+                        <td class="rate">
+                            @item.Rate.ToString("N2")
+                        </td>
+
+                        <td class="amt">
+                            @item.Amount.ToString("N2")
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+
+        <div class="line"></div>
+
+        <!-- Totals -->
+
+        <div class="total-section">
+
+            <div class="row">
+                <span>Gross Amount</span>
+                <span>₹ @Model.GrossAmount.ToString("N2")</span>
+            </div>
+
+            <div class="row">
+                <span>
+                    Discount (@Model.DiscountPercent%)
+                </span>
+                <span>
+                    ₹ @Model.DiscountAmount.ToString("N2")
+                </span>
+            </div>
+
+            <div class="line"></div>
+
+            <div class="row grand-total">
+                <span>NET TOTAL</span>
+                <span>₹ @Model.TotalAmount.ToString("N2")</span>
+            </div>
+
+        </div>
+
+        <div class="line"></div>
+
+        <!-- Footer -->
+
+        <div class="footer">
+
+            <p>Thank You Visit Again</p>
+            <p>Please Keep This Receipt</p>
+
+        </div>
+
+        <button class="print-btn" onclick="window.print()">
+            Print Bill
+        </button>
+
+    </div>
+
+    <script>
+        window.onload = function () {
+            setTimeout(function () {
+                window.print();
+            }, 500);
+        };
+    </script>

@@ -1,0 +1,860 @@
+﻿@model POSModels.Models.MithaiShop.StockTransfer
+
+@{
+    Layout = "~/Views/Shared/_SideLayout.cshtml";
+    ViewBag.Title = "Stock Adjustment";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    :root {
+        --ink: #18181b;
+        --ink-2: #52525b;
+        --ink-3: #a1a1aa;
+        --surface: #ffffff;
+        --surface-2: #f4f4f5;
+        --surface-3: #fafafa;
+        --border: #e4e4e7;
+        --border-2: #d4d4d8;
+        --green: #16a34a;
+        --red: #dc2626;
+        --blue-bg: #eff6ff;
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 14px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+        --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+        --font: 'DM Sans', sans-serif;
+        --mono: 'DM Mono', monospace;
+    }
+
+    .sa-page {
+        font-family: var(--font);
+        background: var(--surface-2);
+        min-height: 100vh;
+        padding: 1.75rem 1.5rem 4rem;
+        color: var(--ink);
+    }
+
+    .sa-wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    /* Title */
+    .sa-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .sa-title-icon {
+        width: 38px;
+        height: 38px;
+        background: var(--ink);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .sa-title-icon svg {
+            width: 19px;
+            height: 19px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+    .sa-title h1 {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -.3px;
+    }
+
+    .sa-title p {
+        font-size: 13px;
+        color: var(--ink-2);
+        margin-top: 1px;
+    }
+
+    /* Card */
+    .sa-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.25rem;
+        overflow: hidden;
+    }
+
+    .sa-card-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 13px 18px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-3);
+    }
+
+        .sa-card-head svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--ink-2);
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .sa-card-head span {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+    .sa-card-body {
+        padding: 1.25rem 1.5rem;
+    }
+
+    /* Form */
+    .sa-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 1.25rem;
+    }
+
+    .sa-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .sa-field label {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--ink-2);
+        }
+
+    .sa-select {
+        height: 40px;
+        padding: 0 32px 0 12px;
+        border: 1px solid var(--border-2);
+        border-radius: var(--radius-sm);
+        font-family: var(--font);
+        font-size: 14px;
+        color: var(--ink);
+        background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2352525b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 10px center;
+        appearance: none;
+        outline: none;
+        cursor: pointer;
+        transition: border-color .15s, box-shadow .15s;
+    }
+
+        .sa-select:focus {
+            border-color: var(--ink);
+            box-shadow: 0 0 0 3px rgba(24,24,27,.1);
+        }
+
+    /* Load button */
+    .sa-btn-load {
+        height: 40px;
+        padding: 0 20px;
+        background: var(--ink);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: var(--font);
+        font-size: 13.5px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        transition: opacity .15s, transform .1s;
+        white-space: nowrap;
+    }
+
+        .sa-btn-load svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .sa-btn-load:hover {
+            opacity: .85;
+        }
+
+        .sa-btn-load:active {
+            transform: scale(.98);
+        }
+
+    /* Search */
+    .sa-search-wrap {
+        position: relative;
+        margin-bottom: 14px;
+    }
+
+        .sa-search-wrap svg {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 15px;
+            stroke: var(--ink-3);
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+        }
+
+    .sa-search-input {
+        width: 100%;
+        height: 38px;
+        padding: 0 12px 0 36px;
+        border: 1px solid var(--border-2);
+        border-radius: var(--radius-sm);
+        font-family: var(--font);
+        font-size: 13.5px;
+        color: var(--ink);
+        background: var(--surface-3);
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+    }
+
+        .sa-search-input:focus {
+            border-color: var(--ink);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(24,24,27,.08);
+        }
+
+    /* Table */
+    .sa-table-wrap {
+        overflow-x: auto;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+    }
+
+    .sa-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13.5px;
+    }
+
+        .sa-table thead tr {
+            background: var(--surface-2);
+        }
+
+        .sa-table th {
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--ink-2);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .sa-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--ink);
+            vertical-align: middle;
+        }
+
+        .sa-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .sa-table tbody tr:hover td {
+            background: var(--surface-3);
+        }
+
+        .sa-table tbody tr.row-selected td {
+            background: var(--blue-bg);
+        }
+
+    .sa-qty-input {
+        width: 90px;
+        height: 34px;
+        padding: 0 10px;
+        border: 1px solid var(--border-2);
+        border-radius: var(--radius-sm);
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink);
+        background: var(--surface);
+        outline: none;
+        text-align: center;
+        transition: border-color .15s;
+    }
+
+        .sa-qty-input:focus {
+            border-color: var(--ink);
+            box-shadow: 0 0 0 3px rgba(24,24,27,.08);
+        }
+
+        .sa-qty-input:disabled {
+            opacity: .35;
+        }
+
+    .sa-cb {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--ink);
+        cursor: pointer;
+    }
+
+    .qty-badge {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 12px;
+        padding: 2px 9px;
+        border-radius: 20px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: var(--ink-2);
+    }
+
+    /* Empty state */
+    .sa-empty {
+        padding: 2.5rem;
+        text-align: center;
+        color: var(--ink-3);
+        font-size: 13.5px;
+    }
+
+        .sa-empty svg {
+            width: 36px;
+            height: 36px;
+            stroke: var(--border-2);
+            fill: none;
+            stroke-width: 1.5;
+            display: block;
+            margin: 0 auto 10px;
+        }
+
+    .sa-summary-empty {
+        padding: 1.5rem;
+        text-align: center;
+        color: var(--ink-3);
+        font-size: 13px;
+    }
+
+    /* Save row */
+    .sa-save-row {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
+        background: var(--surface-3);
+    }
+
+    .sa-count-badge {
+        font-size: 13px;
+        color: var(--ink-2);
+    }
+
+        .sa-count-badge strong {
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+    .sa-btn-save {
+        height: 40px;
+        padding: 0 22px;
+        background: var(--green);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background .15s, transform .1s;
+    }
+
+        .sa-btn-save svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .sa-btn-save:hover {
+            background: #15803d;
+        }
+
+        .sa-btn-save:active {
+            transform: scale(.98);
+        }
+
+        .sa-btn-save:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    /* Toast */
+    .sa-toast {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        padding: 12px 18px;
+        border-radius: var(--radius-md);
+        font-size: 13.5px;
+        font-weight: 500;
+        color: #fff;
+        box-shadow: var(--shadow-md);
+        z-index: 9999;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity .25s, transform .25s;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        max-width: 340px;
+    }
+
+        .sa-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sa-toast.success {
+            background: var(--green);
+        }
+
+        .sa-toast.error {
+            background: var(--red);
+        }
+
+        .sa-toast svg {
+            width: 17px;
+            height: 17px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+    /* Spinner */
+    .sa-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin .6s linear infinite;
+        flex-shrink: 0;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .sa-form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="sa-page">
+    <div class="sa-wrap">
+
+        <!-- Page Title -->
+        <div class="sa-title">
+            <div class="sa-title-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17 8v12m0 0 4-4m-4 4-4-4M7 16V4m0 12-4-4m4 4 4-4" />
+                </svg>
+            </div>
+            <div>
+                <h1>Stock Adjustment</h1>
+                <p>Shop se Warehouse mein product wapas bhejein</p>
+            </div>
+        </div>
+
+        <!-- Setup Card -->
+        <div class="sa-card">
+            <div class="sa-card-head">
+                <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /></svg>
+                <span>Shop → Warehouse Transfer Setup</span>
+            </div>
+            <div class="sa-card-body">
+
+                <div class="sa-form-row">
+                    <div class="sa-field">
+                        <label for="sourceId">Source — Shop</label>
+                        <select class="sa-select" id="sourceId">
+                            <option value="">-- Shop Select Karein --</option>
+                            @foreach (var item in Model.selectshop)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="sa-field">
+                        <label for="destId">Destination — Warehouse</label>
+                        <select class="sa-select" id="destId">
+                            <option value="">-- Warehouse Select Karein --</option>
+                            @foreach (var item in Model.SelectWarehouse)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <button class="sa-btn-load" id="btnLoad" type="button" onclick="loadProducts()">
+                    <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 .49-4.6" /></svg>
+                    Products Load Karo
+                </button>
+
+            </div>
+        </div>
+
+        <!-- Products Card -->
+        <div class="sa-card" id="cardProducts" style="display:none">
+            <div class="sa-card-head">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
+                <span>Shop mein Available Products</span>
+            </div>
+            <div class="sa-card-body">
+
+                <div class="sa-search-wrap">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                    <input type="text" class="sa-search-input" id="productSearch"
+                           placeholder="Product naam se dhundhein..."
+                           oninput="filterProducts()" />
+                </div>
+
+                <div class="sa-table-wrap">
+                    <table class="sa-table" id="tblProducts">
+                        <thead>
+                            <tr>
+                                <th style="width:42px">
+                                    <input type="checkbox" class="sa-cb" id="chkAll" onchange="toggleAll(this)" />
+                                </th>
+                                <th>#</th>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Unit</th>
+                                <th>Available (Shop)</th>
+                                <th>Transfer Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTbody">
+                            <tr>
+                                <td colspan="7">
+                                    <div class="sa-empty">
+                                        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /></svg>
+                                        Pehle shop aur warehouse select karein
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Summary + Save Card -->
+        <div class="sa-card" id="cardSummary" style="display:none">
+            <div class="sa-card-head">
+                <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+                <span>Transfer Summary</span>
+            </div>
+
+            <div class="sa-table-wrap" style="border:none;border-radius:0;border-top:1px solid var(--border)">
+                <table class="sa-table" id="tblSummary">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th>Unit</th>
+                            <th>Transfer Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryTbody">
+                        <tr><td colspan="4"><div class="sa-summary-empty">Koi item select nahi kiya</div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="sa-save-row">
+                <span class="sa-count-badge">Selected: <strong id="selectedCount">0</strong> items</span>
+                <button class="sa-btn-save" id="btnSave" type="button" onclick="saveTransfer()" disabled>
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+                    Save Transfer
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="sa-toast" id="saToast" role="alert" aria-live="polite"></div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+    // ── Load Products ─────────────────────────────────────────────────────────
+    function loadProducts() {
+    var shopId      = $('#sourceId').val();
+    var warehouseId = $('#destId').val();
+
+    if (!shopId)      { showToast('Shop select karein.', 'error'); return; }
+    if (!warehouseId) { showToast('Warehouse select karein.', 'error'); return; }
+
+    var $btn = $('#btnLoad');
+    $btn.html('<span class="sa-spinner"></span> Loading...').prop('disabled', true);
+
+    $.get('/Warehouse/GetShopProducts?shopId=' + shopId, function (data) {
+    renderProductTable(data);
+    $('#cardProducts').show();
+    $('#cardSummary').show();
+    renderSummary();
+    })
+    .fail(function () {
+    showToast('Products load karne mein error aaya.', 'error');
+    })
+    .always(function () {
+    $btn.html('<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.6"/></svg> Products Load Karo')
+    .prop('disabled', false);
+    });
+    }
+
+    // ── Render Product Table ──────────────────────────────────────────────────
+    function renderProductTable(products) {
+    var $tbody = $('#productTbody').empty();
+    $('#chkAll').prop('checked', false).prop('indeterminate', false);
+
+    if (!products || products.length === 0) {
+    $tbody.append('<tr><td colspan="7"><div class="sa-empty">Is shop mein koi product available nahi hai.</div></td></tr>');
+    return;
+    }
+
+    $.each(products, function (i, p) {
+    $tbody.append(`
+    <tr data-id="${p.productId}"
+    data-name="${escHtml(p.productName)}"
+    data-unit="${escHtml(p.unitName)}"
+    data-avail="${p.availableQty}">
+    <td><input type="checkbox" class="sa-cb row-cb" onchange="onRowCheck(this)" /></td>
+    <td style="color:var(--ink-3);font-family:var(--mono);font-size:12px">${i + 1}</td>
+    <td style="font-weight:500">${escHtml(p.productName)}</td>
+    <td style="color:var(--ink-2)">${escHtml(p.categoryName)}</td>
+    <td style="color:var(--ink-2)">${escHtml(p.unitName)}</td>
+    <td><span class="qty-badge">${parseFloat(p.availableQty).toLocaleString('en-IN')}</span></td>
+    <td>
+    <input type="number" class="sa-qty-input qty-inp"
+    min="0.001" max="${p.availableQty}" step="0.001"
+    placeholder="0" disabled
+    oninput="renderSummary()" />
+    </td>
+    </tr>`);
+    });
+    }
+
+    // ── Search Filter ─────────────────────────────────────────────────────────
+    function filterProducts() {
+    var q = $('#productSearch').val().toLowerCase();
+    $('#productTbody tr').each(function () {
+    var name = ($(this).data('name') || '').toLowerCase();
+    $(this).toggle(!q || name.includes(q));
+    });
+    }
+
+    // ── Checkbox Logic ────────────────────────────────────────────────────────
+    function toggleAll(chk) {
+    $('#productTbody .row-cb').each(function () {
+    $(this).prop('checked', chk.checked);
+    var $row = $(this).closest('tr');
+    $row.toggleClass('row-selected', chk.checked);
+    $row.find('.qty-inp').prop('disabled', !chk.checked);
+    });
+    renderSummary();
+    }
+
+    function onRowCheck(chk) {
+    var $row = $(chk).closest('tr');
+    $row.toggleClass('row-selected', chk.checked);
+    $row.find('.qty-inp').prop('disabled', !chk.checked);
+
+    var total   = $('#productTbody .row-cb').length;
+    var checked = $('#productTbody .row-cb:checked').length;
+    $('#chkAll')
+    .prop('indeterminate', checked > 0 && checked < total)
+    .prop('checked', checked === total && total > 0);
+
+    renderSummary();
+    }
+
+    // ── Summary ───────────────────────────────────────────────────────────────
+    function renderSummary() {
+    var items  = getSelectedItems();
+    var $tbody = $('#summaryTbody').empty();
+    var $btn   = $('#btnSave');
+
+    if (items.length === 0) {
+    $tbody.append('<tr><td colspan="4"><div class="sa-summary-empty">Koi item select nahi kiya</div></td></tr>');
+    $btn.prop('disabled', true);
+    $('#selectedCount').text('0');
+    return;
+    }
+
+    var allHaveQty = true;
+    $.each(items, function (i, it) {
+    if (!it.quantity || it.quantity <= 0) allHaveQty = false;
+    $tbody.append(`
+    <tr>
+    <td style="color:var(--ink-3);font-family:var(--mono);font-size:12px">${i + 1}</td>
+    <td style="font-weight:500">${escHtml(it.productName)}</td>
+    <td style="color:var(--ink-2)">${escHtml(it.unitName)}</td>
+    <td style="font-family:var(--mono);font-weight:500">
+    ${it.quantity > 0
+    ? parseFloat(it.quantity).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 3 })
+    : '<span style="color:var(--ink-3)">—</span>'}
+    </td>
+    </tr>`);
+    });
+
+    $('#selectedCount').text(items.length);
+    $btn.prop('disabled', !allHaveQty);
+    }
+
+    function getSelectedItems() {
+    var items = [];
+    $('#productTbody .row-cb:checked').each(function () {
+    var $row = $(this).closest('tr');
+    items.push({
+    productId:   parseInt($row.data('id')),
+    productName: $row.data('name'),
+    unitName:    $row.data('unit'),
+    availQty:    parseFloat($row.data('avail')),
+    quantity:    parseFloat($row.find('.qty-inp').val()) || 0
+    });
+    });
+    return items;
+    }
+
+    // ── Save Transfer ─────────────────────────────────────────────────────────
+    function saveTransfer() {
+    var items = getSelectedItems();
+
+    if (items.length === 0) { showToast('Koi product select nahi kiya.', 'error'); return; }
+
+    var invalid = items.filter(function (it) { return it.quantity <= 0; });
+    if (invalid.length > 0) {
+    showToast('"' + invalid[0].productName + '" ki quantity fill karein.', 'error');
+    return;
+    }
+
+    var overQty = items.filter(function (it) { return it.quantity > it.availQty; });
+    if (overQty.length > 0) {
+    showToast('"' + overQty[0].productName + '" ki quantity available stock se zyada hai.', 'error');
+    return;
+    }
+
+    var payload = {
+    transferType:    'ShopToWarehouse',
+    fromShopId:      parseInt($('#sourceId').val()),
+    toWarehouseId:   parseInt($('#destId').val()),
+    fromWarehouseId: null,
+    toShopId:        null,
+    items: items.map(function (it) {
+    return { productId: it.productId, quantity: it.quantity };
+    })
+    };
+
+    var $btn    = $('#btnSave');
+    var savedHtml = $btn.html();
+    $btn.html('<span class="sa-spinner"></span> Saving...').prop('disabled', true);
+
+    $.ajax({
+    url:         '/Warehouse/SaveStockTransfer',
+    type:        'POST',
+    contentType: 'application/json',
+    data:        JSON.stringify(payload),
+    success: function (res) {
+    if (res.success) {
+    showToast(res.message, 'success');
+    // Reset after success
+    setTimeout(function () {
+    $('#sourceId, #destId').val('');
+    $('#cardProducts, #cardSummary').hide();
+    $('#productTbody').empty();
+    renderSummary();
+    }, 1500);
+    } else {
+    showToast(res.message, 'error');
+    $btn.html(savedHtml).prop('disabled', false);
+    }
+    },
+    error: function () {
+    showToast('Server error aaya. Dobara try karein.', 'error');
+    $btn.html(savedHtml).prop('disabled', false);
+    }
+    });
+    }
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+    var toastTimer;
+    function showToast(msg, type) {
+    var icon = type === 'success'
+    ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+    : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    var $t = $('#saToast');
+    $t.html(icon + msg).removeClass('success error').addClass(type + ' show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { $t.removeClass('show'); }, 3500);
+    }
+
+    // ── Helper ────────────────────────────────────────────────────────────────
+    function escHtml(str) {
+    return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+</script>

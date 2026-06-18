@@ -1,0 +1,544 @@
+﻿@model POSModels.Models.PurchaseEntry.RawPurchaseModel
+
+@{
+    ViewData["Title"] = "Add Purchase";
+    Layout = "/Views/Shared/_SideLayout.cshtml";
+}
+
+<style>
+    /* ===== PAGE LAYOUT ===== */
+    .pu-page {
+        padding: 1.5rem;
+        background: #f5f5f3;
+        min-height: 100vh;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* ===== TOP BAR ===== */
+    .pu-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+
+    .pu-breadcrumb {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 3px;
+    }
+
+        .pu-breadcrumb span {
+            color: #222;
+            font-weight: 500;
+        }
+
+    .pu-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .pu-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 500;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: #E6F1FB;
+        color: #0C447C;
+        border: 0.5px solid #B5D4F4;
+    }
+
+        .pu-status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #378ADD;
+            display: inline-block;
+        }
+
+    /* ===== SECTION CARD ===== */
+    .section-card {
+        background: #fff;
+        border: 0.5px solid rgba(0,0,0,0.1);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .section-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 20px;
+        border-bottom: 0.5px solid rgba(0,0,0,0.08);
+        background: #fafaf8;
+    }
+
+        .section-head i {
+            font-size: 16px;
+            color: #888;
+        }
+
+    .section-head-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .section-body {
+        padding: 20px;
+    }
+
+    /* ===== FORM FIELDS ===== */
+    .f-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+    }
+
+    .f-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+        .f-group label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .f-group .form-control {
+            height: 36px;
+            padding: 0 10px;
+            border: 0.5px solid rgba(0,0,0,0.15);
+            border-radius: 8px;
+            background: #fff;
+            color: #1a1a1a;
+            font-size: 13px;
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+            .f-group .form-control:focus {
+                outline: none;
+                border-color: #378ADD;
+                box-shadow: 0 0 0 3px rgba(55,138,221,.13);
+            }
+
+    /* ===== ITEMS TABLE ===== */
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    table.items-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        table-layout: fixed;
+    }
+
+        table.items-table thead tr {
+            background: #fafaf8;
+        }
+
+        table.items-table thead th {
+            padding: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border-bottom: 0.5px solid rgba(0,0,0,0.08);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        table.items-table tbody tr {
+            border-bottom: 0.5px solid rgba(0,0,0,0.06);
+            transition: background .1s;
+        }
+
+            table.items-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            table.items-table tbody tr:hover {
+                background: #fafaf8;
+            }
+
+        table.items-table td {
+            padding: 6px 8px;
+            vertical-align: middle;
+        }
+
+            table.items-table td .form-control {
+                height: 32px;
+                padding: 0 8px;
+                border: 0.5px solid rgba(0,0,0,0.12);
+                border-radius: 6px;
+                background: #fff;
+                color: #1a1a1a;
+                font-size: 12px;
+                width: 100%;
+                transition: border-color .12s, box-shadow .12s;
+            }
+
+                table.items-table td .form-control:focus {
+                    outline: none;
+                    border-color: #378ADD;
+                    box-shadow: 0 0 0 2px rgba(55,138,221,.12);
+                }
+
+            table.items-table td input[readonly].form-control {
+                background: #f5f5f3;
+                color: #555;
+                font-weight: 500;
+                cursor: default;
+            }
+
+    /* ===== TABLE FOOTER ===== */
+    .table-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        border-top: 0.5px solid rgba(0,0,0,0.08);
+        background: #fafaf8;
+    }
+
+    .grand-total-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #777;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-right: 8px;
+    }
+
+    .grand-total-val {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-add-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 8px;
+        background: #fff;
+        color: #1a1a1a;
+        border: 0.5px solid rgba(0,0,0,0.15);
+        cursor: pointer;
+        transition: background .12s;
+    }
+
+        .btn-add-row:hover {
+            background: #f5f5f3;
+        }
+
+    .btn-remove {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #FCEBEB;
+        color: #A32D2D;
+        border: 0.5px solid #F7C1C1;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity .12s;
+    }
+
+        .btn-remove:hover {
+            opacity: .7;
+        }
+
+    .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 4px;
+    }
+
+    .btn-cancel {
+        padding: 8px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 8px;
+        background: transparent;
+        color: #555;
+        border: 0.5px solid rgba(0,0,0,0.15);
+        cursor: pointer;
+        transition: background .12s;
+    }
+
+        .btn-cancel:hover {
+            background: #f5f5f3;
+        }
+
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 20px;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 8px;
+        background: #185FA5;
+        color: #E6F1FB;
+        border: none;
+        cursor: pointer;
+        transition: background .12s;
+    }
+
+        .btn-save:hover {
+            background: #0C447C;
+        }
+</style>
+
+
+<div class="pu-page">
+
+    <!-- ===== TOP BAR ===== -->
+    <div class="pu-topbar">
+        <div>
+            <div class="pu-breadcrumb">Purchases &rsaquo; <span>New Entry</span></div>
+            <div class="pu-title">Add Purchase</div>
+        </div>
+        <span class="pu-status-badge">Draft</span>
+    </div>
+
+    <form method="post" asp-action="AddPurchase">
+
+        <!-- ===== PURCHASE DETAILS ===== -->
+        <div class="section-card">
+
+            <div class="section-head">
+                <i class="ti ti-file-description"></i>
+                <span class="section-head-label">Purchase Details</span>
+            </div>
+
+            <div class="section-body">
+                <div class="f-grid">
+
+                    <div class="f-group">
+                        <label>Purchase No</label>
+                        <input type="text" class="form-control" asp-for="PurchaseNo" placeholder="PUR-2025-001" />
+                    </div>
+
+                    <div class="f-group">
+                        <label>Purchase Date</label>
+                        <input type="date" class="form-control" asp-for="PurchaseDate" />
+                    </div>
+
+                    <div class="f-group">
+                        <label>Warehouse</label>
+                        <select class="form-control" asp-for="WarehouseId">
+                            <option value="">Select warehouse</option>
+                        </select>
+                    </div>
+
+                    <div class="f-group">
+                        <label>Remarks</label>
+                        <input type="text" class="form-control" asp-for="Remarks" placeholder="Optional note..." />
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== PURCHASE ITEMS ===== -->
+        <div class="section-card">
+
+            <div class="section-head">
+                <i class="ti ti-list-details"></i>
+                <span class="section-head-label">Purchase Items</span>
+            </div>
+
+            <div class="table-wrap">
+                <table class="items-table" id="itemTable">
+
+                    <colgroup>
+                        <col style="width:24%">
+                        <col style="width:13%">
+                        <col style="width:10%">
+                        <col style="width:12%">
+                        <col style="width:10%">
+                        <col style="width:14%">
+                        <col style="width:5%">
+                    </colgroup>
+
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Unit</th>
+                            <th>Qty</th>
+                            <th>Rate (&#8377;)</th>
+                            <th>GST %</th>
+                            <th>Total (&#8377;)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="itemBody">
+                        <tr>
+
+                            <td>
+                                <select name="Items[0].ProductId" class="form-control">
+                                    <option value="">Select product</option>
+                                    @foreach (var item in Model.selectedProductList)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+                            </td>
+
+                            <td>
+                                <select name="Items[0].UnitId" class="form-control">
+                                    <option value="">Select unit</option>
+                                    @foreach (var item in Model.selectedunitlist)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                </select>
+                            </td>
+
+                            <td>
+                                <input type="number" name="Items[0].Quantity" class="form-control qty" placeholder="0" />
+                            </td>
+
+                            <td>
+                                <input type="number" name="Items[0].Rate" class="form-control rate" placeholder="0.00" />
+                            </td>
+
+                            <td>
+                                <input type="number" name="Items[0].GSTPercent" class="form-control gst" placeholder="0" />
+                            </td>
+
+                            <td>
+                                <input type="number" class="form-control rowtotal" readonly placeholder="0.00" />
+                            </td>
+
+                            <td>
+                                <button type="button" class="btn-remove">&#10005;</button>
+                            </td>
+
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+
+            <div class="table-footer">
+                <button type="button" class="btn-add-row" id="addRow">
+                    + Add Item
+                </button>
+                <div>
+                    <span class="grand-total-label">Grand Total</span>
+                    <span class="grand-total-val" id="grandTotal">&#8377; 0.00</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== FORM ACTIONS ===== -->
+        <div class="form-actions">
+            <button type="button" class="btn-cancel">Cancel</button>
+            <button type="submit" class="btn-save">Save Purchase</button>
+        </div>
+
+    </form>
+
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    let index = 1;
+
+    // ===== PRODUCT & UNIT OPTIONS =====
+    let productOptions = `@foreach (var item in Model.selectedProductList) {
+        <option value="@item.Value">@item.Text</option>
+        }
+`;
+
+    let unitOptions = `@foreach (var item in Model.selectedunitlist) {
+        <option value="@item.Value">@item.Text</option>
+        }
+`;
+
+    // ===== ADD ROW =====
+    $("#addRow").click(function () {
+        let row = `
+        <tr>
+            <td>
+                <select name="Items[${index}].ProductId" class="form-control">
+                    <option value="">Select product</option>
+                    ${productOptions}
+                </select>
+            </td>
+            <td>
+                <select name="Items[${index}].UnitId" class="form-control">
+                    <option value="">Select unit</option>
+                    ${unitOptions}
+                </select>
+            </td>
+            <td><input type="number" name="Items[${index}].Quantity" class="form-control qty" placeholder="0" /></td>
+            <td><input type="number" name="Items[${index}].Rate" class="form-control rate" placeholder="0.00" /></td>
+            <td><input type="number" name="Items[${index}].GSTPercent" class="form-control gst" placeholder="0" /></td>
+            <td><input type="number" class="form-control rowtotal" readonly placeholder="0.00" /></td>
+            <td><button type="button" class="btn-remove">&#10005;</button></td>
+        </tr>`;
+
+        $("#itemBody").append(row);
+        index++;
+    });
+
+    // ===== REMOVE ROW =====
+    $(document).on("click", ".btn-remove", function () {
+        if ($("#itemBody tr").length > 1) {
+            $(this).closest("tr").remove();
+            updateGrandTotal();
+        }
+    });
+
+    // ===== CALCULATION =====
+    $(document).on("input", ".qty, .rate, .gst", function () {
+        let row = $(this).closest("tr");
+        let qty  = parseFloat(row.find(".qty").val())  || 0;
+        let rate = parseFloat(row.find(".rate").val()) || 0;
+        let gst  = parseFloat(row.find(".gst").val())  || 0;
+        let total = (qty * rate) * (1 + gst / 100);
+        row.find(".rowtotal").val(total.toFixed(2));
+        updateGrandTotal();
+    });
+
+    // ===== GRAND TOTAL =====
+    function updateGrandTotal() {
+        let grand = 0;
+        $(".rowtotal").each(function () {
+            grand += parseFloat($(this).val()) || 0;
+        });
+        $("#grandTotal").text("₹ " + grand.toFixed(2));
+    }
+</script>

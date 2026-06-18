@@ -1,0 +1,530 @@
+﻿@* @model POSModels.Models.MithaiShop.Product
+
+@{
+    ViewData["Title"] = "Create Product";
+    Layout = "~/Views/Shared/_SideLayout.cshtml";
+}
+
+<link href="~/css/product.css" rel="stylesheet" />
+
+<div class="product-page">
+    <div class="page-header">
+        <div class="page-header-icon">📦</div>
+        <div class="page-header-text">
+            <h1>Add new product</h1>
+            <p>Register a new item in your inventory</p>
+        </div>
+    </div>
+
+    <form id="productForm" asp-controller="Home" asp-action="Addproduct" method="post" enctype="multipart/form-data">
+
+        <!-- ── Basic Information ──────────────────── -->
+        <div class="form-section">
+            <div class="section-header">
+                <div class="section-header-dot"></div>
+                <span>Basic information</span>
+            </div>
+            <div class="section-body">
+                <div class="grid-2">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="field code-field">
+                        <label asp-for="ProductCode">Product code <span class="req">*</span></label>
+                        <input asp-for="ProductCode" class="form-control" placeholder="e.g. MTH-001" />
+                        <span asp-validation-for="ProductCode" class="text-danger"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="ProductName">Product name <span class="req">*</span></label>
+                        <input asp-for="ProductName" class="form-control" placeholder="e.g. Kaju Katli" />
+                        <span asp-validation-for="ProductName" class="text-danger"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="CategoryId">Category <span class="req">*</span></label>
+                        <select asp-for="CategoryId" asp-items="Model.SelectedCategoryList">
+                            <option value="">— Select category —</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="UnitId">Unit <span class="req">*</span></label>
+                        <select asp-for="UnitId" asp-items="Model.SelectUnitList">
+                            <option value="">— Select unit —</option>
+                        </select>
+                    </div>
+
+                    <div class="field col-span-2">
+                        <label asp-for="Description">Description</label>
+                        <textarea asp-for="Description" placeholder="Optional — brief product description..."></textarea>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Pricing & Tax ──────────────────────── -->
+        <div class="form-section">
+            <div class="section-header">
+                <div class="section-header-dot"></div>
+                <span>Pricing &amp; tax</span>
+            </div>
+            <div class="section-body">
+                <div class="grid-3">
+
+                    <div class="field">
+                        <label asp-for="PurchaseRate">Purchase rate <span class="req">*</span></label>
+                        <div class="input-wrap has-left">
+                            <span class="adorn adorn-left">₹</span>
+                            <input asp-for="PurchaseRate" type="number" min="0" step="0.01" placeholder="0.00" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="SaleRate">Sale rate <span class="req">*</span></label>
+                        <div class="input-wrap has-left">
+                            <span class="adorn adorn-left">₹</span>
+                            <input asp-for="SaleRate" type="number" min="0" step="0.01" placeholder="0.00" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="GSTPercent">GST %</label>
+                        <div class="input-wrap has-right">
+                            <input asp-for="GSTPercent" type="number" min="0" max="100" step="0.5" placeholder="0" />
+                            <span class="adorn adorn-right">%</span>
+                        </div>
+                        <span class="field-hint">Leave 0 for GST-exempt items</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Inventory Settings ─────────────────── -->
+        <div class="form-section">
+            <div class="section-header">
+                <div class="section-header-dot"></div>
+                <span>Inventory settings</span>
+            </div>
+            <div class="section-body" style="display:flex; flex-direction:column; gap:16px;">
+
+                <div class="field" style="max-width:220px;">
+                    <label asp-for="ExpiryDays">Expiry days</label>
+                    <div class="input-wrap has-right">
+                        <input asp-for="ExpiryDays" type="number" min="0" placeholder="e.g. 7" />
+                        <span class="adorn adorn-right">days</span>
+                    </div>
+                    <span class="field-hint">Days from manufacture to expiry</span>
+                </div>
+
+                <div class="toggles-grid">
+
+                    <label class="toggle-card">
+                        <div class="toggle-text">
+                            <div class="toggle-title">Weight machine item</div>
+                            <div class="toggle-desc">Weighed and billed per gram / kg</div>
+                        </div>
+                        <div class="toggle-pill">
+                            <input asp-for="IsWeightMachine" type="checkbox" />
+                            <span class="toggle-track"></span>
+                            <span class="toggle-thumb"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-card">
+                        <div class="toggle-text">
+                            <div class="toggle-title">Piece-wise billing</div>
+                            <div class="toggle-desc">Sold and counted per piece</div>
+                        </div>
+                        <div class="toggle-pill">
+                            <input asp-for="IsPieceWise" type="checkbox" />
+                            <span class="toggle-track"></span>
+                            <span class="toggle-thumb"></span>
+                        </div>
+                    </label>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Product Image ──────────────────────── -->
+        <div class="form-section">
+            <div class="section-header">
+                <div class="section-header-dot"></div>
+                <span>Product image</span>
+            </div>
+            <div class="section-body">
+                <div class="image-grid">
+
+                    <div class="upload-zone" tabindex="0" role="button" onclick="document.getElementById('fileUpload').click()">
+                        <div class="upload-icon">🖼️</div>
+                        <div class="upload-label">Click to upload image</div>
+                        <div class="upload-hint">PNG, JPG, WEBP — max 2 MB</div>
+                        <input type="file" asp-for="ImageFile" id="fileUpload" accept="image/*" style="display:none;" />
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="ImageUrl">Or paste image URL</label>
+                        <input asp-for="ImageUrl" type="text" placeholder="https://example.com/image.jpg" />
+                        <span class="field-hint">Direct link to a hosted product image</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Footer ─────────────────────────────── -->
+        <div class="form-footer">
+            <a href="javascript:history.back()" class="btn btn-ghost">✕ &nbsp;Discard</a>
+
+@if (Model.Id > 0)
+                {
+                    <button type="submit" class="btn btn-primary">💾 &nbsp;Update product</button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-primary">💾 &nbsp;Save product</button>
+                }
+        </div>
+
+    </form>
+</div>
+<script>
+    document.getElementById('productForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const saveBtn = document.querySelector('.btn-primary');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '⏳ &nbsp;Saving...';
+
+        try {
+            const formData = new FormData(this);
+
+            const response = await fetch('/Home/Addproduct', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Server error: ' + response.status);
+
+            const result = await response.json();
+
+            if (result.result) {
+                showToast('success', '✅ Product saved successfully!');
+                setTimeout(() => {
+                    window.location.href = '/Home/ProductList';
+                }, 1500);
+            } else {
+                showToast('error', '❌ ' + result.message);
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            }
+
+        } catch (err) {
+            showToast('error', '❌ Something went wrong: ' + err.message);
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+        }
+    });
+
+    function showToast(type, message) {
+        // Remove existing toast
+        const existing = document.getElementById('ajaxToast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.id = 'ajaxToast';
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            animation: toastIn 0.3s ease;
+            max-width: 320px;
+            ${type === 'success'
+                ? 'background:#d1fae5; color:#065f46; border:1px solid #6ee7b7;'
+                : 'background:#fee2e2; color:#991b1b; border:1px solid #fca5a5;'}
+        `;
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+</script>
+
+<style>
+    @@keyframes toastIn {
+        from {
+            opacity: 0;
+            transform: translateX(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+</style>
+ *@
+
+
+@model POSModels.Models.MithaiShop.Product
+
+@{
+    ViewData["Title"] = "Create Product";
+    Layout = "~/Views/Shared/_SideLayout.cshtml";
+}
+
+<link href="~/css/product.css" rel="stylesheet" />
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+    /* स्कैन बटन और इनपुट को एक लाइन में रखने के लिए */
+    .barcode-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    }
+
+    .barcode-input-wrapper input {
+    flex: 1;
+    }
+
+    .scan-btn {
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 42px; /* इनपुट बॉक्स के बराबर हाइट */
+    transition: background 0.2s;
+    }
+
+    .scan-btn:hover {
+    background-color: #4338ca;
+    }
+    /* कैमरा रीजऩ के लिए स्टाइल */
+    #scanner-container {
+    width: 100%;
+    max-width: 350px;
+    margin: 10px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px dashed #4f46e5;
+    background: #fafafa;
+    }
+</style>
+
+<div class="product-page">
+    <div class="page-header">
+        <div class="page-header-icon">📦</div>
+        <div class="page-header-text">
+            <h1>Add new product</h1>
+            <p>Register a new item in your inventory</p>
+        </div>
+    </div>
+
+    <form id="productForm" asp-controller="Home" asp-action="Addproduct" method="post" enctype="multipart/form-data">
+
+        <div class="form-section">
+            <div class="section-header">
+                <div class="section-header-dot"></div>
+                <span>Basic information</span>
+            </div>
+            <div class="section-body">
+                <div class="grid-2">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="field code-field">
+                        <label asp-for="ProductCode">Product code <span class="req">*</span></label>
+                        <div class="barcode-input-wrapper">
+                            <input asp-for="ProductCode" class="form-control" placeholder="e.g. MTH-001" id="product-code-input" />
+                            <button type="button" class="scan-btn" id="toggle-scanner-btn">
+                                📷 <span>Scan</span>
+                            </button>
+                        </div>
+                        <div id="scanner-container" style="display: none;"></div>
+                        <span asp-validation-for="ProductCode" class="text-danger"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="ProductName">Product name <span class="req">*</span></label>
+                        <input asp-for="ProductName" class="form-control" placeholder="e.g. Kaju Katli" />
+                        <span asp-validation-for="ProductName" class="text-danger"></span>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="CategoryId">Category <span class="req">*</span></label>
+                        <select asp-for="CategoryId" asp-items="Model.SelectedCategoryList">
+                            <option value="">— Select category —</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="UnitId">Unit <span class="req">*</span></label>
+                        <select asp-for="UnitId" asp-items="Model.SelectUnitList">
+                            <option value="">— Select unit —</option>
+                        </select>
+                    </div>
+
+                    <div class="field col-span-2">
+                        <label asp-for="Description">Description</label>
+                        <textarea asp-for="Description" placeholder="Optional — brief product description..."></textarea>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-header">
+                <div class="section-header-dot"></div>
+                <span>Pricing &amp; tax</span>
+            </div>
+            <div class="section-body">
+                <div class="grid-3">
+
+                    <div class="field">
+                        <label asp-for="PurchaseRate">Purchase rate <span class="req">*</span></label>
+                        <div class="input-wrap has-left">
+                            <span class="adorn adorn-left">₹</span>
+                            <input asp-for="PurchaseRate" type="number" min="0" step="0.01" placeholder="0.00" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="SaleRate">Sale rate <span class="req">*</span></label>
+                        <div class="input-wrap has-left">
+                            <span class="adorn adorn-left">₹</span>
+                            <input asp-for="SaleRate" type="number" min="0" step="0.01" placeholder="0.00" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="GSTPercent">GST %</label>
+                        <div class="input-wrap has-right">
+                            <input asp-for="GSTPercent" type="number" min="0" max="100" step="0.5" placeholder="0" />
+                            <span class="adorn adorn-right">%</span>
+                        </div>
+                        <span class="field-hint">Leave 0 for GST-exempt items</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-header">
+                <div class="section-header-dot"></div>
+                <span>Inventory settings</span>
+            </div>
+            <div class="section-body" style="display:flex; flex-direction:column; gap:16px;">
+
+                <div class="field" style="max-width:220px;">
+                    <label asp-for="ExpiryDays">Expiry days</label>
+                    <div class="input-wrap has-right">
+                        <input asp-for="ExpiryDays" type="number" min="0" placeholder="e.g. 7" />
+                        <span class="adorn adorn-right">days</span>
+                    </div>
+                    <span class="field-hint">Days from manufacture to expiry</span>
+                </div>
+
+                <div class="toggles-grid">
+
+                    <label class="toggle-card">
+                        <div class="toggle-text">
+                            <div class="toggle-title">Weight machine item</div>
+                            <div class="toggle-desc">Weighed and billed per gram / kg</div>
+                        </div>
+                        <div class="toggle-pill">
+                            <input asp-for="IsWeightMachine" type="checkbox" />
+                            <span class="toggle-track"></span>
+                            <span class="toggle-thumb"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-card">
+                        <div class="toggle-text">
+                            <div class="toggle-title">Piece-wise billing</div>
+                            <div class="toggle-desc">Sold and counted per piece</div>
+                        </div>
+                        <div class="toggle-pill">
+                            <input asp-for="IsPieceWise" type="checkbox" />
+                            <span class="toggle-track"></span>
+                            <span class="toggle-thumb"></span>
+                        </div>
+                    </label>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-header">
+                <div class="section-header-dot"></div>
+                <span>Product image</span>
+            </div>
+            <div class="section-body">
+                <div class="image-grid">
+
+                    <div class="upload-zone" tabindex="0" role="button" onclick="document.getElementById('fileUpload').click()">
+                        <div class="upload-icon">🖼️</div>
+                        <div class="upload-label">Click to upload image</div>
+                        <div class="upload-hint">PNG, JPG, WEBP — max 2 MB</div>
+                        <input type="file" asp-for="ImageFile" id="fileUpload" accept="image/*" style="display:none;" />
+                    </div>
+
+                    <div class="field">
+                        <label asp-for="ImageUrl">Or paste image URL</label>
+                        <input asp-for="ImageUrl" type="text" placeholder="https://example.com/image.jpg" />
+                        <span class="field-hint">Direct link to a hosted product image</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <a href="javascript:history.back()" class="btn btn-ghost">✕ &nbsp;Discard</a>
+
+            @if (Model.Id > 0)
+            {
+                <button type="submit" class="btn btn-primary">💾 &nbsp;Update product</button>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-primary">💾 &nbsp;Save product</button>
+            }
+        </div>
+
+    </form>
+</div>
+<script src="~/js/product.js"></script>
+<style>
+    @@keyframes toastIn {
+    from {
+    opacity: 0;
+    transform: translateX(40px);
+    }
+
+    to {
+    opacity: 1;
+    transform: translateX(0);
+    }
+    }
+</style>

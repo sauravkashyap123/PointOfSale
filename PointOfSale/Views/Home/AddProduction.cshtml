@@ -1,0 +1,303 @@
+﻿@model POSModels.Models.MithaiShop.Production
+@{
+    ViewData["Title"] = "Create Product";
+    Layout = "~/Views/Shared/_SideLayout.cshtml";
+}
+<style>
+    .production-container {
+        background: #f4f6f9;
+        font-family: 'Segoe UI', sans-serif;
+        display: flex;
+        justify-content: center;
+        padding: 40px 15px;
+    }
+
+    .production-card {
+        width: 100%;
+        max-width: 850px;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .production-header {
+        background: linear-gradient(135deg, #4f46e5, #06b6d4);
+        color: white;
+        padding: 25px;
+    }
+
+        .production-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .production-header p {
+            margin: 5px 0 0;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+    .production-form {
+        padding: 25px;
+    }
+
+    /* GRID - Desktop */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .form-group.full {
+            grid-column: span 2;
+        }
+
+    label {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #333;
+    }
+
+    .form-control {
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        outline: none;
+        transition: 0.3s;
+        font-size: 14px;
+    }
+
+        .form-control:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 6px rgba(79,70,229,0.3);
+        }
+
+    /* Buttons */
+    .btn-section {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #16a34a, #22c55e);
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(34,197,94,0.3);
+        }
+
+    .btn-reset {
+        background: #e5e7eb;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+        .btn-reset:hover {
+            background: #d1d5db;
+        }
+
+    /* =========================
+       📱 MOBILE RESPONSIVE
+    ========================= */
+
+    @@media (max-width: 768px) {
+
+        .production-container {
+            padding: 20px 10px;
+        }
+
+        .production-header {
+            text-align: center;
+            padding: 20px;
+        }
+
+            .production-header h2 {
+                font-size: 20px;
+            }
+
+        .production-form {
+            padding: 18px;
+        }
+        /* 1 column layout on mobile */
+        .grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .form-group.full {
+            grid-column: span 1;
+        }
+
+        .btn-section {
+            flex-direction: column;
+        }
+
+        .btn-save,
+        .btn-reset {
+            width: 100%;
+        }
+    }
+
+    /* Extra Small Devices */
+    @@media (max-width: 480px) {
+
+        .production-header h2 {
+            font-size: 18px;
+        }
+
+        .form-control {
+            font-size: 13px;
+            padding: 9px 10px;
+        }
+    }
+</style>
+<div class="production-container">
+
+    <div class="production-card">
+        <div class="production-header">
+            <h2>Production Entry</h2>
+            <p>Manage production details efficiently</p>
+        </div>
+
+        <form asp-action="AddProduction" asp-controller="Home" method="post" id="productionForm" class="production-form" enctype="multipart/form-data">
+
+            <div class="grid">
+
+                <div class="form-group">
+                    <label>Production No</label>
+                    <input asp-for="ProductionNo" class="form-control" placeholder="Enter Production No" />
+                </div>
+
+                <div class="form-group">
+                    <label>Production Date</label>
+                    <input asp-for="ProductionDate" type="date" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label>Product</label>
+
+                    <select asp-for="ProductId"
+                            class="form-control"
+                            asp-items="Model.SelectedproductList">
+                        <option value="">-- Select Product --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <p id="unitname">Quantity</p>
+                    <input asp-for="Quantity" type="number" step="0.01" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label>Cost Amount</label>
+                    <input asp-for="CostAmount" type="number" step="0.01" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input asp-for="ExpiryDate" type="date" class="form-control" />
+                </div>
+
+                <div class="form-group full">
+                    <label>Remarks</label>
+                    <textarea asp-for="Remarks" class="form-control" rows="3" placeholder="Enter remarks..."></textarea>
+                </div>
+
+            </div>
+
+            <div class="btn-section">
+                <button type="submit" class="btn-save">Save Production</button>
+                <button type="reset" class="btn-reset">Reset</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+<!-- JQUERY -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- DATATABLE JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Product Unit Change
+        $("#ProductId").change(function () {
+
+            var productId = $(this).val();
+
+            if (!productId) {
+                $("#unitname").text("");
+                return;
+            }
+            $.ajax({
+                url: '/Home/GetProductUnit',
+                type: 'GET',
+                data: { productId: productId },
+                success: function (res) {
+                    $("#unitname").text("Quantity/" + res);
+                },
+                error: function () {
+                    $("#unitname").text("");
+                }
+            });
+        });
+
+        // Form Submit
+        $("#productionForm").submit(function (e) {
+
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: $(this).attr("action"),
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function () {
+                    $(".btn-save").prop("disabled", true).text("Saving...");
+                },
+                success: function (response) {
+
+                    if (response.result) {
+                        alert(response.message);
+
+                        $("#productionForm")[0].reset();
+                        $("#unitname").text("Quantity");
+                    }
+                    else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert("Something went wrong.");
+                },
+                complete: function () {
+                    $(".btn-save").prop("disabled", false).text("Save Production");
+                }
+            });
+
+        });
+
+    });
+</script>
