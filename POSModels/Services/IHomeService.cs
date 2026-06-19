@@ -29,6 +29,6 @@ namespace POSModels.Services
         public Product GetProductDetails(int id);
         public string GetSpecificProductunit(int productId);
         public Task<dynamic> GetAllSendStockTransferList(string warehousecode, DateTime? fromDate, DateTime? toDate);
-        //public GeneralModel GetAllDashboardData();
+        public GeneralModel GetAllDashboardData();
     }
 }

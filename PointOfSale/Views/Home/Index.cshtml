@@ -1,4 +1,5 @@
-﻿@{
+﻿@model GeneralModel
+@{
     ViewData["Title"] = "Dashboard";
     Layout = "/Views/Shared/_SideLayout.cshtml";
 }
@@ -86,7 +87,7 @@
                         </div>
                         <span class="stat-badge badge-flat">→ 0%</span>
                     </div>
-                    <div class="stat-value">6</div>
+                    <div class="stat-value">@Model.TotalWarehouse</div>
                     <div class="stat-label">Warehouses</div>
                     <div class="stat-sub">4 active · 2 maintenance</div>
                     <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--amber)"></div></div>
@@ -103,7 +104,7 @@
                         </div>
                         <span class="stat-badge badge-down">↓ 3.2%</span>
                     </div>
-                    <div class="stat-value">3,491</div>
+                    <div class="stat-value">@Model.TotalProduct</div>
                     <div class="stat-label">Products</div>
                     <div class="stat-sub">48 low stock alerts</div>
                     <div class="stat-bar"><div class="stat-bar-fill" style="width:88%;background:var(--purple)"></div></div>

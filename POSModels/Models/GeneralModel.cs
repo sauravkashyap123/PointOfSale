@@ -8,5 +8,10 @@ namespace POSModels.Models
 {
     public class GeneralModel
     {
+        public int TotalShop { get;  set; }
+        public int TotalWarehouse { get;  set; }
+        public int TotalProduct { get;  set; }
+        public int TotalStaff { get;  set; }
+        public int TotalCategory { get;  set; }
     }
 }

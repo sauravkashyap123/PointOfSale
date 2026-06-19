@@ -35,11 +35,11 @@ namespace PointOfSale.Controllers
         public IActionResult Index()
         {
             GeneralModel gm = new GeneralModel();
-            //var ab = _homeservice.GetAllDashboardData();
+            var ab = _homeservice.GetAllDashboardData();
             
             ViewBag.OperatorName = User.Identity.Name;
             ViewBag.OperatorRole = "Admin";
-            return View();
+            return View(gm);
         }
 
         public IActionResult AddWarehouse()

@@ -371,7 +371,7 @@ namespace POSModels.ViewModels
                     ep.IsPieceWise = model.IsPieceWise;
                     ep.CreatedDate = currentdate;
                     ep.IsDeleted = false;
-                    if (imageUrl != null)
+                    if (imageUrl != null ||imageUrl!=" ")
                     {
                         ep.ImageUrl = imageUrl;
                     }
@@ -471,6 +471,8 @@ namespace POSModels.ViewModels
                                    ImageUrl=d.ImageUrl,
                                    Description=d.Description,
                                    Id=d.Id,
+                                   UnitId=d.UnitId,
+                                   
                                    IsWeightMachine=d.IsWeightMachine,
                                    IsPieceWise=d.IsPieceWise,  
                                    StockQuantity = s != null ? s.Quantity : 0,
@@ -729,18 +731,32 @@ namespace POSModels.ViewModels
 
 
 
-        //public GeneralModel GetAllDashboardData()
-        //{
-        //    try
-        //    {
+        public GeneralModel GetAllDashboardData()
+        {
+            GeneralModel gm=new GeneralModel();
+            try
+            {
+                var ab = (from d in _context.tblwarehouse select d).ToList();
+                var bc = (from d in _context.tblShop select d).ToList();
+                var cd = (from d in _context.tblProduct select d).ToList();
+                var de = (from d in _context.tblStaff select d).ToList();
+                var ef = (from d in _context.tblCategory select d).ToList();
+               
 
-        //    }
-        //    catch (Exception)
-        //    {
+                gm.TotalShop = bc.Count();
+                gm.TotalWarehouse = ab.Count();
+                gm.TotalProduct = cd.Count();
+                gm.TotalStaff = de.Count();
+                gm.TotalCategory = ef.Count();
+                return gm;
 
-        //        throw;
-        //    }
-        //}
+            }
+            catch (Exception)
+            {
+
+                return new GeneralModel();
+            }
+        }
 
 
     }
