@@ -1,0 +1,190 @@
+@model List<POSModels.Models.BulkOrderModel>
+@{
+    ViewData["Title"] = "Bulk Orders";
+    Layout = "~/Views/Shared/_SideLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+
+<style>
+    .bo-page {
+        padding: 24px;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    .bo-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .bo-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .bo-subtitle {
+        font-size: 14px;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    .bo-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .table-wrap {
+        padding: 16px;
+    }
+
+    #bulkOrderTable {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    #bulkOrderTable thead {
+        background: #0C447C;
+    }
+
+    #bulkOrderTable thead th {
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 12px 16px;
+        border: none;
+    }
+
+    #bulkOrderTable tbody td {
+        font-size: 13.5px;
+        color: #334155;
+        padding: 14px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    #bulkOrderTable tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    /* Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .status-pending { background: #fef3c7; color: #d97706; }
+    .status-processing { background: #e0f2fe; color: #0284c7; }
+    .status-ready { background: #f3e8ff; color: #7c3aed; }
+    .status-delivered { background: #dcfce7; color: #16a34a; }
+    .status-cancelled { background: #fee2e2; color: #dc2626; }
+
+    .balance-badge {
+        font-family: monospace;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    .balance-paid { background: #e2fbe8; color: #15803d; }
+    .balance-owing { background: #fff1f2; color: #b91c1c; }
+</style>
+
+<div class="bo-page">
+    <div class="bo-header">
+        <div>
+            <h1 class="bo-title">Bulk Orders Register</h1>
+            <p class="bo-subtitle">Manage large event bookings and sweet orders across all outlets.</p>
+        </div>
+    </div>
+
+    <div class="bo-card">
+        <div class="table-wrap">
+            <table id="bulkOrderTable" class="display">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Order Date</th>
+                        <th>Delivery Date</th>
+                        <th>Shop / Outlets</th>
+                        <th>Total Amount</th>
+                        <th>Advance Paid</th>
+                        <th>Balance Due</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var item in Model)
+                        {
+                            var balance = item.TotalAmount - item.AdvanceAmount;
+                            var balanceClass = balance <= 0 ? "balance-paid" : "balance-owing";
+                            var statusClass = "status-" + item.Status.ToLower();
+
+                            <tr>
+                                <td style="font-weight:700; color:#0c447c;">@item.OrderNumber</td>
+                                <td>
+                                    <strong>@item.CustomerName</strong><br />
+                                    <span style="color:#64748b; font-size:11px;">Mob: @item.ContactNumber</span>
+                                </td>
+                                <td>@item.OrderDate.ToString("dd-MM-yyyy hh:mm tt")</td>
+                                <td style="color:#7c3aed; font-weight:600;">@item.DeliveryDate.ToString("dd-MM-yyyy hh:mm tt")</td>
+                                <td>
+                                    <strong>@item.ShopName</strong><br />
+                                    <span style="color:#64748b; font-size:11px;">By: @item.StaffName</span>
+                                </td>
+                                <td>₹@item.TotalAmount.ToString("N2")</td>
+                                <td style="color:#16a34a; font-weight:600;">₹@item.AdvanceAmount.ToString("N2")</td>
+                                <td>
+                                    <span class="balance-badge @balanceClass">
+                                        ₹@balance.ToString("N2")
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge @statusClass">@item.Status</span>
+                                </td>
+                                <td style="font-size:12px; color:#64748b; max-width:180px; white-space:normal;">@item.Remarks</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" style="text-align:center; padding:40px; color:#64748b;">
+                                <i class="ti ti-database-off" style="font-size:32px; display:block; margin-bottom:8px;"></i>
+                                No bulk orders found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#bulkOrderTable').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            pageLength: 10,
+            order: [[3, 'asc']] // order by delivery date ascending
+        });
+    });
+</script>

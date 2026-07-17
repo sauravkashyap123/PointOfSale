@@ -3,99 +3,233 @@
     Layout = "/Views/Shared/_SideLayout.cshtml";
 }
 
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
+
 <style>
-    body {
-        background: #f4f6f9;
+    /* ── PAGE ── */
+    .pp-page {
+        padding: 1.5rem;
     }
 
-    .page-header {
-        background: #ffffff;
-        padding: 16px 20px;
-        border-radius: 12px;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
-        margin-bottom: 18px;
+    /* ── HEADER ── */
+    .pp-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
     }
 
-        .page-header h3 {
+        .pp-header h3 {
             margin: 0;
+            font-size: 20px;
             font-weight: 600;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-    .table-wrapper {
-        background: #fff;
-        padding: 18px;
-        border-radius: 12px;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
-    }
+            .pp-header h3 i {
+                font-size: 22px;
+                color: #0C447C;
+            }
 
-    table.dataTable {
-        border-collapse: collapse !important;
-    }
-
-        table.dataTable thead {
-            background: #f1f3f6;
-        }
-
-        table.dataTable th {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        table.dataTable td {
-            font-size: 14px;
-            vertical-align: middle;
-        }
-
-    /* BUTTONS */
-    .btn-action {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 13px;
-        text-decoration: none;
-        transition: 0.2s;
-    }
-
-    .btn-edit {
-        background: #0d6efd;
+    .btn-add-purchase {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #0C447C;
         color: #fff;
+        border: none;
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.2s;
     }
 
-        .btn-edit:hover {
-            background: #084298;
+        .btn-add-purchase:hover {
+            background: #093563;
             color: #fff;
         }
 
-    /* MOBILE CARD */
+    /* ── TABLE CARD ── */
+    .pp-card {
+        background: #fff;
+        border: 0.5px solid rgba(0,0,0,0.1);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+        /* ── DATATABLE OVERRIDES ── */
+        .pp-card .dataTables_wrapper {
+            padding: 0;
+        }
+
+        .pp-card .dataTables_filter,
+        .pp-card .dataTables_length {
+            padding: 12px 16px;
+        }
+
+            .pp-card .dataTables_filter input {
+                border: 0.5px solid rgba(0,0,0,0.15);
+                border-radius: 8px;
+                padding: 6px 12px;
+                font-size: 13px;
+                outline: none;
+                transition: border-color 0.2s;
+            }
+
+                .pp-card .dataTables_filter input:focus {
+                    border-color: #0C447C;
+                }
+
+        .pp-card .dataTables_info,
+        .pp-card .dataTables_paginate {
+            padding: 10px 16px;
+            font-size: 13px;
+            border-top: 0.5px solid rgba(0,0,0,0.08);
+        }
+
+    /* ── TABLE ── */
+    table#purchaseTable {
+        width: 100% !important;
+        border-collapse: collapse;
+    }
+
+        table#purchaseTable thead tr {
+            background: #f7f9fc;
+        }
+
+        table#purchaseTable thead th {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 10px 14px;
+            border-bottom: 0.5px solid rgba(0,0,0,0.1) !important;
+            border-top: none !important;
+            white-space: nowrap;
+        }
+
+        table#purchaseTable tbody td {
+            font-size: 14px;
+            color: #1a1a2e;
+            padding: 11px 14px;
+            border-bottom: 0.5px solid rgba(0,0,0,0.06) !important;
+            vertical-align: middle;
+        }
+
+        table#purchaseTable tbody tr:last-child td {
+            border-bottom: none !important;
+        }
+
+        table#purchaseTable tbody tr:hover {
+            background: #f7f9fc;
+        }
+
+    /* ── BADGES ── */
+    .badge-cat {
+        display: inline-block;
+        background: #E6F1FB;
+        color: #0C447C;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+
+    .badge-wh {
+        display: inline-block;
+        background: #EAF3DE;
+        color: #3B6D11;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+
+    /* ── CODE ── */
+    .pp-code {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: #6b7280;
+        background: #f3f4f6;
+        padding: 2px 7px;
+        border-radius: 4px;
+    }
+
+    /* ── EDIT BUTTON ── */
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 11px;
+        border-radius: 7px;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.15s;
+        border: 0.5px solid rgba(12, 68, 124, 0.3);
+        color: #0C447C;
+        background: transparent;
+    }
+
+        .btn-action:hover {
+            background: #E6F1FB;
+            color: #0C447C;
+        }
+
+    /* ── SERIAL NO ── */
+    .sno {
+        color: #9ca3af;
+        font-size: 13px;
+    }
+
+    /* ── MOBILE CARD ── */
     .mobile-card {
         display: none;
     }
 
-    .card-box {
+    .m-card-box {
         background: #fff;
-        padding: 14px;
+        border: 0.5px solid rgba(0,0,0,0.1);
         border-radius: 12px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        padding: 14px 16px;
+        margin-bottom: 10px;
     }
 
-    .card-title {
-        font-size: 16px;
+    .m-card-name {
+        font-size: 15px;
         font-weight: 600;
-        margin-bottom: 6px;
+        color: #1a1a2e;
+        margin-bottom: 8px;
     }
 
-    .card-sub {
+    .m-card-row {
+        display: flex;
+        gap: 6px;
         font-size: 13px;
-        color: #555;
+        color: #6b7280;
         margin-bottom: 4px;
+        align-items: center;
     }
 
-    .card-actions {
-        margin-top: 10px;
+        .m-card-row b {
+            color: #374151;
+            font-weight: 500;
+            min-width: 70px;
+        }
+
+    .m-card-actions {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 0.5px solid rgba(0,0,0,0.08);
     }
 
-    @@media (max-width:768px) {
+    @@media (max-width: 768px) {
         .desktop-table {
             display: none;
         }
@@ -106,24 +240,30 @@
     }
 </style>
 
-<div class="container mt-4">
+<div class="pp-page">
 
-    <div class="page-header d-flex justify-content-between align-items-center">
-        <h3>Purchase Product List</h3>
-        <a href="/Purchase/Add" class="btn btn-primary">+ Add Purchase</a>
+    <div class="pp-header">
+        <h3>
+            <i class="ti ti-package"></i>
+            Purchase Product List
+        </h3>
+        <a href="/Purchase/AddPurchaseProduct" class="btn-add-purchase">
+            <i class="ti ti-plus" style="font-size:15px;"></i>
+            Add Purchase
+        </a>
     </div>
 
     <!-- DESKTOP TABLE -->
-    <div class="table-wrapper desktop-table">
-        <table id="purchaseTable" class="display table table-bordered" style="width:100%">
+    <div class="pp-card desktop-table">
+        <table id="purchaseTable" class="display" style="width:100%">
             <thead>
                 <tr>
-                    <th>S.No.</th>
+                    <th>#</th>
                     <th>Product Name</th>
-                    <th>Product Code</th>
+                    <th>Code</th>
                     <th>Category</th>
                     <th>Warehouse</th>
-                    <th>Created Date</th>
+                    <th>Created</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -138,81 +278,4 @@
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-
-<script>
-    $(document).ready(function () {
-
-        $.ajax({
-            url: '/Purchase/AllPurchaseProductList',
-            type: 'GET',
-            success: function (res) {
-
-                let rows = '';
-                let cards = '';
-                let i = 1;
-
-                res.data.forEach(function (item) {
-
-                    let date = item.createdDate
-                        ? new Date(item.createdDate).toLocaleDateString()
-                        : '';
-
-                    let warehouse = item.warehouseName ?? '';
-
-                    // ================= DESKTOP =================
-                    rows += `
-                        <tr>
-                            <td>${i}</td>
-                            <td>${item.productName ?? ''}</td>
-                            <td>${item.purchaseProductCode ?? ''}</td>
-                            <td>${item.categoryName ?? ''}</td>
-                            <td>${warehouse}</td>
-                            <td>${date}</td>
-                            <td>
-                                <a href="/Purchase/AddPurchaseProduct/${item.id}" class="btn-action btn-edit">
-                                    Edit
-                                </a>
-                            </td>
-                        </tr>
-                    `;
-
-                    // ================= MOBILE =================
-                    cards += `
-                        <div class="card-box">
-                            <div class="card-title">${item.productName ?? ''}</div>
-
-                            <div class="card-sub"><b>Code:</b> ${item.purchaseProductCode ?? ''}</div>
-                            <div class="card-sub"><b>Category:</b> ${item.categoryName ?? ''}</div>
-                            <div class="card-sub"><b>Warehouse:</b> ${warehouse}</div>
-                            <div class="card-sub"><b>Date:</b> ${date}</div>
-
-                            <div class="card-actions">
-                                <a href="/Purchase/AddPurchaseProduct/${item.id}" class="btn-action btn-edit">
-                                    Edit
-                                </a>
-                            </div>
-                        </div>
-                    `;
-
-                    i++;
-                });
-
-                $('#tblBody').html(rows);
-                $('#mobileList').html(cards);
-
-                // DataTable safe init
-                if ($.fn.DataTable.isDataTable('#purchaseTable')) {
-                    $('#purchaseTable').DataTable().destroy();
-                }
-
-                $('#purchaseTable').DataTable({
-                    paging: true,
-                    searching: true,
-                    ordering: true,
-                    pageLength: 10
-                });
-            }
-        });
-
-    });
-</script>
+<script src="~/js/purchaseproduct.js"></script>

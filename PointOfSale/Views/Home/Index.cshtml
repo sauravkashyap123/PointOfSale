@@ -1,4 +1,4 @@
-﻿@model GeneralModel
+@model GeneralModel
 @{
     ViewData["Title"] = "Dashboard";
     Layout = "/Views/Shared/_SideLayout.cshtml";
@@ -52,12 +52,12 @@
                                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                             </svg>
                         </div>
-                        <span class="stat-badge badge-up">↑ 12.4%</span>
+                        <span class="stat-badge badge-up">Live</span>
                     </div>
-                    <div class="stat-value">₹2.4L</div>
+                    <div class="stat-value">₹@Model.TotalRevenue.ToString("N2")</div>
                     <div class="stat-label">Total Revenue</div>
-                    <div class="stat-sub">vs ₹2.1L last month</div>
-                    <div class="stat-bar"><div class="stat-bar-fill" style="width:72%;background:var(--blue)"></div></div>
+                    <div class="stat-sub">Cumulative sales revenue</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--blue)"></div></div>
                 </div>
 
                 <div class="stat-card">
@@ -69,12 +69,12 @@
                                 <path d="M16 10a4 4 0 0 1-8 0" />
                             </svg>
                         </div>
-                        <span class="stat-badge badge-up">↑ 8.1%</span>
+                        <span class="stat-badge badge-up">Live</span>
                     </div>
-                    <div class="stat-value">1,284</div>
+                    <div class="stat-value">@Model.TotalOrders</div>
                     <div class="stat-label">Total Orders</div>
-                    <div class="stat-sub">284 pending fulfilment</div>
-                    <div class="stat-bar"><div class="stat-bar-fill" style="width:64%;background:var(--green)"></div></div>
+                    <div class="stat-sub">Invoices generated</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--green)"></div></div>
                 </div>
 
                 <div class="stat-card">
@@ -102,12 +102,12 @@
                                 <line x1="12" y1="17" x2="12" y2="21" />
                             </svg>
                         </div>
-                        <span class="stat-badge badge-down">↓ 3.2%</span>
+                        <span class="stat-badge badge-down">Alerts</span>
                     </div>
                     <div class="stat-value">@Model.TotalProduct</div>
                     <div class="stat-label">Products</div>
-                    <div class="stat-sub">48 low stock alerts</div>
-                    <div class="stat-bar"><div class="stat-bar-fill" style="width:88%;background:var(--purple)"></div></div>
+                    <div class="stat-sub">@Model.LowStockAlerts low stock alerts</div>
+                    <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--purple)"></div></div>
                 </div>
 
             </div>
@@ -206,52 +206,24 @@
                     <a href="#">View all →</a>
                 </div>
                 <div class="panel-body">
-
-                    <div class="activity-item">
-                        <div class="act-icon ic-green">✅</div>
-                        <div class="act-body">
-                            <div class="act-title">Order #ORD-2841 fulfilled</div>
-                            <div class="act-desc">Dispatched from Warehouse WH-001 · Mumbai</div>
-                        </div>
-                        <div class="act-time">2m ago</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="act-icon ic-blue">👤</div>
-                        <div class="act-body">
-                            <div class="act-title">New user registered</div>
-                            <div class="act-desc">sarah.k@example.com joined as Operator</div>
-                        </div>
-                        <div class="act-time">14m ago</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="act-icon ic-amber">⚠️</div>
-                        <div class="act-body">
-                            <div class="act-title">Low stock alert — SKU #P-0094</div>
-                            <div class="act-desc">Only 12 units remaining · Reorder suggested</div>
-                        </div>
-                        <div class="act-time">1h ago</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="act-icon ic-purple">🏭</div>
-                        <div class="act-body">
-                            <div class="act-title">Production batch #PB-441 completed</div>
-                            <div class="act-desc">1,200 units added to inventory</div>
-                        </div>
-                        <div class="act-time">3h ago</div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="act-icon ic-red">❌</div>
-                        <div class="act-body">
-                            <div class="act-title">Payment failed — Order #ORD-2835</div>
-                            <div class="act-desc">Gateway timeout · Retry pending</div>
-                        </div>
-                        <div class="act-time">5h ago</div>
-                    </div>
-
+                    @if (Model.RecentActivities != null && Model.RecentActivities.Count > 0)
+                    {
+                        foreach (var act in Model.RecentActivities)
+                        {
+                            <div class="activity-item">
+                                <div class="act-icon @act.IconClass">@act.Icon</div>
+                                <div class="act-body">
+                                    <div class="act-title">@act.Title</div>
+                                    <div class="act-desc">@act.Description</div>
+                                </div>
+                                <div class="act-time">@act.TimeAgo</div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div style="text-align:center;padding:20px;color:var(--muted)">No recent activity.</div>
+                    }
                 </div>
             </div>
 
@@ -303,55 +275,55 @@
                     <a href="#">Refresh →</a>
                 </div>
                 <div class="panel-body">
-
+ 
                     <div class="quick-stat-row">
                         <div class="qs-label"><div class="qs-dot" style="background:var(--green)"></div>Active Shops</div>
                         <div style="display:flex;align-items:center;gap:8px">
-                            <span class="qs-value">14</span>
-                            <span class="qs-change badge-up">+2</span>
+                            <span class="qs-value">@Model.ActiveShops</span>
+                            <span class="qs-change badge-up">shops</span>
                         </div>
                     </div>
-
+ 
                     <div class="quick-stat-row">
                         <div class="qs-label"><div class="qs-dot" style="background:var(--blue)"></div>Today's Sales</div>
                         <div style="display:flex;align-items:center;gap:8px">
-                            <span class="qs-value">₹48,210</span>
-                            <span class="qs-change badge-up">↑9%</span>
+                            <span class="qs-value">₹@Model.TodaySales.ToString("N2")</span>
+                            <span class="qs-change badge-up">today</span>
                         </div>
                     </div>
-
+ 
                     <div class="quick-stat-row">
-                        <div class="qs-label"><div class="qs-dot" style="background:var(--amber)"></div>Pending Orders</div>
+                        <div class="qs-label"><div class="qs-dot" style="background:var(--amber)"></div>Total Shop Outlets</div>
                         <div style="display:flex;align-items:center;gap:8px">
-                            <span class="qs-value">284</span>
-                            <span class="qs-change badge-down">↑18</span>
+                            <span class="qs-value">@Model.TotalShop</span>
+                            <span class="qs-change badge-flat">total</span>
                         </div>
                     </div>
-
+ 
                     <div class="quick-stat-row">
                         <div class="qs-label"><div class="qs-dot" style="background:var(--purple)"></div>Stock Value</div>
                         <div style="display:flex;align-items:center;gap:8px">
-                            <span class="qs-value">₹9.2L</span>
-                            <span class="qs-change badge-flat">→</span>
+                            <span class="qs-value">₹@Model.TotalStockValue.ToString("N2")</span>
+                            <span class="qs-change badge-flat">valuation</span>
                         </div>
                     </div>
-
+ 
                     <div class="quick-stat-row">
                         <div class="qs-label"><div class="qs-dot" style="background:var(--red)"></div>Low Stock Items</div>
                         <div style="display:flex;align-items:center;gap:8px">
-                            <span class="qs-value">48</span>
-                            <span class="qs-change badge-down">+5</span>
+                            <span class="qs-value">@Model.LowStockAlerts</span>
+                            <span class="qs-change badge-down">warning</span>
                         </div>
                     </div>
-
+ 
                     <div class="quick-stat-row">
                         <div class="qs-label"><div class="qs-dot" style="background:var(--cyan)"></div>Active Users</div>
                         <div style="display:flex;align-items:center;gap:8px">
-                            <span class="qs-value">7</span>
-                            <span class="qs-change badge-up">online</span>
+                            <span class="qs-value">@Model.ActiveUsers</span>
+                            <span class="qs-change badge-up">operators</span>
                         </div>
                     </div>
-
+ 
                 </div>
             </div>
 

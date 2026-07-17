@@ -10,5 +10,6 @@ namespace POSDb.EntityModels.MithaiShop
     {
         public string UnitName { get; set; }
         public string ShortName { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

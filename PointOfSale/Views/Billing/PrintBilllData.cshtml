@@ -454,8 +454,8 @@
             success: function (response) {
                 if (response.status) {
                     alert(response.message);
-                    resetForm();                    // FIX: full reset including Id
-                    fetchAndFillTable();            // API se fresh data lo aur table refill karo
+                    resetForm();                    
+                    window.location.href = "/Billing/PrintBillData";
                 } else {
                     alert(response.message);
                 }

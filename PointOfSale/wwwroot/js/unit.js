@@ -18,7 +18,7 @@ $(document).ready(function () {
         }
 
         var formData = { Id: id, UnitName: unitName, ShortName: shortName };
-        var url = id > 0 ? '/Home/UpdateUnit' : '/Home/AddUnit';
+        var url = id > 0 ? '/Home/AddUnit' : '/Home/AddUnit';
 
         $.ajax({
             url: url,
@@ -27,7 +27,7 @@ $(document).ready(function () {
             success: function (res) {
                 showAlert(res.message || 'Unit saved successfully!', true);
                 cancelEdit();
-                if (dt) { dt.ajax.reload(); } else { loadUnit(); }
+                 loadUnit(); 
                 updateBadge();
             },
             error: function () {
@@ -72,6 +72,7 @@ function loadUnit() {
     onclick='deleteUnit(${item.id})'>
     <i class="ti ti-trash" style="font-size:13px"></i> Delete
     </button>
+
     </td>
     </tr>`;
             });
@@ -116,9 +117,30 @@ function deleteUnit(id) {
     if (!confirm('Are you sure you want to delete this unit?')) return;
     $.ajax({
         url: '/Home/DeleteUnit/' + id,
-        type: 'POST',
+        type: 'DELETE',
+        data: { id: id },
         success: function (res) {
-            showAlert(res.message || 'Unit deleted.', true);
+            if (res.status == true) {
+                showAlert(res.message || 'Unit deleted.', true);
+                loadUnit();
+            }
+            
+            // if (dt) { dt.ajax.reload(); } else { loadUnit(); }
+            updateBadge();
+        },
+        error: function () {
+            showAlert('Delete failed. Please try again.', false);
+        }
+    });
+}
+function ChangeUnitStatus(id) {
+    if (!confirm('Are you sure you want to delete this unit?')) return;
+    $.ajax({
+        url: '/Home/ChangeUnitStatus/' + id,
+        type: 'GET',
+        data: { id: id },
+        success: function (res) {
+            showAlert(res.message || 'Unit .', true);
             if (dt) { dt.ajax.reload(); } else { loadUnit(); }
             updateBadge();
         },

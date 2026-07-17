@@ -10,7 +10,7 @@ namespace POSModels.Models.MithaiShop
 {
     public class Production:BaseModel
     {
-        public string ProductionNo { get; set; }
+        public string? ProductionNo { get; set; }
 
         public DateTime ProductionDate { get; set; } = DateTime.Now;
 
@@ -18,7 +18,7 @@ namespace POSModels.Models.MithaiShop
         [Column(TypeName = "decimal(18,2)")]
         public decimal Quantity { get; set; }
         [Column(TypeName = "decimal(18,2)")]
-        public decimal CostAmount { get; set; }
+        public decimal CostAmount { get; set; } = 0.00m;
 
         public DateTime ExpiryDate { get; set; } = DateTime.Now;
 

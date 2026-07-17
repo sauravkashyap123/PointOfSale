@@ -4,259 +4,370 @@
     ViewData["Title"] = "Category";
     Layout = "/Views/Shared/_SideLayout.cshtml";
 }
+
+<!-- DATATABLE CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
 <style>
 
-
-/* ══════════════════════════════════
-   CARD
-══════════════════════════════════ */
-.card {
-    background: #ffffff;
-    border: 0.5px solid #e5e5e3;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 1.25rem;
-}
-
-.card-header {
-    background: #fafaf9;
-    border-bottom: 0.5px solid #e5e5e3;
-    padding: 0.85rem 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-    .card-header i {
-        font-size: 18px;
-        color: #888780;
+    :root {
+        --cf-ink: #1a1a18;
+        --cf-muted: #888780;
+        --cf-border: #e5e5e3;
+        --cf-border-2: #c8c7c0;
+        --cf-surface: #ffffff;
+        --cf-surface-2: #fafaf9;
+        --cf-input-bg: #f7f7f5;
+        --cf-green: #0f6e56;
+        --cf-blue: #378add;
+        --cf-danger-bg: #fdecec;
+        --cf-danger-text: #a32d2d;
+        --cf-danger-border: #eab3b3;
+        --cf-warn-bg: #faeeda;
+        --cf-warn-text: #854f0b;
+        --cf-warn-border: #ef9f27;
+        --cf-radius: 12px;
+        --cf-radius-sm: 8px;
     }
 
-    .card-header h4 {
-        margin: 0;
-        font-size: 14px;
-        font-weight: 500;
-        color: #1a1a18;
-        letter-spacing: 0.01em;
+    /* ══════════════════════════════════
+       CARD
+    ══════════════════════════════════ */
+    .cf-card {
+        background: var(--cf-surface);
+        border: 0.5px solid var(--cf-border);
+        border-radius: var(--cf-radius);
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,.04);
     }
 
-/* ══════════════════════════════════
-   FORM LABELS
-══════════════════════════════════ */
-label {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #888780;
-    display: block;
-    margin-bottom: 5px;
-}
-
-/* ══════════════════════════════════
-   INPUTS
-══════════════════════════════════ */
-.form-control {
-    padding: 8px 12px;
-    border: 0.5px solid #c8c7c0;
-    border-radius: 8px;
-    background: #f7f7f5;
-    font-size: 13.5px;
-    color: #1a1a18;
-    width: 100%;
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-    .form-control:focus {
-        outline: none;
-        border-color: #378add;
-        box-shadow: 0 0 0 3px rgba(55, 138, 221, 0.12);
-        background: #ffffff;
+    .cf-card-header {
+        background: var(--cf-surface-2);
+        border-bottom: 0.5px solid var(--cf-border);
+        padding: 0.85rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    .form-control::placeholder {
-        color: #b4b2a9;
+        .cf-card-header svg {
+            width: 17px;
+            height: 17px;
+            stroke: var(--cf-muted);
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .cf-card-header h4 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--cf-ink);
+            letter-spacing: 0.01em;
+        }
+
+    .cf-card-body {
+        padding: 1.25rem;
     }
 
-/* ══════════════════════════════════
-   SAVE / UPDATE BUTTON
-══════════════════════════════════ */
-#btnSave {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 20px;
-    background: #0f6e56;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.15s;
-}
-
-    #btnSave:hover {
-        opacity: 0.85;
+    /* ══════════════════════════════════
+       FORM LAYOUT (no bootstrap grid dependency)
+    ══════════════════════════════════ */
+    .cf-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
     }
 
-    #btnSave i {
-        font-size: 16px;
+    .cf-col-6 {
+        flex: 1 1 calc(50% - 16px);
+        min-width: 220px;
     }
 
-/* ══════════════════════════════════
-   TABLE
-══════════════════════════════════ */
-.table {
-    font-size: 13px;
-    width: 100%;
-    border-collapse: collapse;
-}
+    .cf-col-12 {
+        flex: 1 1 100%;
+    }
 
-    .table thead th {
-        background: #f7f7f5;
+    .cf-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 0.75rem;
+    }
+
+    /* ══════════════════════════════════
+       FORM LABELS
+    ══════════════════════════════════ */
+    label {
         font-size: 11px;
+        font-weight: 500;
         letter-spacing: 0.06em;
         text-transform: uppercase;
+        color: var(--cf-muted);
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    /* ══════════════════════════════════
+       INPUTS
+    ══════════════════════════════════ */
+    .form-control {
+        padding: 8px 12px;
+        border: 0.5px solid var(--cf-border-2);
+        border-radius: var(--cf-radius-sm);
+        background: var(--cf-input-bg);
+        font-size: 13.5px;
+        color: var(--cf-ink);
+        width: 100%;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--cf-blue);
+            box-shadow: 0 0 0 3px rgba(55, 138, 221, 0.12);
+            background: var(--cf-surface);
+        }
+
+        .form-control::placeholder {
+            color: #b4b2a9;
+        }
+
+    /* ══════════════════════════════════
+       BUTTONS
+    ══════════════════════════════════ */
+    #btnSave {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 20px;
+        background: var(--cf-green);
+        color: #ffffff;
+        border: none;
+        border-radius: var(--cf-radius-sm);
+        font-size: 13px;
         font-weight: 500;
-        color: #888780;
-        border-bottom: 0.5px solid #e5e5e3;
-        padding: 10px 14px;
-        text-align: left;
-        white-space: nowrap;
+        cursor: pointer;
+        transition: opacity 0.15s;
     }
 
-    .table td {
-        padding: 10px 14px;
-        vertical-align: middle;
-        border-bottom: 0.5px solid #f0efea;
-        color: #1a1a18;
+        #btnSave:hover {
+            opacity: 0.85;
+        }
+
+        #btnSave svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+    #btnCancel {
+        display: none;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 18px;
+        background: var(--cf-surface-2);
+        color: var(--cf-muted);
+        border: 0.5px solid var(--cf-border-2);
+        border-radius: var(--cf-radius-sm);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s;
     }
 
-    .table tbody tr:hover td {
-        background: #fafaf9;
+        #btnCancel:hover {
+            background: #f0efea;
+        }
+
+    /* ══════════════════════════════════
+       TABLE
+    ══════════════════════════════════ */
+    .table {
+        font-size: 13px;
+        width: 100%;
+        border-collapse: collapse;
     }
 
-    .table tbody tr:last-child td {
-        border-bottom: none;
+        .table thead th {
+            background: var(--cf-input-bg);
+            font-size: 11px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-weight: 500;
+            color: var(--cf-muted);
+            border-bottom: 0.5px solid var(--cf-border);
+            padding: 10px 14px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .table td {
+            padding: 10px 14px;
+            vertical-align: middle;
+            border-bottom: 0.5px solid #f0efea;
+            color: var(--cf-ink);
+        }
+
+        .table tbody tr:nth-child(even) td {
+            background: #fcfcfb;
+        }
+
+        .table tbody tr:hover td {
+            background: var(--cf-surface-2);
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+    /* Category Code pill */
+    .table td code {
+        font-size: 12px;
+        background: var(--cf-input-bg);
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 0.5px solid var(--cf-border);
+        color: #5f5e5a;
     }
 
-/* Category Code pill */
-.table td code {
-    font-size: 12px;
-    background: #f7f7f5;
-    padding: 2px 8px;
-    border-radius: 4px;
-    border: 0.5px solid #e5e5e3;
-    color: #5f5e5a;
-}
-
-/* ══════════════════════════════════
-   EDIT BUTTON
-══════════════════════════════════ */
-.btn-warning.btn-sm {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 5px 12px;
-    background: #faeeda;
-    color: #854f0b;
-    border: 0.5px solid #ef9f27;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.15s;
-}
-
-    .btn-warning.btn-sm:hover {
-        opacity: 0.8;
+    /* ══════════════════════════════════
+       ACTION BUTTONS (Edit / Delete)
+    ══════════════════════════════════ */
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: opacity 0.15s;
+        border: 0.5px solid transparent;
     }
 
-    .btn-warning.btn-sm i {
-        font-size: 14px;
+        .btn-icon svg {
+            width: 13px;
+            height: 13px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-icon:hover {
+            opacity: 0.8;
+        }
+
+    .btn-edit {
+        background: var(--cf-warn-bg);
+        color: var(--cf-warn-text);
+        border-color: var(--cf-warn-border);
     }
 
-/* ══════════════════════════════════
-   VALIDATION ERROR
-══════════════════════════════════ */
-.text-danger {
-    font-size: 11.5px;
-    color: #a32d2d;
-    margin-top: 3px;
-    display: block;
-}
+    .btn-delete {
+        background: var(--cf-danger-bg);
+        color: var(--cf-danger-text);
+        border-color: var(--cf-danger-border);
+    }
 
-/* ══════════════════════════════════
-   ROW SERIAL NUMBER BADGE
-══════════════════════════════════ */
-.badge-num {
-    display: inline-block;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #f0efea;
-    border: 0.5px solid #e5e5e3;
-    font-size: 11px;
-    font-weight: 500;
-    color: #888780;
-    text-align: center;
-    line-height: 22px;
-}
+    /* ══════════════════════════════════
+       VALIDATION ERROR
+    ══════════════════════════════════ */
+    .text-danger {
+        font-size: 11.5px;
+        color: var(--cf-danger-text);
+        margin-top: 3px;
+        display: block;
+    }
+
+    /* ══════════════════════════════════
+       ROW SERIAL NUMBER BADGE
+    ══════════════════════════════════ */
+    .badge-num {
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #f0efea;
+        border: 0.5px solid var(--cf-border);
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--cf-muted);
+        text-align: center;
+        line-height: 22px;
+    }
+
+    .table-empty {
+        text-align: center;
+        padding: 2.5rem 1rem !important;
+        color: #b4b2a9;
+        font-size: 13px;
+    }
+
+    /* ══════════════════════════════════
+       MOBILE
+    ══════════════════════════════════ */
+    @@media (max-width: 640px) {
+        .cf-col-6 {
+            flex: 1 1 100%;
+        }
+
+        .cf-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        #btnSave, #btnCancel {
+            justify-content: center;
+        }
+    }
 
 </style>
-<!-- DATATABLE CSS -->
-<link rel="stylesheet"
-      href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
 
-<div class="card shadow-sm">
+<div class="cf-card">
 
-    <div class="card-header">
+    <div class="cf-card-header">
+        <svg viewBox="0 0 24 24"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24L4 3a1 1 0 0 0-1 1l.24 5.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.82Z" /><circle cx="7.5" cy="7.5" r="1.5" /></svg>
         <h4>Add / Update Category</h4>
     </div>
 
-    <div class="card-body">
+    <div class="cf-card-body">
 
         <form id="categoryForm">
 
             <input asp-for="Id" type="hidden" id="Id" />
 
-            <div class="row">
+            <div class="cf-row">
 
-                <div class="col-md-6">
-
+                <div class="cf-col-6">
                     <label>Category Name</label>
-
-                    <input asp-for="CategoryName"
-                           class="form-control"
-                           id="CategoryName" />
-
-                    <span asp-validation-for="CategoryName"
-                          class="text-danger"></span>
-
+                    <input asp-for="CategoryName" class="form-control" id="CategoryName" placeholder="e.g. Kaju Sweets" />
+                    <span asp-validation-for="CategoryName" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-6">
-
+                <div class="cf-col-6">
                     <label>Category Code</label>
-
-                    <input asp-for="CategoryCode"
-                           class="form-control"
-                           id="CategoryCode" />
-
-                    <span asp-validation-for="CategoryCode"
-                          class="text-danger"></span>
-
+                    <input asp-for="CategoryCode" class="form-control" id="CategoryCode" placeholder="e.g. KJU" />
+                    <span asp-validation-for="CategoryCode" class="text-danger"></span>
                 </div>
 
-                <div class="col-md-12 mt-3">
-
-                    <button type="submit"
-                            class="btn btn-primary"
-                            id="btnSave">
-                        Save
+                <div class="cf-col-12 cf-actions">
+                    <button type="submit" id="btnSave">
+                        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+                        <span id="btnSaveText">Save</span>
                     </button>
-
+                    <button type="button" id="btnCancel" onclick="cancelEdit()">
+                        Cancel
+                    </button>
                 </div>
 
             </div>
@@ -267,34 +378,25 @@ label {
 
 </div>
 
-<br />
+<div class="cf-card">
 
-<div class="card shadow-sm">
-
-    <div class="card-header">
+    <div class="cf-card-header">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
         <h4>Category List</h4>
     </div>
 
-    <div class="card-body">
-
-        <table class="table table-bordered table-striped"
-               id="categoryTable">
-
-            <thead class="table-dark">
-
+    <div class="cf-card-body">
+        <table class="table" id="categoryTable">
+            <thead>
                 <tr>
                     <th>#</th>
                     <th>Category Name</th>
                     <th>Category Code</th>
                     <th>Action</th>
                 </tr>
-
             </thead>
-
             <tbody></tbody>
-
         </table>
-
     </div>
 
 </div>
@@ -305,11 +407,21 @@ label {
 <!-- DATATABLE JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
+<!-- SWEETALERT2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@* TODO: agar asp-validation-for spans me client-side error dikhana hai to ye partial bhi include karo: *@
+@* <partial name="_ValidationScriptsPartial" /> *@
+
 <script>
+
+    // Cache of currently loaded categories - avoids embedding JSON directly
+    // inside onclick attributes (breaks if name has a single quote, and is
+    // an unnecessary XSS surface).
+    var allCategories = [];
 
     $(document).ready(function () {
 
-        // LOAD CATEGORY LIST
         loadCategory();
 
         // FORM SUBMIT
@@ -318,113 +430,120 @@ label {
             e.preventDefault();
 
             var model = {
-
-                Id: $("#Id").val(),
-
-                CategoryName: $("#CategoryName").val(),
-
-                CategoryCode: $("#CategoryCode").val()
+                Id: $("#Id").val() || 0,
+                CategoryName: $("#CategoryName").val().trim(),
+                CategoryCode: $("#CategoryCode").val().trim()
             };
 
-            console.log(model);
+            if (!model.CategoryName || !model.CategoryCode) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Missing fields",
+                    text: "Category Name aur Category Code dono zaroori hain."
+                });
+                return;
+            }
 
             $.ajax({
-
                 url: '/Home/AddCategory',
-
                 type: 'POST',
-
                 data: model,
-
                 success: function (res) {
-
                     if (res.status == true) {
 
-                        alert(res.message);
+                        Swal.fire({
+                            icon: "success",
+                            title: res.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
 
-                        // RESET FORM
-                        $("#categoryForm")[0].reset();
-
-                        $("#Id").val('');
-
-                        $("#btnSave").text("Save");
-
-                        // RELOAD TABLE
+                        resetForm();
                         loadCategory();
                     }
                     else {
-
-                        alert(res.message);
+                        Swal.fire({
+                            icon: "error",
+                            title: "Failed",
+                            text: res.message
+                        });
                     }
                 },
-
                 error: function (xhr, status, error) {
-
                     console.log(error);
-
-                    alert("Error while saving category");
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error while saving category."
+                    });
                 }
             });
 
         });
 
+        // EVENT DELEGATION for Edit / Delete buttons (no inline JSON needed)
+        $("#categoryTable").on("click", ".btn-edit", function () {
+            var id = $(this).data("id");
+            var item = allCategories.find(function (c) { return c.id == id; });
+            if (item) editCategory(item);
+        });
+
+        $("#categoryTable").on("click", ".btn-delete", function () {
+            var id = $(this).data("id");
+            deleteCategory(id);
+        });
+
     });
 
-        function loadCategory() {
+    function loadCategory() {
 
-        // CHECK DATATABLE EXISTS
         if ($.fn.dataTable && $.fn.dataTable.isDataTable('#categoryTable')) {
-
             $('#categoryTable').DataTable().destroy();
         }
 
         $.ajax({
-
             url: '/Home/AllCategoryList',
-
             type: 'GET',
-
             success: function (res) {
 
+                allCategories = res.data || [];
+
+                if (!allCategories.length) {
+                    $("#categoryTable tbody").html('<tr><td colspan="4" class="table-empty">Koi category nahi mili. Upar se ek add karein.</td></tr>');
+                    return;
+                }
+
                 var html = '';
-                console.log(res);
-                $.each(res.data, function (i, item) {
-                    
+
+                $.each(allCategories, function (i, item) {
                     html += `
                         <tr>
-
-                            <td>${i + 1}</td>
-
-                            <td>${item.categoryName}</td>
-
-                            <td>${item.categoryCode}</td>
-
+                            <td><span class="badge-num">${i + 1}</span></td>
+                            <td>${escapeHtml(item.categoryName)}</td>
+                            <td><code>${escapeHtml(item.categoryCode)}</code></td>
                             <td>
-
-                                <button
-                                    type="button"
-                                    class="btn btn-warning btn-sm"
-                                    onclick='editCategory(${JSON.stringify(item)})'>
-
+                                <button type="button" class="btn-icon btn-edit" data-id="${item.id}">
+                                    <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z" /></svg>
                                     Edit
-
                                 </button>
-
+                                <button type="button" class="btn-icon btn-delete" data-id="${item.id}">
+                                    <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                                    Delete
+                                </button>
                             </td>
-
                         </tr>
                     `;
                 });
 
                 $("#categoryTable tbody").html(html);
-
-                // INIT DATATABLE
                 $('#categoryTable').DataTable();
             },
-
             error: function () {
-
-                alert("Error loading category");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Error loading category list."
+                });
             }
         });
     }
@@ -433,20 +552,85 @@ label {
     function editCategory(item) {
 
         $("#Id").val(item.id);
-
         $("#CategoryName").val(item.categoryName);
-
         $("#CategoryCode").val(item.categoryCode);
 
-        $("#btnSave").text("Update");
+        $("#btnSaveText").text("Update");
+        $("#btnCancel").css("display", "inline-flex");
 
-        // SCROLL TO TOP
-        window.scrollTo({
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-            top: 0,
+    function cancelEdit() {
+        resetForm();
+    }
 
-            behavior: 'smooth'
+    function resetForm() {
+        $("#categoryForm")[0].reset();
+        $("#Id").val('');
+        $("#btnSaveText").text("Save");
+        $("#btnCancel").css("display", "none");
+    }
+
+    function deleteCategory(id) {
+
+        Swal.fire({
+            icon: "warning",
+            title: "Category delete karein?",
+            text: "Ye action wapas nahi ho sakta.",
+            showCancelButton: true,
+            confirmButtonText: "Haan, Delete karein",
+            cancelButtonText: "Cancel",
+            confirmButtonColor: "#a32d2d"
+        }).then(function (result) {
+
+            if (!result.isConfirmed) return;
+
+            $.ajax({
+                url: "/Home/DeleteCategory/" + id,
+                type: "DELETE",
+                success: function (resp) {
+                    if (resp.status == true) {
+                        Swal.fire({
+                            icon: "success",
+                            title: resp.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                        // agar jo row delete ho rahi hai wahi edit ho rahi thi, form reset karo
+                        if ($("#Id").val() == id) resetForm();
+
+                        loadCategory();
+                    }
+                    else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Failed",
+                            text: resp.message
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Error while deleting category."
+                    });
+                }
+            });
         });
+    }
+
+    // Basic HTML-escape so category name/code can never break out of markup
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
 </script>

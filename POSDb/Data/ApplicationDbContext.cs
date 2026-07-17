@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using POSDb.EntityModels;
 using POSDb.EntityModels.MithaiShop;
@@ -34,6 +34,9 @@ namespace POSDb.Data
                 .WithMany(x => x.PurchaseDetails)
                 .HasForeignKey(x => x.PurchaseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+           
         }
         public DbSet<EWarehouseModel> tblwarehouse { get; set; }
         public DbSet<EShop> tblShop { get; set; }
@@ -58,5 +61,9 @@ namespace POSDb.Data
         public DbSet<EStockTransferDetail> tblStockTransferDetails { get; set; }
         public DbSet<EShopStock> tblshopstock { get; set;  }
         public DbSet<EShopStockHistory> tblshopstockHistory { get; set; }
+        public DbSet<EWarehousestock> tblWarehousestock { get; set; }
+        public DbSet<EWarehouseStockHistory> tblWarehousestockhistory { get; set; }
+        public DbSet<EBulkOrder> tblBulkOrder { get; set; }
+        public DbSet<EBulkOrderDetail> tblBulkOrderDetail { get; set; }
     }
 }

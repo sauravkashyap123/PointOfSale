@@ -1,0 +1,510 @@
+﻿@model POSModels.Models.StaffModel
+
+@{
+    ViewBag.Title = "Create Staff";
+    Layout = "~/Views/Shared/_SideLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/staff-create.css" />
+
+<div class="pos-container">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div class="header-left">
+            <a href="@Url.Action("Index", "Staff")" class="back-btn">
+                <i class="ti ti-arrow-left"></i>
+            </a>
+            <div>
+                <h1>Create Staff</h1>
+                <p class="breadcrumb-text">Staff Management › Add New Staff</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARD -->
+    <div class="staff-card">
+
+        <div class="staff-card-header">
+            <i class="ti ti-user-plus"></i>
+            <h2>Staff Details</h2>
+        </div>
+
+        <div class="staff-card-body">
+
+            <form @* asp-action="CreateStaff" asp-controller="Home" method="post" *@ id="staffForm">
+
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <!-- Section: Basic Info -->
+                <p class="form-section-label">Basic Information</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Name" class="form-label">Full Name <span class="required">*</span></label>
+                        <input asp-for="Name" class="form-control" placeholder="e.g. Ramesh Kumar" />
+                        <span asp-validation-for="Name" class="field-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Mobileno" class="form-label">Mobile Number</label>
+                        <input asp-for="Mobileno" class="form-control" placeholder="10-digit number" />
+                    </div>
+                </div>
+
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label asp-for="Address" class="form-label">Address</label>
+                        <textarea asp-for="Address" class="form-control" rows="3" placeholder="Full address..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="DOB" class="form-label">Date of Birth</label>
+                        <input asp-for="DOB" type="date" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="AadharCardNo" class="form-label">Aadhaar Card No.</label>
+                        <input asp-for="AadharCardNo" class="form-control" placeholder="12-digit Aadhaar" />
+                    </div>
+                </div>
+
+                <hr class="form-divider" />
+
+                <!-- Section: Employment -->
+                <p class="form-section-label">Employment</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="StaffCode" class="form-label">Staff Code</label>
+                        <input asp-for="StaffCode" id="staffCode" class="form-control" readonly />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Shopid" class="form-label">Assigned Shop</label>
+                        <div class="select-wrapper">
+                            <select asp-for="Shopid" asp-items="Model.selectedshoplist" value=""  class="form-select">
+                                <option value="">-- Select Shop --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="form-divider" />
+
+                <!-- Section: Login Credentials -->
+                <p class="form-section-label">Login Credentials</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" placeholder="staff@example.com" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Set a password" />
+                    </div>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="form-actions">
+                    <button type="reset" class="btn btn-secondary">
+                        <i class="ti ti-refresh"></i> Reset
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy"></i> Update Staff
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+   $('#staffForm').on('submit', function (e) {
+    e.preventDefault();
+    const form = this; // <-- yahan capture karo
+
+    Swal.fire({
+        title: 'Staff Save karo?',
+        text: 'Kya aap is staff ki details save karna chahte hain?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0C447C',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Haan, Save karo',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = new FormData(form); // <-- form use karo, this nahi
+
+            $.ajax({
+                url: '/Home/CreateStaff',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    if (res.result) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Done!',
+                            text: res.message || 'Staff successfully save ho gaya.',
+                            confirmButtonColor: '#0C447C'
+                        }).then(() => {
+                            window.location.href = '/Home/StaffList';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: res.message || 'Kuch galat ho gaya.',
+                            confirmButtonColor: '#0C447C'
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error',
+                        text: 'Request process nahi ho saki. Dobara try karo.',
+                        confirmButtonColor: '#0C447C'
+                    });
+                }
+            });
+        }
+    });
+});
+
+</script>
+<style>
+
+   
+    :root {
+        --brand: #0C447C;
+        --brand-dark: #083360;
+        --brand-light: #E8F0F9;
+        --accent: #F5A623;
+        --bg: #F0F4F8;
+        --surface: #FFFFFF;
+        --border: #D1DCE8;
+        --border-focus: #0C447C;
+        --text-primary: #1A2B3C;
+        --text-muted: #5E7A94;
+        --danger: #D94040;
+        --success: #2E7D52;
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 14px;
+        --shadow-card: 0 2px 12px rgba(12, 68, 124, 0.10);
+        --shadow-btn: 0 2px 8px rgba(12, 68, 124, 0.25);
+        --transition: 0.18s ease;
+    }
+
+    /* ── Page wrapper ── */
+    .pos-container {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 28px 20px 48px;
+        background: #F0F4F8;
+        min-height: 100vh;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: #1A2B3C;
+    }
+
+    /* ── Page Header ── */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--brand);
+        text-decoration: none;
+        transition: background var(--transition), border-color var(--transition);
+        flex-shrink: 0;
+    }
+
+        .back-btn:hover {
+            background: var(--brand-light);
+            border-color: var(--brand);
+        }
+
+    .page-header h1 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 2px;
+        letter-spacing: -0.01em;
+    }
+
+    .breadcrumb-text {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    /* ── Card ── */
+    .staff-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
+    }
+
+    .staff-card-header {
+        background: var(--brand);
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .staff-card-header h2 {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.01em;
+        }
+
+        .staff-card-header i {
+            color: rgba(255,255,255,0.75);
+            font-size: 1rem;
+        }
+
+    .staff-card-body {
+        padding: 28px 24px 24px;
+    }
+
+    /* ── Section label ── */
+    .form-section-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin: 0 0 14px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Grid rows ── */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+    /* ── Field group ── */
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .form-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+        .form-label .required {
+            color: var(--danger);
+            margin-left: 2px;
+        }
+
+    /* ── Inputs ── */
+    .form-control,
+    .form-select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 9px 12px;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        background: #fff;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm);
+        outline: none;
+        transition: border-color var(--transition), box-shadow var(--transition);
+        appearance: none;
+        font-family: inherit;
+    }
+
+        .form-control::placeholder {
+            color: #A5BCCE;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(12, 68, 124, 0.12);
+        }
+
+        /* readonly staff code */
+        .form-control[readonly] {
+            background: var(--brand-light);
+            color: var(--brand);
+            font-weight: 600;
+            font-size: 0.82rem;
+            letter-spacing: 0.05em;
+            cursor: default;
+        }
+
+    /* select arrow */
+    .select-wrapper {
+        position: relative;
+    }
+
+        .select-wrapper::after {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--text-muted);
+        }
+
+        .select-wrapper .form-select {
+            padding-right: 32px;
+        }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    /* ── Validation text ── */
+    .field-error {
+        font-size: 0.73rem;
+        color: var(--danger);
+        margin-top: 2px;
+    }
+
+    /* ── Divider ── */
+    .form-divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 20px 0;
+    }
+
+    /* ── Form actions ── */
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 8px;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 22px;
+        font-size: 0.855rem;
+        font-weight: 600;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+        font-family: inherit;
+        line-height: 1;
+    }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+    .btn-primary {
+        background: var(--brand);
+        color: #fff;
+        border-color: var(--brand);
+        box-shadow: var(--shadow-btn);
+    }
+
+        .btn-primary:hover {
+            background: var(--brand-dark);
+            border-color: var(--brand-dark);
+            box-shadow: 0 4px 12px rgba(12, 68, 124, 0.32);
+        }
+
+    .btn-secondary {
+        background: #fff;
+        color: var(--text-muted);
+        border-color: var(--border);
+    }
+
+        .btn-secondary:hover {
+            background: var(--bg);
+            color: var(--text-primary);
+            border-color: #b0c4d8;
+        }
+
+    /* ── Validation summary ── */
+    .validation-summary {
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        color: var(--danger);
+        margin-bottom: 18px;
+    }
+
+    /* ── Responsive ── */
+    @@media (max-width: 600px) {
+        .pos-container {
+            padding: 16px 12px 36px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .staff-card-body {
+            padding: 20px 16px 18px;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+

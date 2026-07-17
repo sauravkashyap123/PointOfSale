@@ -1,0 +1,494 @@
+﻿@{
+    Layout = "~/Views/Shared/_SideLayout.cshtml";
+    ViewBag.Title = "All Stock Adjustments";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
+<style>
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    :root {
+        --ink: #18181b;
+        --ink-2: #52525b;
+        --ink-3: #a1a1aa;
+        --surface: #ffffff;
+        --surface-2: #f4f4f5;
+        --surface-3: #fafafa;
+        --border: #e4e4e7;
+        --border-2: #d4d4d8;
+        --green: #16a34a;
+        --red: #dc2626;
+        --blue-bg: #eff6ff;
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 14px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+        --font: 'DM Sans', sans-serif;
+        --mono: 'DM Mono', monospace;
+    }
+
+    .asl-page {
+        font-family: var(--font);
+        background: var(--surface-2);
+        min-height: 100vh;
+        padding: 1.75rem 1.5rem 4rem;
+        color: var(--ink);
+    }
+
+    .asl-wrap {
+        max-width: 1300px;
+        margin: 0 auto;
+    }
+
+    .asl-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .asl-title-icon {
+        width: 38px;
+        height: 38px;
+        background: var(--ink);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .asl-title-icon svg {
+            width: 19px;
+            height: 19px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+    .asl-title h1 {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -.3px;
+    }
+
+    .asl-title p {
+        font-size: 13px;
+        color: var(--ink-2);
+        margin-top: 1px;
+    }
+
+    .asl-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+
+    .asl-filter-bar {
+        display: flex;
+        align-items: flex-end;
+        gap: 16px;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-3);
+        flex-wrap: wrap;
+    }
+
+    .asl-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .asl-field label {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--ink-2);
+        }
+
+    .asl-input {
+        height: 38px;
+        padding: 0 12px;
+        border: 1px solid var(--border-2);
+        border-radius: var(--radius-sm);
+        font-family: var(--font);
+        font-size: 13.5px;
+        color: var(--ink);
+        background: var(--surface);
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+    }
+
+        .asl-input:focus {
+            border-color: var(--ink);
+            box-shadow: 0 0 0 3px rgba(24,24,27,.08);
+        }
+
+    .asl-btn {
+        height: 38px;
+        padding: 0 18px;
+        background: var(--ink);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-family: var(--font);
+        font-size: 13.5px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        transition: opacity .15s;
+        white-space: nowrap;
+    }
+
+        .asl-btn svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .asl-btn:hover {
+            opacity: .85;
+        }
+
+    .asl-btn-clear {
+        background: var(--surface);
+        color: var(--ink-2);
+        border: 1px solid var(--border-2);
+    }
+
+    .asl-table-body {
+        padding: 1.25rem 1.5rem;
+    }
+
+    /* ── Horizontal scroll wrapper — table ab kabhi hidden/cut nahi hoga,
+         chhoti screen par sirf side-scroll hoga ── */
+    .asl-table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+    }
+
+    table.dataTable {
+        width: 100% !important;
+        min-width: 920px; /* table ka natural width lock — isse neeche squeeze nahi hoga, scroll hoga */
+        font-family: var(--font);
+        font-size: 13.5px;
+        border-collapse: collapse !important;
+        margin: 0 !important;
+    }
+
+        table.dataTable thead th {
+            background: var(--surface-2);
+            color: var(--ink-2);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            padding: 10px 12px !important;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        table.dataTable tbody td {
+            padding: 10px 12px !important;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        table.dataTable tbody tr:hover {
+            background: var(--surface-3);
+        }
+
+    /* DataTables ke apne length/search/info/pagination controls ko bhi
+       mobile par theek se wrap/stack karo */
+    .dataTables_wrapper {
+        padding: 0 1px;
+    }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            font-family: var(--font);
+            font-size: 12.5px;
+            color: var(--ink-2);
+            margin: 8px 0;
+        }
+
+        .dataTables_wrapper .dataTables_filter input,
+        .dataTables_wrapper .dataTables_length select {
+            border: 1px solid var(--border-2);
+            border-radius: var(--radius-sm);
+            padding: 4px 8px;
+            font-family: var(--font);
+            font-size: 12.5px;
+            outline: none;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 4px 9px !important;
+            margin-left: 3px;
+            border-radius: var(--radius-sm) !important;
+            font-size: 12.5px !important;
+        }
+
+    .qty-badge {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 12px;
+        padding: 2px 9px;
+        border-radius: 20px;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: var(--green);
+        font-weight: 500;
+    }
+
+    .warehouse-pill {
+        display: inline-block;
+        font-size: 11.5px;
+        font-weight: 500;
+        padding: 3px 10px;
+        border-radius: 20px;
+        background: var(--blue-bg);
+        color: #1d4ed8;
+    }
+
+        .warehouse-pill.admin {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+    .asl-empty {
+        padding: 2.5rem;
+        text-align: center;
+        color: var(--ink-3);
+        font-size: 13.5px;
+    }
+
+    /* ── Mobile breakpoint ── */
+    @@media (max-width: 640px) {
+        .asl-page {
+            padding: 1rem 0.75rem 3rem;
+        }
+
+        .asl-title {
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .asl-title h1 {
+            font-size: 16px;
+        }
+
+        .asl-title p {
+            font-size: 12px;
+        }
+
+        .asl-filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 1rem;
+            gap: 12px;
+        }
+
+        .asl-field {
+            width: 100%;
+        }
+
+        .asl-input {
+            width: 100%;
+        }
+
+        .asl-btn {
+            width: 100%;
+        }
+
+        .asl-table-body {
+            padding: 0.75rem;
+        }
+
+        table.dataTable {
+            min-width: 760px; /* thoda kam kar diya chhoti screen ke liye, phir bhi scroll rahega */
+            font-size: 12.5px;
+        }
+
+            table.dataTable thead th,
+            table.dataTable tbody td {
+                padding: 8px 10px !important;
+            }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+            width: 100%;
+        }
+
+            .dataTables_wrapper .dataTables_filter input {
+                width: 100%;
+                margin-left: 0 !important;
+                margin-top: 4px;
+            }
+    }
+</style>
+
+<div class="asl-page">
+    <div class="asl-wrap">
+
+        <!-- Page Title -->
+        <div class="asl-title">
+            <div class="asl-title-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9 2 2 4-4" /></svg>
+            </div>
+            <div>
+                <h1>All Stock Adjustments</h1>
+                <p>Shop se Warehouse mein hue saare stock transfers ka poora record</p>
+            </div>
+        </div>
+
+        <!-- Filter + Table Card -->
+        <div class="asl-card">
+
+            <div class="asl-filter-bar">
+                <div class="asl-field">
+                    <label for="fromDate">From Date</label>
+                    <input type="date" class="asl-input" id="fromDate" />
+                </div>
+                <div class="asl-field">
+                    <label for="toDate">To Date</label>
+                    <input type="date" class="asl-input" id="toDate" />
+                </div>
+                <button class="asl-btn" type="button" onclick="loadStockAdjustments()">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                    Filter Karo
+                </button>
+                <button class="asl-btn asl-btn-clear" type="button" onclick="clearFilter()">
+                    <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+                    Clear
+                </button>
+            </div>
+
+            <div class="asl-table-body">
+                <div class="asl-table-scroll">
+                    <table id="tblStockAdjustments" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Product Code</th>
+                                <th>Product Name</th>
+                                <th>Destination</th>
+                                <th>From Shop</th>
+                                <th>Qty Transferred</th>
+                                <th>Stock Before</th>
+                                <th>Stock After</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+
+    var dataTable;
+
+    $(document).ready(function () {
+        initTable();
+        loadStockAdjustments();
+    });
+
+    // ── Init empty DataTable shell ────────────────────────────────────────────
+    function initTable() {
+        dataTable = $('#tblStockAdjustments').DataTable({
+            data: [],
+            columns: [
+                { data: null, render: function (data, type, row, meta) { return meta.row + 1; } },
+                { data: 'transactionDate', render: formatDate },
+                { data: 'productCode', defaultContent: '—' },
+                { data: 'productName' },
+                { data: 'warehousename' },
+                { data: 'relatedShopName' },
+                { data: 'quantityChanged', render: function (v) { return '<span class="qty-badge">+' + parseFloat(v).toLocaleString('en-IN') + '</span>'; } },
+                { data: 'previousQuantity', render: function (v) { return parseFloat(v).toLocaleString('en-IN'); } },
+                { data: 'newQuantity', render: function (v) { return '<b>' + parseFloat(v).toLocaleString('en-IN') + '</b>'; } },
+                { data: 'remarks', defaultContent: '—' }
+            ],
+            order: [[1, 'desc']],
+            pageLength: 25,
+            // scrollX yahan intentionally use nahi kiya — hamara .asl-table-scroll wrapper
+            // already horizontal scroll de raha hai, DataTables ka apna scrollX use karne se
+            // header/body alignment issues aa sakte hain
+            language: {
+                emptyTable: 'Koi stock adjustment record nahi mila.',
+                zeroRecords: 'Is date range mein koi record nahi mila.'
+            }
+        });
+    }
+
+    // ── Load data from server ─────────────────────────────────────────────────
+    function loadStockAdjustments() {
+        var fromDate = $('#fromDate').val();
+        var toDate = $('#toDate').val();
+
+        var url = '/Warehouse/GetAllStockAdjustmentList?';
+        if (fromDate) url += 'fromDate=' + fromDate + '&';
+        if (toDate) url += 'toDate=' + toDate;
+
+        $.get(url)
+            .done(function (res) {
+                var rows = (res && res.data) ? res.data : [];
+                dataTable.clear();
+                dataTable.rows.add(rows);
+                dataTable.draw();
+            })
+            .fail(function () {
+                dataTable.clear().draw();
+            });
+    }
+
+    function clearFilter() {
+        $('#fromDate, #toDate').val('');
+        loadStockAdjustments();
+    }
+
+    // ── Renderers ──────────────────────────────────────────────────────────────
+    function formatDate(dateStr) {
+        if (!dateStr) return '—';
+        var d = new Date(dateStr);
+        return d.toLocaleString('en-IN', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+</script>

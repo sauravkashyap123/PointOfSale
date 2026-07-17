@@ -5,58 +5,85 @@
     Layout = "~/Views/Shared/_SideLayout.cshtml";
 }
 
-<div class="staff-container">
+<div class="sl-wrap">
 
     <!-- HEADER -->
-    <div class="page-header">
+    <div class="sl-header">
         <div>
-            <h2>Staff List</h2>
-            <p class="sub-text">Manage all registered staff members</p>
+            <h2>
+                <i class="ti ti-users" aria-hidden="true"></i>
+                Staff list
+            </h2>
+            <p class="sl-sub">Manage all registered staff members</p>
         </div>
-
-        <a href="@Url.Action("CreateStaff", "Home")" class="btn-add">
-            + Add Staff
+        <a href="@Url.Action("CreateStaff", "Home")" class="sl-btn-add">
+            <i class="ti ti-plus" aria-hidden="true"></i> Add staff
         </a>
     </div>
 
     <!-- TABLE CARD -->
-    <div class="card table-card">
-
-        <div class="table-responsive">
-            <table class="staff-table">
-
+    <div class="sl-card">
+        <div class="sl-table-wrap">
+            <table class="sl-table">
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Name</th>
-                        <th>Mobile</th>
-                        <th>Email</th>
-                        <th>Staff Code</th>
-                        <th>Address</th>
-                        <th>Password</th>
-                        <th>Aadhar Card No</th>
-                        <th>Date Of Birth</th>
-                        <th>Date Of Joining</th>
+                        <th><i class="ti ti-user" aria-hidden="true"></i> Name</th>
+                        <th><i class="ti ti-phone" aria-hidden="true"></i> Mobile</th>
+                        <th><i class="ti ti-mail" aria-hidden="true"></i> Email</th>
+                        <th><i class="ti ti-id-badge-2" aria-hidden="true"></i> Staff code</th>
+                        <th><i class="ti ti-id-badge-2" aria-hidden="true"></i> Password</th>
+                        <th><i class="ti ti-map-pin" aria-hidden="true"></i> Address</th>
+                        <th><i class="ti ti-fingerprint" aria-hidden="true"></i> Aadhar no.</th>
+                        <th><i class="ti ti-calendar" aria-hidden="true"></i> DOB</th>
+                        <th><i class="ti ti-calendar-check" aria-hidden="true"></i> DOJ</th>
+                        
+                        <th><i class="ti ti-calendar-check" aria-hidden="true"></i>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-
                 <tbody>
                     @if (Model != null && Model.Count > 0)
                     {
                         int i = 1;
                         foreach (var item in Model)
                         {
+                            var initials = string.Join("", item.Name.Split(' ')
+                                .Take(2).Select(w => w.Length > 0 ? w[0].ToString().ToUpper() : ""));
                             <tr>
-                                <td>@i</td>
-                                <td>@item.Name</td>
+                                <td class="sl-serial">@i</td>
+                                <td>
+                                    <span class="sl-name-cell">
+                                        <span class="sl-avatar">@initials</span>
+                                        @item.Name
+                                    </span>
+                                </td>
                                 <td>@item.Mobileno</td>
                                 <td>@item.Email</td>
-                                <td>@item.StaffCode</td>
+                                <td><span class="sl-badge">@item.StaffCode</span></td>
+                                <td><span class="sl-badge">@item.Password</span></td>
                                 <td>@item.Address</td>
-                                <td>@item.Password</td>
                                 <td>@item.AadharCardNo</td>
-                                <td>@item.DOB</td>
-                                <td>@item.DOJ</td>
+                                <td>@(item.DOB != null ? ((DateTime)item.DOB).ToString("dd MMM yyyy") : "-")</td>
+                                <td>@(item.DOJ != null ? ((DateTime)item.DOJ).ToString("dd MMM yyyy") : "-")</td>
+                                <td>@(item.IsActive == true ? "Active" : "Disabled")</td>
+                                <td>
+                                    <div class="sl-action-wrap">
+                                        <a href="/Home/EditStaff/@item.Id" class="sl-btn-edit">
+                                            <i class="ti ti-edit" aria-hidden="true"></i> Edit
+                                        </a>
+                                        <button class="sl-btn-del" onclick="confirmDelete(@item.Id)">
+                                            <i class="ti ti-trash" aria-hidden="true"></i> Delete
+                                        </button>
+                                        @if (item.IsActive == false)
+                                        {
+                                            <button class="sl-btn-edit" onclick="confirmEnabled(@item.Id)">
+                                                <i class="ti ti-settings" aria-hidden="true"></i> Enabled
+                                            </button>
+                                        }
+                                       
+                                    </div>
+                                </td>
                                 
                             </tr>
                             i++;
@@ -65,146 +92,347 @@
                     else
                     {
                         <tr>
-                            <td colspan="7" class="no-data">No Staff Found</td>
+                            <td colspan="10" class="sl-no-data">
+                                <i class="ti ti-users-off" style="font-size:28px;display:block;margin-bottom:6px;opacity:0.4"></i>
+                                No staff found
+                            </td>
                         </tr>
                     }
                 </tbody>
-
             </table>
         </div>
-
     </div>
 </div>
 
-    <style>
 
-        /* CONTAINER */
-        .staff-container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px;
-            font-family: Arial;
-            background: #f8fafc;
-            min-height: 100vh;
-        }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        /* HEADER */
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-            .page-header h2 {
-                margin: 0;
-                font-size: 24px;
-                font-weight: 700;
-            }
-
-        .sub-text {
-            margin: 0;
-            font-size: 13px;
-            color: #64748b;
-        }
-
-        /* BUTTON */
-        .btn-add {
-            background: #2563eb;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-            .btn-add:hover {
-                background: #1d4ed8;
-            }
-
-        /* CARD */
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        /* TABLE */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        .staff-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 700px;
-        }
-
-            .staff-table th,
-            .staff-table td {
-                padding: 12px;
-                text-align: left;
-                border-bottom: 1px solid #e2e8f0;
-                font-size: 14px;
-            }
-
-            .staff-table th {
-                background: #f1f5f9;
-                font-weight: 600;
-            }
-
-        /* ACTION BUTTONS */
-        .btn-edit {
-            background: #10b981;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 12px;
-            margin-right: 5px;
-        }
-
-        .btn-delete {
-            background: #ef4444;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 12px;
-        }
-
-        /* NO DATA */
-        .no-data {
-            text-align: center;
-            color: #94a3b8;
-            padding: 20px;
-        }
-
-        /* MOBILE RESPONSIVE */
-        @@media (max-width: 768px) {
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .staff-table {
-                min-width: 100%;
-            }
-
-                .staff-table th,
-                .staff-table td {
-                    font-size: 12px;
-                    padding: 8px;
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Delete staff?',
+                text: 'This action cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#c0392b',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Home/DeleteStaff/' + id,
+                        type: 'DELETE',
+                        success: function (response) {
+                            if (response.status) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted!',
+                                    text: response.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Failed',
+                                    text: response.message
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Something went wrong. Please try again.'
+                            });
+                        }
+                    });
                 }
-
-            .btn-add {
-                width: 100%;
-                text-align: center;
-            }
+            });
         }
+        function confirmEnabled(id) {
+            Swal.fire({
+                title: 'Enabled staff?',
+                text: 'This action cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#c0392b',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Home/EnabledStaff/' + id,
+                        type: 'GET',
+                        success: function (response) {
+                            if (response.status) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Enabled!',
+                                    text: response.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Failed',
+                                    text: response.message
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Something went wrong. Please try again.'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    </script>
 
-    </style>
+
+<style>
+    .sl-wrap {
+    max-width: 1300px;
+    margin: auto;
+    padding: 24px 20px;
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+    min-height: 100vh;
+    }
+
+    /* HEADER */
+    .sl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    }
+
+    .sl-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    }
+
+    .sl-header h2 i {
+    font-size: 22px;
+    color: #0C447C;
+    }
+
+    .sl-sub {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #64748b;
+    }
+
+    /* ADD BUTTON */
+    .sl-btn-add {
+    background: #0C447C;
+    color: #fff;
+    padding: 9px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    }
+
+    .sl-btn-add:hover {
+    background: #0a3a6b;
+    color: #fff;
+    }
+
+    .sl-btn-add i {
+    font-size: 15px;
+    }
+
+    /* CARD */
+    .sl-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    /* TABLE */
+    .sl-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    }
+
+    .sl-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 950px;
+    }
+
+    .sl-table thead tr {
+    background: #eef4fb;
+    }
+
+    .sl-table th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: #0C447C;
+    border-bottom: 1.5px solid #cde0f2;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    }
+
+    .sl-table th i {
+    font-size: 14px;
+    vertical-align: -2px;
+    margin-right: 3px;
+    }
+
+    .sl-table td {
+    padding: 11px 14px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 0.5px solid #e9eef5;
+    vertical-align: middle;
+    }
+
+    .sl-table tbody tr:last-child td {
+    border-bottom: none;
+    }
+
+    .sl-table tbody tr:hover td {
+    background: #f7fafd;
+    }
+
+    /* SERIAL */
+    .sl-serial {
+    color: #94a3b8;
+    font-size: 12px;
+    }
+
+    /* NAME WITH AVATAR */
+    .sl-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    }
+
+    .sl-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #0C447C;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    }
+
+    /* STAFF CODE BADGE */
+    .sl-badge {
+    background: #e6f1fb;
+    color: #0C447C;
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+    }
+
+    /* ACTION BUTTONS */
+    .sl-action-wrap {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    }
+
+    .sl-btn-edit {
+    background: #e6f1fb;
+    color: #0C447C;
+    border: none;
+    padding: 5px 11px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    }
+
+    .sl-btn-edit:hover {
+    background: #cde0f5;
+    color: #0C447C;
+    }
+
+    .sl-btn-edit i {
+    font-size: 13px;
+    }
+
+    .sl-btn-del {
+    background: #fff0f0;
+    color: #c0392b;
+    border: none;
+    padding: 5px 11px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+    }
+
+    .sl-btn-del:hover {
+    background: #fde0e0;
+    }
+
+    .sl-btn-del i {
+    font-size: 13px;
+    }
+
+    /* NO DATA */
+    .sl-no-data {
+    text-align: center;
+    color: #94a3b8;
+    padding: 36px;
+    font-size: 14px;
+    }
+
+    /* MOBILE */
+    @@media (max-width: 768px) {
+    .sl-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    }
+
+    .sl-btn-add {
+    width: 100%;
+    justify-content: center;
+    }
+    }
+</style>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -514,114 +514,175 @@
 
             <!-- Navigation -->
             <nav class="sb-nav" aria-label="Main navigation">
+                @{
+                    bool isAdmin = User.IsInRole("admin") || User.IsInRole("Admin");
+                    bool isWarehouse = User.IsInRole("warehouse manager") || User.IsInRole("Warehouse Manager") || User.IsInRole("Warehouse");
+                    bool isStaff = User.IsInRole("staff") || User.IsInRole("Staff");
 
-                <div class="section-label">Main</div>
+                    // Fallback to Admin to show everything if roles are not configured
+                    if (!isAdmin && !isWarehouse && !isStaff)
+                    {
+                        isAdmin = true;
+                    }
+                }
 
-                <a href="/Home/Index">
-                    <div class="nav-item active" onclick="setActive(this)">
-                    <i class="ti ti-layout-dashboard icon"></i>
-                    <span class="nav-label">Dashboard</span>
+                @if (isWarehouse)
+                {
+                    <div class="section-label">Main</div>
+
+                    <a href="/Warehouse/Dashboard">
+                        <div class="nav-item active" onclick="setActive(this)">
+                            <i class="ti ti-layout-dashboard icon"></i>
+                            <span class="nav-label">Dashboard</span>
+                        </div>
+                    </a>
+
+                    <div class="section-label">Inventory</div>
+
+                    <div class="nav-item dropdown-toggle" id="dd5-toggle" onclick="toggleDropdown('dd5')">
+                        <i class="ti ti-package icon"></i>
+                        <span class="nav-label">Manage Stock</span>
+                        <i class="ti ti-chevron-down chevron"></i>
                     </div>
-                </a>
+                    <div class="dropdown-body" id="dd5" style="display: block;">
+                        <a href="/Warehouse/StockTransfer"><div class="sub-item" onclick="setActive(this)">Stock Transfer to Shop</div></a>
+                        <a href="/Warehouse/AllStockTransferList"><div class="sub-item" onclick="setActive(this)">All Stock Transfer List</div></a>
+                        <a href="/Warehouse/StockAdjustment"><div class="sub-item" onclick="setActive(this)">Stock Adjustment</div></a>
+                        <a href="/Warehouse/AllStockAdjustmentList"><div class="sub-item" onclick="setActive(this)">All Stock Adjustment List</div></a>
+                    </div>
+                }
+                else if (isStaff)
+                {
+                    <div class="section-label">Main</div>
 
-                <div class="nav-item" onclick="setActive(this)">
-                    <i class="ti ti-chart-bar icon"></i>
-                    <span class="nav-label">Analytics</span>
-                    <span class="nav-badge">5</span>
-                </div>
+                    <a href="/Billing/Index">
+                        <div class="nav-item active" onclick="setActive(this)">
+                            <i class="ti ti-receipt-2 icon"></i>
+                            <span class="nav-label">POS Terminal</span>
+                        </div>
+                    </a>
 
-                <!-- Dropdown: Projects -->
-                <div class="nav-item dropdown-toggle" id="dd1-toggle" onclick="toggleDropdown('dd1')">
-                    <i class="ti ti-folder icon"></i>
-                    <span class="nav-label">Master key</span>
-                    <i class="ti ti-chevron-down chevron"></i>
-                </div>
-                <div class="dropdown-body" id="dd1">
-                    <a href="/Home/AddShop"><div class="sub-item" onclick="setActive(this)">Add Shop</div></a>
-                    <a href="/Home/AddWarehouse"><div class="sub-item" onclick="setActive(this)">Add Warehouse</div></a>
-                    <a href="/Home/AddCategory"><div class="sub-item" onclick="setActive(this)">Add Category</div></a>
-                    <a href="/Home/AddUnit"><div class="sub-item" onclick="setActive(this)">Add Unit</div></a>
-                </div>
+                    <div class="section-label">Operations</div>
 
-                <!-- Dropdown: Team -->
-                <div class="nav-item dropdown-toggle" id="dd2-toggle" onclick="toggleDropdown('dd2')">
-                    <i class="ti ti-users icon"></i>
-                    <span class="nav-label">Products</span>
-                    <i class="ti ti-chevron-down chevron"></i>
-                </div>
-                <div class="dropdown-body" id="dd2">
-                    <a href="/Home/Addproduct"><div class="sub-item" onclick="setActive(this)">Add Product</div></a>
-                    <a href="/Home/ProductList"><div class="sub-item" onclick="setActive(this)">Product List</div></a>
-                    @* <a href="/Home/AddProductionUnit"><div class="sub-item" onclick="setActive(this)">Add production Unit</div></a> *@
-                    <a href="/Home/AddProduction"><div class="sub-item" onclick="setActive(this)">Add Production</div></a>
-                    <a href="/Home/ProductionList"><div class="sub-item" onclick="setActive(this)">Production List</div></a>
-                </div>
+                    <a href="/Billing/ViewStock">
+                        <div class="nav-item" onclick="setActive(this)">
+                            <i class="ti ti-packages icon"></i>
+                            <span class="nav-label">View Stock</span>
+                        </div>
+                    </a>
 
-                <div class="nav-item dropdown-toggle" id="dd3-toggle" onclick="toggleDropdown('dd3')">
-                    <i class="ti ti-users icon"></i>
-                    <span class="nav-label">Purchase Entry Master</span>
-                    <i class="ti ti-chevron-down chevron"></i>
-                </div>
-                <div class="dropdown-body" id="dd3">
-                    <a href="/Purchase/AddPurchaseProduct"><div class="sub-item" onclick="setActive(this)">Add Purchase Product</div></a>
-                    <a href="/Purchase/PurchaseProductList"><div class="sub-item" onclick="setActive(this)">Purchase Product List</div></a>
-                    @* <a href="/Home/AddProductionUnit"><div class="sub-item" onclick="setActive(this)">Add production Unit</div></a> *@
-                    <a href="/Purchase/PurchaseEntry"><div class="sub-item" onclick="setActive(this)">Purchase Entry</div></a>
-                    <a href="/Purchase/PurchaseEntryList"><div class="sub-item" onclick="setActive(this)">Purchase Entry List</div></a>
-                   
-                </div>
-                <div class="nav-item dropdown-toggle" id="dd5-toggle" onclick="toggleDropdown('dd4')">
-                    <i class="ti ti-users icon"></i>
-                    <span class="nav-label">Staff</span>
-                    <i class="ti ti-chevron-down chevron"></i>
-                </div>
-                <div class="dropdown-body" id="dd4">
-                    <a href="/Home/CreateStaff"><div class="sub-item" onclick="setActive(this)">Create Staff</div></a>
-                    <a href="/Home/StaffList"><div class="sub-item" onclick="setActive(this)">Staff List</div></a>
-                    
-                </div>
-                <div class="nav-item dropdown-toggle" id="dd5-toggle" onclick="toggleDropdown('dd5')">
-                    <i class="ti ti-users icon"></i>
-                    <span class="nav-label">Manage Stock</span>
-                    <i class="ti ti-chevron-down chevron"></i>
-                </div>
-                <div class="dropdown-body" id="dd5">
-                    <a href="/Billing/ViewStock"><div class="sub-item" onclick="setActive(this)">View Stock</div></a>
-                    <a href="/Warehouse/StockTransfer"><div class="sub-item" onclick="setActive(this)">Stock Transfer</div></a>
-                    <a href="/Warehouse/AllStockTransferList"><div class="sub-item" onclick="setActive(this)">All Stock Transfer List</div></a>
-                    <a href="/Warehouse/StockAdjustment"><div class="sub-item" onclick="setActive(this)">Stock Adjustment</div></a>
-                </div>
-                <div class="nav-item dropdown-toggle" id="dd6-toggle" onclick="toggleDropdown('dd6')">
-                    <i class="ti ti-users icon"></i>
-                    <span class="nav-label">Sale</span>
-                    <i class="ti ti-chevron-down chevron"></i>
-                </div>
-                <div class="dropdown-body" id="dd6">
-                    <a href="/Billing/ShopAllSaleList"><div class="sub-item" onclick="setActive(this)">Shop Wise SaleList</div></a>
-                   
-                </div>
+                    <a href="/Billing/ShopAllSaleList">
+                        <div class="nav-item" onclick="setActive(this)">
+                            <i class="ti ti-receipt icon"></i>
+                            <span class="nav-label">Shop Sales List</span>
+                        </div>
+                    </a>
+                }
+                else if (isAdmin)
+                {
+                    <div class="section-label">Main</div>
 
-                <div class="section-label">Manage</div>
+                    <a href="/Home/Index">
+                        <div class="nav-item active" onclick="setActive(this)">
+                        <i class="ti ti-layout-dashboard icon"></i>
+                        <span class="nav-label">Dashboard</span>
+                        </div>
+                    </a>
 
-                <div class="nav-item" onclick="setActive(this)">
-                    <i class="ti ti-file-invoice icon"></i>
-                    <span class="nav-label">Billing</span>
-                </div>
+                    <!-- Dropdown: Projects -->
+                    <div class="nav-item dropdown-toggle" id="dd1-toggle" onclick="toggleDropdown('dd1')">
+                        <i class="ti ti-folder icon"></i>
+                        <span class="nav-label">Master key</span>
+                        <i class="ti ti-chevron-down chevron"></i>
+                    </div>
+                    <div class="dropdown-body" id="dd1">
+                        <a href="/Home/AddShop"><div class="sub-item" onclick="setActive(this)">Add Shop</div></a>
+                        <a href="/Home/AddWarehouse"><div class="sub-item" onclick="setActive(this)">Add Warehouse</div></a>
+                        <a href="/Home/AddCategory"><div class="sub-item" onclick="setActive(this)">Add Category</div></a>
+                        <a href="/Home/AddUnit"><div class="sub-item" onclick="setActive(this)">Add Unit</div></a>
+                    </div>
 
-                <!-- Dropdown: Settings -->
-                <div class="nav-item dropdown-toggle" id="dd7-toggle" onclick="toggleDropdown('dd7')">
-                    <i class="ti ti-settings icon"></i>
-                    <span class="nav-label">Settings</span>
-                    <i class="ti ti-chevron-down chevron"></i>
-                </div>
-                <div class="dropdown-body" id="dd7">
-                    <a href="/Billing/PrintBilllData"><div class="sub-item" onclick="setActive(this)">Save Bill Data</div></a>
-                    <a href="/Billing/AllPrintDataContent"><div class="sub-item" onclick="setActive(this)">All Print Data Content</div></a>
-                    <div class="sub-item" onclick="setActive(this)">Notifications</div>
-                    <div class="sub-item" onclick="setActive(this)">Security</div>
-                    <div class="sub-item" onclick="setActive(this)">Integrations</div>
-                </div>
+                    <!-- Dropdown: Team -->
+                    <div class="nav-item dropdown-toggle" id="dd2-toggle" onclick="toggleDropdown('dd2')">
+                        <i class="ti ti-users icon"></i>
+                        <span class="nav-label">Products</span>
+                        <i class="ti ti-chevron-down chevron"></i>
+                    </div>
+                    <div class="dropdown-body" id="dd2">
+                        <a href="/Home/Addproduct"><div class="sub-item" onclick="setActive(this)">Add Product</div></a>
+                        <a href="/Home/ProductList"><div class="sub-item" onclick="setActive(this)">Product List</div></a>
+                        <a href="/Home/AddProduction"><div class="sub-item" onclick="setActive(this)">Add Production</div></a>
+                        <a href="/Home/ProductionList"><div class="sub-item" onclick="setActive(this)">Production List</div></a>
+                    </div>
 
+                    <div class="nav-item dropdown-toggle" id="dd3-toggle" onclick="toggleDropdown('dd3')">
+                        <i class="ti ti-users icon"></i>
+                        <span class="nav-label">Purchase Entry Master</span>
+                        <i class="ti ti-chevron-down chevron"></i>
+                    </div>
+                    <div class="dropdown-body" id="dd3">
+                        <a href="/Purchase/AddPurchaseProduct"><div class="sub-item" onclick="setActive(this)">Add Purchase Product</div></a>
+                        <a href="/Purchase/PurchaseProductList"><div class="sub-item" onclick="setActive(this)">Purchase Product List</div></a>
+                        <a href="/Purchase/PurchaseEntry"><div class="sub-item" onclick="setActive(this)">Purchase Entry</div></a>
+                        <a href="/Purchase/AllPurchaseEntryList"><div class="sub-item" onclick="setActive(this)">Purchase Entry List</div></a>
+                    </div>
+
+                    <div class="nav-item dropdown-toggle" id="dd5-toggle" onclick="toggleDropdown('dd4')">
+                        <i class="ti ti-users icon"></i>
+                        <span class="nav-label">Staff</span>
+                        <i class="ti ti-chevron-down chevron"></i>
+                    </div>
+                    <div class="dropdown-body" id="dd4">
+                        <a href="/Home/CreateStaff"><div class="sub-item" onclick="setActive(this)">Create Staff</div></a>
+                        <a href="/Home/StaffList"><div class="sub-item" onclick="setActive(this)">Staff List</div></a>
+                    </div>
+
+                    <div class="nav-item dropdown-toggle" id="dd5-toggle" onclick="toggleDropdown('dd5')">
+                        <i class="ti ti-users icon"></i>
+                        <span class="nav-label">Manage Stock</span>
+                        <i class="ti ti-chevron-down chevron"></i>
+                    </div>
+                    <div class="dropdown-body" id="dd5">
+                        <a href="/Billing/ViewStock"><div class="sub-item" onclick="setActive(this)">View Stock</div></a>
+                        <a href="/Warehouse/StockTransfer"><div class="sub-item" onclick="setActive(this)">Stock Transfer</div></a>
+                        <a href="/Warehouse/AllStockTransferList"><div class="sub-item" onclick="setActive(this)">All Stock Transfer List</div></a>
+                        <a href="/Warehouse/StockAdjustment"><div class="sub-item" onclick="setActive(this)">Stock Adjustment</div></a>
+                        <a href="/Warehouse/AllStockAdjustmentList"><div class="sub-item" onclick="setActive(this)">All Stock Adjustment List</div></a>
+                    </div>
+
+                    <div class="nav-item dropdown-toggle" id="dd6-toggle" onclick="toggleDropdown('dd6')">
+                        <i class="ti ti-users icon"></i>
+                        <span class="nav-label">Sale</span>
+                        <i class="ti ti-chevron-down chevron"></i>
+                    </div>
+                    <div class="dropdown-body" id="dd6">
+                        <a href="/Billing/ShopAllSaleList"><div class="sub-item" onclick="setActive(this)">Shop Wise SaleList</div></a>
+                        <a href="/Home/BulkOrders"><div class="sub-item" onclick="setActive(this)">Bulk Orders</div></a>
+                    </div>
+
+                    <div class="section-label">Manage</div>
+
+                    <a href="/Reports/Index">
+                        <div class="nav-item" onclick="setActive(this)">
+                            <i class="ti ti-file-invoice icon"></i>
+                            <span class="nav-label">Reports</span>
+                        </div>
+                    </a>
+
+                    <!-- Dropdown: Settings -->
+                    <div class="nav-item dropdown-toggle" id="dd7-toggle" onclick="toggleDropdown('dd7')">
+                        <i class="ti ti-settings icon"></i>
+                        <span class="nav-label">Settings</span>
+                        <i class="ti ti-chevron-down chevron"></i>
+                    </div>
+                    <div class="dropdown-body" id="dd7">
+                        <a href="/Billing/PrintBilllData"><div class="sub-item" onclick="setActive(this)">Save Bill Data</div></a>
+                        <a href="/Billing/AllPrintDataContent"><div class="sub-item" onclick="setActive(this)">All Print Data Content</div></a>
+                        <div class="sub-item" onclick="setActive(this)">Notifications</div>
+                        <div class="sub-item" onclick="setActive(this)">Security</div>
+                        <div class="sub-item" onclick="setActive(this)">Integrations</div>
+                    </div>
+                }
             </nav>
 
             <!-- Footer links -->

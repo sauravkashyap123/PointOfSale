@@ -1,4 +1,4 @@
-﻿@model POSModels.Models.MithaiShop.Product
+@model POSModels.Models.MithaiShop.Product
 
 @{
     ViewData["Title"] = "Product List";
@@ -678,7 +678,7 @@
                 <p class="pl-subtitle">Manage all products</p>
             </div>
         </div>
-        <a href="/Product/Add" class="btn-add-prod">
+        <a href="/Home/AddProduct" class="btn-add-prod">
             <i class="ti ti-plus"></i> Add Product
         </a>
     </div>
@@ -756,8 +756,13 @@
                         foreach (var item in Model.productList)
                         {
                             <tr>
-                                <td><span class="sno-badge">@i</span></td>
-                                <td><span class="code-pill">@item.ProductCode</span></td>
+                                <td><span class="sno-badge">@(i++)</span></td>
+                                <td>
+                                    <span class="code-pill">@item.ProductCode</span>
+                                    <div style="margin-top: 4px;">
+                                        <svg class="barcode" jsbarcode-value="@item.ProductCode" jsbarcode-textmargin="0" jsbarcode-height="25" jsbarcode-width="1.1" jsbarcode-displayValue="false"></svg>
+                                    </div>
+                                </td>
                                 <td>
                                     @if (!string.IsNullOrEmpty(item.ImageUrl))
                                     {
@@ -796,7 +801,7 @@
                                     </a>
                                 </td>
                             </tr>
-                            @(i++)
+                           
                         }
                     }
                     else
@@ -832,6 +837,9 @@
                             <div class="pm-info">
                                 <div class="pm-name">@item.ProductName</div>
                                 <div class="pm-code">@item.ProductCode</div>
+                                <div style="margin-top: 4px;">
+                                    <svg class="barcode-mobile" jsbarcode-value="@item.ProductCode" jsbarcode-textmargin="0" jsbarcode-height="20" jsbarcode-width="1.0" jsbarcode-displayValue="false"></svg>
+                                </div>
                                 <div class="pm-cat">@item.CategoryName &bull; @item.UnitName</div>
                             </div>
                             <div class="pm-rate-wrap">
@@ -875,10 +883,10 @@
                             </div>
 
                             <div class="pm-actions">
-                                <a href="/Product/AddProduct/@item.Id" class="pm-btn-edit">
+                                <a href="/Home/AddProduct/@item.Id" class="pm-btn-edit">
                                     <i class="ti ti-edit" style="font-size:15px"></i> Edit
                                 </a>
-                                <a href="/Product/Delete/@item.Id"
+                                <a href="/Home/Delete/@item.Id"
                                    class="pm-btn-del"
                                    onclick="return confirm('Delete this product?')">
                                     <i class="ti ti-trash" style="font-size:15px"></i> Delete
@@ -904,12 +912,28 @@
 <!-- JS -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
 <script>
     var dt = $('#productTable').DataTable({
     paging: true, searching: true,
     ordering: true, pageLength: 10,
     order: [[1, 'asc']]
+    });
+
+    // Draw barcodes on page load and table redrawing
+    function renderBarcodes() {
+        try {
+            JsBarcode(".barcode").init();
+            JsBarcode(".barcode-mobile").init();
+        } catch(e) {
+            console.error("Barcode generation error: ", e);
+        }
+    }
+
+    renderBarcodes();
+    dt.on('draw', function () {
+        renderBarcodes();
     });
 
     document.getElementById('liveSearch').addEventListener('input', function () {

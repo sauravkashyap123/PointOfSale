@@ -1,0 +1,194 @@
+﻿@model List<POSModels.Models.PurchaseEntry.RawPurchaseModel>
+
+@{
+    ViewData["Title"] = "Purchase List";
+    Layout = "/Views/Shared/_SideLayout.cshtml";
+}
+
+<div class="pl-wrap">
+
+    <!-- HEADER -->
+    <div class="pl-header">
+        <div>
+            <div class="pl-breadcrumb">Purchases &rsaquo; <span>All Entries</span></div>
+            <h2 class="pl-title">
+                <i class="ti ti-shopping-cart" aria-hidden="true"></i>
+                Purchase list
+            </h2>
+        </div>
+        <a href="@Url.Action("PurchaseEntry", "Home")" class="pl-btn-add">
+            <i class="ti ti-plus" aria-hidden="true"></i> New purchase
+        </a>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="pl-stats">
+        <div class="pl-stat-card">
+            <div class="pl-stat-icon blue">
+                <i class="ti ti-file-invoice" aria-hidden="true"></i>
+            </div>
+            <div>
+                <div class="pl-stat-val">@Model.Count</div>
+                <div class="pl-stat-label">Total entries</div>
+            </div>
+        </div>
+        <div class="pl-stat-card">
+            <div class="pl-stat-icon green">
+                <i class="ti ti-currency-rupee" aria-hidden="true"></i>
+            </div>
+            <div>
+                <div class="pl-stat-val">₹ @Model.Sum(x => x.TotalAmount)</div>
+                <div class="pl-stat-label">Total value</div>
+            </div>
+        </div>
+        <div class="pl-stat-card">
+            <div class="pl-stat-icon amber">
+                <i class="ti ti-packages" aria-hidden="true"></i>
+            </div>
+            <div>
+                <div class="pl-stat-val">@Model.Sum(x => x.ItemCount)</div>
+                <div class="pl-stat-label">Total items</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DESKTOP TABLE -->
+    <div class="pl-card desktop-view">
+        <div class="pl-table-wrap">
+            <table class="pl-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th><i class="ti ti-file-invoice" aria-hidden="true"></i> Purchase no.</th>
+                        <th><i class="ti ti-calendar" aria-hidden="true"></i> Date</th>
+                        <th><i class="ti ti-packages" aria-hidden="true"></i> Items</th>
+                        <th><i class="ti ti-currency-rupee" aria-hidden="true"></i> Grand total</th>
+                        <th><i class="ti ti-note" aria-hidden="true"></i> Remarks</th>
+                        <th><i class="ti ti-clock" aria-hidden="true"></i> Created on</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        int i = 1;
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="pl-serial">@i</td>
+                                <td><span class="pl-badge">@item.PurchaseNo</span></td>
+                                <td>@item.PurchaseDate</td>
+                                <td>
+                                    <span class="pl-item-count">
+                                        <i class="ti ti-box" aria-hidden="true"></i> @item.ItemCount
+                                    </span>
+                                </td>
+                                <td class="pl-amount">₹ @item.TotalAmount</td>
+                                <td class="pl-remarks">@item.Remarks</td>
+                                <td class="pl-date-muted">@item.CreatedDate</td>
+                                <td>
+                                    <div class="pl-actions">
+                                        <button class="pl-btn-view btn-toggle-detail" data-id="@item.Id">
+                                            <i class="ti ti-eye" aria-hidden="true"></i> View
+                                        </button>
+                                        <button class="pl-btn-del" onclick="confirmDelete(@item.Id)">
+                                            <i class="ti ti-trash" aria-hidden="true"></i> Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- DETAIL PANEL ROW -->
+                            <tr class="detail-row" id="detail-row-@item.Id" style="display:none;">
+                                <td colspan="8" class="detail-td">
+                                    <div class="detail-panel" id="detail-panel-@item.Id">
+                                        <div class="detail-loading">
+                                            <i class="ti ti-loader-2 spin" aria-hidden="true"></i> Loading...
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="pl-no-data">
+                                <i class="ti ti-shopping-cart-off" aria-hidden="true"></i>
+                                <div>No purchases found</div>
+                                <a href="@Url.Action("PurchaseEntry", "Purchase")" class="pl-btn-add" style="margin-top:12px;font-size:12px;padding:7px 14px;">
+                                    + New purchase
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MOBILE CARDS -->
+    <div class="mobile-view">
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var item in Model)
+            {
+                <div class="mob-card">
+                    <div class="mob-card-top">
+                        <span class="pl-badge">@item.PurchaseNo</span>
+                        <span class="mob-amount">₹ @item.TotalAmount</span>
+                    </div>
+                    <div class="mob-card-body">
+                        <div class="mob-row">
+                            <span class="mob-label"><i class="ti ti-calendar" aria-hidden="true"></i> Date</span>
+                            <span class="mob-val">@item.PurchaseDate</span>
+                        </div>
+                        <div class="mob-row">
+                            <span class="mob-label"><i class="ti ti-packages" aria-hidden="true"></i> Items</span>
+                            <span class="mob-val">@item.ItemCount items</span>
+                        </div>
+                        <div class="mob-row">
+                            <span class="mob-label"><i class="ti ti-note" aria-hidden="true"></i> Remarks</span>
+                            <span class="mob-val">@item.Remarks</span>
+                        </div>
+                        <div class="mob-row">
+                            <span class="mob-label"><i class="ti ti-clock" aria-hidden="true"></i> Created</span>
+                            <span class="mob-val">@item.CreatedDate</span>
+                        </div>
+                    </div>
+                    <div class="mob-card-footer">
+                        <button class="pl-btn-view btn-toggle-detail" data-id="@item.Id">
+                            <i class="ti ti-eye" aria-hidden="true"></i> View
+                        </button>
+                        <button class="pl-btn-del" onclick="confirmDelete(@item.Id)">
+                            <i class="ti ti-trash" aria-hidden="true"></i> Delete
+                        </button>
+                    </div>
+
+                    <!-- MOBILE DETAIL PANEL -->
+                    <div class="mob-detail-wrap" id="mob-detail-@item.Id" style="display:none;">
+                        <div class="detail-panel" id="mob-detail-panel-@item.Id">
+                            <div class="detail-loading">
+                                <i class="ti ti-loader-2 spin" aria-hidden="true"></i> Loading...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="pl-no-data" style="background:#fff;border-radius:12px;padding:40px 20px;">
+                <i class="ti ti-shopping-cart-off" aria-hidden="true"></i>
+                <div>No purchases found</div>
+            </div>
+        }
+    </div>
+
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="~/css/purchaseentrydetails.css" rel="stylesheet" />
+<script src="~/js/purchaseentrydetails.js"></script>

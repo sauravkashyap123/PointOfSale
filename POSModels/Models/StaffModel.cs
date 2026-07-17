@@ -22,5 +22,6 @@ namespace POSModels.Models
         public string StaffCode { get; set; }
         public string? Email { get; set; }
         public List<SelectListItem>? selectedshoplist { get; set; }
+        public bool IsActive { get; set; } = false;
     }
 }

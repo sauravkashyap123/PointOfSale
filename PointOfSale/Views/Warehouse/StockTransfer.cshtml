@@ -7,6 +7,16 @@
 
 
 <link href="~/css/stocktransfer.css" rel="stylesheet" />
+<style>
+    .product-img-placeholder {
+        width: 100%;
+        height: 80px;
+        background: #f3f4f6;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+</style>
 
 <div class="pos-page">
 
@@ -96,7 +106,14 @@
                                 <img src="@item.ImageUrl"
                                      class="product-img"
                                      alt="@item.ProductName"
-                                     onerror="this.src='/images/no-image.png'" />
+                                     onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                <div class="product-img-placeholder" style="display:none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none"
+                                         viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
+                                    </svg>
+                                </div>
 
                                 <div class="product-info">
                                     <h6>@item.ProductName</h6>
@@ -203,278 +220,278 @@
      ============================================================ -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // ============================================================
-    //  stocktransfer.js  –  MithaiShop POS · Stock Transfer
-    // ============================================================
+// ============================================================
+//  stocktransfer.js  –  MithaiShop POS · Stock Transfer
+// ============================================================
 
-    // Track added items: key = "productId_shopId"
-    var transferItems = {};
-    var rowCounter    = 0;
+var transferItems = {};
+var rowCounter    = 0;
 
-    // ── PRODUCT SEARCH FILTER ────────────────────────────────────
-    function filterProducts() {
+// ── PRODUCT SEARCH FILTER ────────────────────────────────────
+function filterProducts() {
     var q = $.trim($("#productSearch").val()).toLowerCase();
     $(".product-item").each(function () {
-    var name = $(this).data("name") || "";
-    var code = $(this).data("code") || "";
-    $(this).toggle(name.includes(q) || code.includes(q));
+        var name = $(this).data("name") || "";
+        var code = $(this).data("code") || "";
+        $(this).toggle(name.includes(q) || code.includes(q));
     });
-    }
+}
 
-    // ── ENTER KEY ON QTY INPUT ───────────────────────────────────
-    function handleQtyEnter(event, productId, productName) {
+// ── ENTER KEY ON QTY INPUT ───────────────────────────────────
+function handleQtyEnter(event, productId, productName) {
     if (event.key === "Enter") {
-    event.preventDefault();
-    addItem(productId, productName);
+        event.preventDefault();
+        addItem(productId, productName);
     }
-    }
+}
 
-    // ── ADD ITEM TO TABLE ────────────────────────────────────────
-    function addItem(productId, productName) {
+// ── ADD ITEM TO TABLE ────────────────────────────────────────
+function addItem(productId, productName) {
     var shopId   = $("#ShopId").val();
     var shopText = $.trim($("#ShopId option:selected").text());
     var qty      = parseInt($.trim($("#qty-" + productId).val()));
     var key      = productId + "_" + shopId;
 
-    // Validations
     if (!shopId) {
-    showToast("Please select a shop first.", "error");
-    $("#ShopId").focus();
-    return;
+        showToast("Please select a shop first.", "error");
+        $("#ShopId").focus();
+        return;
     }
     if (!qty || qty < 1) {
-    showToast("Enter a valid quantity for \"" + productName + "\".", "error");
-    $("#qty-" + productId).focus();
-    return;
+        showToast("Enter a valid quantity for \"" + productName + "\".", "error");
+        $("#qty-" + productId).focus();
+        return;
     }
 
-    // Duplicate check — same product + same shop already in table
+    // Duplicate — update qty
     if (transferItems[key]) {
-    // Update existing row quantity instead of adding new row
-    var existingRowId = transferItems[key];
-    var existingQty   = parseInt($("#row-qty-" + existingRowId).text()) || 0;
-    var newQty        = existingQty + qty;
-
-    $("#row-qty-" + existingRowId).text(newQty);
-    $("#row-qty-hidden-" + existingRowId).val(newQty);
-
-    showToast("Quantity updated for \"" + productName + "\" → " + newQty, "success");
-    flashCard(productId);
-    $("#qty-" + productId).val("");
-    return;
+        var existingRowId = transferItems[key];
+        var existingQty   = parseInt($("#row-qty-" + existingRowId).text()) || 0;
+        var newQty        = existingQty + qty;
+        $("#row-qty-" + existingRowId).text(newQty);
+        $("#row-qty-hidden-" + existingRowId).val(newQty);
+        showToast("Quantity updated for \"" + productName + "\" → " + newQty, "success");
+        flashCard(productId);
+        $("#qty-" + productId).val("");
+        return;
     }
 
-    // Remove empty row
     $("#emptyRow").remove();
-
     rowCounter++;
     var rowId = rowCounter;
     transferItems[key] = rowId;
 
     var row = `
-    <tr id="tr-${rowId}">
-    <td class="cell-num">${Object.keys(transferItems).length}</td>
-    <td>
-    <span class="cell-name">${escHtml(productName)}</span>
-    <input type="hidden" name="ProductId" value="${productId}" />
-    </td>
-    <td>
-    <span class="cell-code">${escHtml(shopText)}</span>
-    <input type="hidden" name="ShopId" value="${shopId}" />
-    </td>
-    <td>
-    <span id="row-qty-${rowId}" class="qty-badge">${qty}</span>
-    <input type="hidden" id="row-qty-hidden-${rowId}" name="Quantity" value="${qty}" />
-    </td>
-    <td>
-    <button type="button" class="btn-tbl-delete"
-    onclick="removeRow(${rowId}, '${productId}_${shopId}')">
-    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none"
-    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-    <path stroke-linecap="round" stroke-linejoin="round"
-    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
-    a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6
-    m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-    </svg>
-    Remove
-    </button>
-    </td>
-    </tr>`;
+        <tr id="tr-${rowId}">
+            <td class="cell-num">${Object.keys(transferItems).length}</td>
+            <td>
+                <span class="cell-name">${escHtml(productName)}</span>
+                <input type="hidden" name="ProductId" value="${productId}" />
+            </td>
+            <td>
+                <span class="cell-code">${escHtml(shopText)}</span>
+                <input type="hidden" name="ShopId" value="${shopId}" />
+            </td>
+            <td>
+                <span id="row-qty-${rowId}" class="qty-badge">${qty}</span>
+                <input type="hidden" id="row-qty-hidden-${rowId}" name="Quantity" value="${qty}" />
+            </td>
+            <td>
+                <button type="button" class="btn-tbl-delete"
+                        onclick="removeRow(${rowId}, '${productId}_${shopId}')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862
+                                 a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6
+                                 m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Remove
+                </button>
+            </td>
+        </tr>`;
 
     $("#transferTable").append(row);
     updateBadge();
     flashCard(productId);
-
     $("#qty-" + productId).val("");
     showToast("\"" + productName + "\" added to transfer list.", "success");
-    }
+}
 
-    // ── REMOVE ROW ───────────────────────────────────────────────
-    function removeRow(rowId, key) {
+// ── REMOVE ROW ───────────────────────────────────────────────
+function removeRow(rowId, key) {
     $("#tr-" + rowId).remove();
     delete transferItems[key];
 
-    // Re-number serial column
     $("#transferTable tr").not("#emptyRow").each(function (i) {
-    $(this).find(".cell-num").text(i + 1);
+        $(this).find(".cell-num").text(i + 1);
     });
 
     updateBadge();
 
     if ($("#transferTable tr").length === 0) {
-    showEmptyRow();
+        showEmptyRow();
     }
-    }
+}
 
-    // ── CLEAR ALL ────────────────────────────────────────────────
-    function clearAll() {
+// ── CLEAR ALL ────────────────────────────────────────────────
+function clearAll() {
     if (Object.keys(transferItems).length === 0) return;
 
     Swal.fire({
-    icon:              "warning",
-    title:             "Clear all items?",
-    text:              "All added transfer items will be removed.",
-    showCancelButton:  true,
-    confirmButtonText: "Yes, clear",
-    cancelButtonText:  "Cancel",
-    confirmButtonColor: "#e74c3c",
-    cancelButtonColor:  "#0C447C"
+        icon:               "warning",
+        title:              "Clear all items?",
+        text:               "All added transfer items will be removed.",
+        showCancelButton:   true,
+        confirmButtonText:  "Yes, clear",
+        cancelButtonText:   "Cancel",
+        confirmButtonColor: "#e74c3c",
+        cancelButtonColor:  "#0C447C"
     }).then(function (result) {
-    if (result.isConfirmed) {
-    transferItems = {};
-    rowCounter    = 0;
-    $("#transferTable").empty();
-    showEmptyRow();
-    updateBadge();
-    }
+        if (result.isConfirmed) {
+            transferItems = {};
+            rowCounter    = 0;
+            $("#transferTable").empty();
+            showEmptyRow();
+            updateBadge();
+        }
     });
-    }
+}
 
-    // ── SAVE TRANSFER ────────────────────────────────────────────
-    function saveTransfer() {
+// ── SAVE TRANSFER ────────────────────────────────────────────
+function saveTransfer() {
     var rows = $("#transferTable tr").not("#emptyRow");
 
     if (rows.length === 0) {
-    showToast("Add at least one item before saving.", "error");
-    return;
+        showToast("Add at least one item before saving.", "error");
+        return;
     }
 
-    // Build payload
     var items = [];
     rows.each(function () {
-    items.push({
-    productId: $(this).find("input[name='ProductId']").val(),
-    shopId:    $(this).find("input[name='ShopId']").val(),
-    quantity:  parseInt($(this).find("input[name='Quantity']").val())
-    });
+        items.push({
+            productId: $(this).find("input[name='ProductId']").val(),
+            shopId:    $(this).find("input[name='ShopId']").val(),
+            quantity:  parseInt($(this).find("input[name='Quantity']").val())
+        });
     });
 
-    // Validate: all quantities must be > 0
     var invalid = items.some(function (x) { return !x.quantity || x.quantity < 1; });
     if (invalid) {
-    showToast("One or more items have invalid quantity.", "error");
-    return;
+        showToast("One or more items have invalid quantity.", "error");
+        return;
     }
 
-    $("#btnSaveTransfer").prop("disabled", true);
-    $("#btnSaveText").text("Saving…");
-
-    $.ajax({
-    url:         "/Home/StockTransfer",
-    type:        "POST",
-    contentType: "application/json",
-    data:        JSON.stringify(items),
-
-    success: function (res) {
-    if (res.status === true) {
     Swal.fire({
-    icon:              "success",
-    title:             "Transfer Saved!",
-    text:              res.message || "Stock transferred successfully.",
-    confirmButtonColor: "#0C447C",
-    timer:             2500,
-    timerProgressBar:  true
-    });
-    // Reset table
-    transferItems = {};
-    rowCounter    = 0;
-    $("#transferTable").empty();
-    showEmptyRow();
-    updateBadge();
-    } else {
-    Swal.fire({
-    icon:               "error",
-    title:              "Transfer Failed",
-    text:               res.message || "Something went wrong.",
-    confirmButtonColor: "#0C447C"
-    });
-    }
-    },
+        title:              "Transfer Save karo?",
+        text:               "Kya aap yeh stock transfer save karna chahte hain?",
+        icon:               "question",
+        showCancelButton:   true,
+        confirmButtonColor: "#0C447C",
+        cancelButtonColor:  "#6c757d",
+        confirmButtonText:  "Haan, Save karo",
+        cancelButtonText:   "Cancel"
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            $("#btnSaveTransfer").prop("disabled", true);
+            $("#btnSaveText").text("Saving…");
 
-    error: function () {
-    Swal.fire({
-    icon:               "error",
-    title:              "Server Error",
-    text:               "Could not connect to server. Please try again.",
-    confirmButtonColor: "#0C447C"
-    });
-    },
+            $.ajax({
+                url:         "/Warehouse/StockTransfer",
+                type:        "POST",
+                contentType: "application/json",
+                data:        JSON.stringify(items),
 
-    complete: function () {
-    $("#btnSaveTransfer").prop("disabled", false);
-    $("#btnSaveText").text("Save Transfer");
-    }
-    });
-    }
+                success: function (res) {
+                    if (res.status === true) {
+                        Swal.fire({
+                            icon:               "success",
+                            title:              "Transfer Saved!",
+                            text:               res.message || "Stock transferred successfully.",
+                            confirmButtonColor: "#0C447C",
+                            timer:              2500,
+                            timerProgressBar:   true
+                        });
+                        transferItems = {};
+                        rowCounter    = 0;
+                        $("#transferTable").empty();
+                        showEmptyRow();
+                        updateBadge();
+                    } else {
+                        Swal.fire({
+                            icon:               "error",
+                            title:              "Transfer Failed",
+                            text:               res.message || "Something went wrong.",
+                            confirmButtonColor: "#0C447C"
+                        });
+                    }
+                },
 
-    // ── HELPERS ──────────────────────────────────────────────────
-    function showEmptyRow() {
+                error: function () {
+                    Swal.fire({
+                        icon:               "error",
+                        title:              "Server Error",
+                        text:               "Could not connect to server. Please try again.",
+                        confirmButtonColor: "#0C447C"
+                    });
+                },
+
+                complete: function () {
+                    $("#btnSaveTransfer").prop("disabled", false);
+                    $("#btnSaveText").text("Save Transfer");
+                }
+            });
+        }
+    });
+}
+
+// ── HELPERS ──────────────────────────────────────────────────
+function showEmptyRow() {
     $("#transferTable").html(
-    '<tr id="emptyRow"><td colspan="5">' +
-    '<div class="empty-state">' +
-    '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" ' +
-    'viewBox="0 0 24 24" stroke="#d1d5db" stroke-width="1.5">' +
-    '<path stroke-linecap="round" stroke-linejoin="round" ' +
-    'd="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>' +
-    '</svg><p>No items added yet. Select products above.</p>' +
-    '</div></td></tr>'
+        '<tr id="emptyRow"><td colspan="5">' +
+        '<div class="empty-state">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" ' +
+        'viewBox="0 0 24 24" stroke="#d1d5db" stroke-width="1.5">' +
+        '<path stroke-linecap="round" stroke-linejoin="round" ' +
+        'd="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>' +
+        '</svg><p>No items added yet. Select products above.</p>' +
+        '</div></td></tr>'
     );
-    }
+}
 
-    function updateBadge() {
+function updateBadge() {
     var count = Object.keys(transferItems).length;
     $("#itemCountBadge").text(count + " item" + (count !== 1 ? "s" : ""));
-    }
+}
 
-    function flashCard(productId) {
+function flashCard(productId) {
     var card = $("#pc-" + productId);
     card.addClass("selected");
     setTimeout(function () { card.removeClass("selected"); }, 1000);
-    }
+}
 
-    function showToast(msg, type) {
+function showToast(msg, type) {
     type     = type || "success";
     var icon = type === "success" ? "✓" : "✕";
     var el   = $('<div class="shop-toast ' + type + '">' + icon + " " + msg + "</div>");
     if (!$("#toastWrap").length) {
-    $("body").append('<div class="toast-wrap" id="toastWrap"></div>');
+        $("body").append('<div class="toast-wrap" id="toastWrap"></div>');
     }
     $("#toastWrap").append(el);
     setTimeout(function () {
-    el.fadeOut(300, function () { el.remove(); });
+        el.fadeOut(300, function () { el.remove(); });
     }, 3000);
-    }
+}
 
-    function escHtml(str) {
+function escHtml(str) {
     if (!str && str !== 0) return "";
     return String(str)
-    .replace(/&/g,  "&amp;")
-    .replace(/</g,  "&lt;")
-    .replace(/>/g,  "&gt;")
-    .replace(/"/g,  "&quot;")
-    .replace(/'/g,  "&#039;");
-    }
-
+        .replace(/&/g,  "&amp;")
+        .replace(/</g,  "&lt;")
+        .replace(/>/g,  "&gt;")
+        .replace(/"/g,  "&quot;")
+        .replace(/'/g,  "&#039;");
+}
 </script>

@@ -21,5 +21,6 @@ namespace POSDb.EntityModels
         public string StaffCode { get; set; }
         public string? Emailid { get; set; }
         public int Shopid { get; set; }
+        public bool IsActive { get; set; } = false;
     }
 }

@@ -24,7 +24,7 @@ namespace POSModels.ViewModels
         {
 			try
 			{
-                var ab = _context.tblwarehouse.Select(x => new SelectListItem
+                var ab = _context.tblwarehouse.Where(x=>x.IsActive==true).Select(x => new SelectListItem
                 {
                     Text=x.WarehouseName,
                     Value=x.Id.ToString(),
@@ -41,7 +41,7 @@ namespace POSModels.ViewModels
         {
 			try
 			{
-                var ab = _context.tblUnit.Select(x => new SelectListItem
+                var ab = _context.tblUnit.Where(x => x.IsActive == true).Select(x => new SelectListItem
                 {
                     Text=x.ShortName+" ( "+x.UnitName+" )",
                     Value=x.Id.ToString(),
@@ -58,7 +58,7 @@ namespace POSModels.ViewModels
         {
 			try
 			{
-                var ab = _context.tblCategory.Select(x => new SelectListItem
+                var ab = _context.tblCategory.Where(f=>f.IsActive==true).Select(x => new SelectListItem
                 {
                     Text=x.CategoryName+" ( Code= "+x.CategoryCode+" )",
                     Value=x.Id.ToString(),
@@ -75,7 +75,7 @@ namespace POSModels.ViewModels
         {
 			try
 			{
-                var ab = _context.tblpurchaseproduct.Select(x => new SelectListItem
+                var ab = _context.tblpurchaseproduct.Where(x=>x.IsActive==true).Select(x => new SelectListItem
                 {
                     Text=x.ProductName+" ( Code= "+x.PurchaseProductCode+" )",
                     Value=x.Id.ToString(),
@@ -93,11 +93,11 @@ namespace POSModels.ViewModels
         {
             try
             {
-                var ab = (from d in _context.tblShop
+                var ab = (from d in _context.tblShop where d.IActive == true
                           select new SelectListItem
                           {
-                              Text=d.ShopName,
-                              Value=d.Id.ToString(),    
+                              Text = d.ShopName,
+                              Value = d.Id.ToString(),
                           }).ToList();
                 return ab;
             }
@@ -112,7 +112,7 @@ namespace POSModels.ViewModels
         {
             try
             {
-                var ab = (from d in _context.tblProduct
+                var ab = (from d in _context.tblProduct where d.IsActive == true
                           select new SelectListItem
                           {
                               Text = d.ProductName+" ("+d.ProductCode+")",

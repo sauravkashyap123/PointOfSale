@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using POSModels.Models;
@@ -22,6 +22,14 @@ namespace PointOfSale.Controllers
         public async Task<IActionResult> Login([FromBody] LoginModel lm)
         {
             AllResponseMessage resp =await _loginview.AllUserLogin(lm);
+            if (resp.Extra.TryGetValue(4, out var extraItem))
+            {
+                ViewBag.Role = extraItem;
+            }
+            else
+            {
+                ViewBag.Role = "DefaultRole"; // Or handle the missing key as needed
+            }
             return Ok(new {result=resp.Result,message=resp.Message, redirect=resp.redirect});
         }
 

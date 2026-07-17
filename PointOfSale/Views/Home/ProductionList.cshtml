@@ -528,7 +528,7 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td><span class="sno-badge">@i</span></td>
+                                <td><span class="sno-badge">@(i++)</span></td>
                                 <td><span class="prod-no">@item.ProductionNo</span></td>
                                 <td>@item.ProductionDate.ToString("dd-MM-yyyy")</td>
                                 <td style="font-weight:600">@item.ProductName</td>
@@ -540,7 +540,7 @@
                                 <td>@item.ExpiryDate.ToString("dd-MM-yyyy")</td>
                                 <td style="color:#888780">@item.Remarks</td>
                             </tr>
-                            @(i++)
+                             @* @(i++)  *@
                         }
                     }
                     else
@@ -566,7 +566,7 @@
                     <div class="mob-card">
                         <div class="mob-card-head" onclick="this.closest('.mob-card').classList.toggle('open')">
                             <div class="mob-card-head-left">
-                                <div class="mob-card-sno">@j</div>
+                                 <div class="mob-card-sno">@j</div> 
                                 <div>
                                     <div class="mob-card-name">@item.ProductName</div>
                                     <div class="mob-card-no">@item.ProductionNo &bull; @item.ProductionDate.ToString("dd-MM-yyyy")</div>
@@ -584,7 +584,7 @@
                             <div class="mob-row"><span class="mob-lbl">Remarks</span><span class="mob-val">@item.Remarks</span></div>
                         </div>
                     </div>
-                    @(j++)
+                     @(j++) 
                 }
             }
         </div>

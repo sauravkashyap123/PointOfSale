@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Stock Transfer List";
     Layout = "~/Views/Shared/_SideLayout.cshtml";
 }
@@ -214,9 +214,19 @@
                 box-shadow: 0 0 0 3px rgba(26,26,24,0.08);
             }
 
+    .st-table-scroll {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid #e2e0d8;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+
     /* Table */
     table#tblTransfer {
         width: 100% !important;
+        min-width: 920px; /* table ka natural width lock — isse neeche squeeze nahi hoga, scroll hoga */
         border-collapse: collapse;
     }
 
@@ -438,21 +448,23 @@
                 </div>
             </div>
 
-            <table id="tblTransfer" class="w-100" aria-label="Stock Transfer Records">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Warehouse</th>
-                        <th>Shop</th>
-                        <th>Product</th>
-                        <th>Category</th>
-                        <th>Unit</th>
-                        <th>Qty</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-            </table>
+            <div class="st-table-scroll">
+                <table id="tblTransfer" class="w-100" aria-label="Stock Transfer Records">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Warehouse</th>
+                            <th>Shop</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Unit</th>
+                            <th>Qty</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
 
         </div>
     </div>

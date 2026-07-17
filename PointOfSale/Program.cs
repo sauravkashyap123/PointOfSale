@@ -39,6 +39,7 @@ builder.Services.AddScoped<IHomeService, HomeViewModel>();
 builder.Services.AddScoped<ISelectItemService, SelectViewModel>();
 builder.Services.AddScoped<IPurchaseService, PurchaseViewModel>();
 builder.Services.AddScoped<IBillingService, BillingService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 

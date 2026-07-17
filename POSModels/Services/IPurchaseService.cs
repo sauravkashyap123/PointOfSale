@@ -10,8 +10,11 @@ namespace POSModels.Services
 {
     public interface IPurchaseService
     {
+        public List<RawPurchaseDetailModel> GetAllPurchaseEntryDetailList(int id);
+        public List<RawPurchaseModel> GetAllPurchaseEntryList();
         public Task<dynamic> GetAllPurchaseProductList();
         public PurchaseProductModel GetPurchaseProductDetail(int id);
+        public AllResponseMessage SavePurchaseEntry(RawPurchaseModel model);
         public Task<AllResponseMessage> SavePurchaseProduct(PurchaseProductModel ppm);
     }
 }

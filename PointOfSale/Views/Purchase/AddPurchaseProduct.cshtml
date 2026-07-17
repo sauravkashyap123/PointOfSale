@@ -455,12 +455,14 @@
 
             const result = await response.json();
 
-            if (result.result) {
+            if (result.status) {
                 showToast('success', '✅ Purchase product saved successfully!');
-                setTimeout(() => {
-                    window.location.href = '/Purchase/Index';
-                }, 1500);
-            } else {
+                clearForm();
+                // setTimeout(() => {
+                //     window.location.href = '/Purchase/Index';
+                // }, 1500);
+            } 
+            else {
                 showToast('error', '❌ ' + result.message);
                 saveBtn.disabled = false;
                 saveBtn.innerHTML = originalText;
@@ -504,5 +506,16 @@
             toast.style.transition = 'opacity 0.3s ease';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
+    }
+    function clearForm() {
+        document.getElementById("purchaseProductForm").reset();
+
+        // Hidden Id bhi clear kar do
+        document.getElementById("Id").value = "";
+
+        // Validation messages hata do
+        document.querySelectorAll(".text-danger").forEach(function (el) {
+            el.innerHTML = "";
+        });
     }
 </script>

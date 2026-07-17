@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using POSDb.Data;
 using POSModels.Models.MithaiShop;
+using POSModels.Models.WarehouseStockTransfer;
 using POSModels.Services;
 using System.Data;
 
@@ -15,11 +18,17 @@ namespace PointOfSale.Controllers
         private readonly ISelectItemService _selectItemService;
         private readonly IHomeService _homeservice;
         private readonly IBillingService _billingservice;
-        public WarehouseController(ISelectItemService selectItemService, IHomeService service, IBillingService billingService)
+        private readonly ApplicationDbContext _context;
+        public WarehouseController(ISelectItemService selectItemService, IHomeService service, IBillingService billingService, ApplicationDbContext context)
         {
             _selectItemService = selectItemService;
             _homeservice = service;
             _billingservice = billingService;
+            _context = context;
+        }
+        public IActionResult Dashboard()
+        {
+            return View();
         }
         public async Task<IActionResult> StockTransfer()
         {
@@ -30,29 +39,31 @@ namespace PointOfSale.Controllers
             return View(sm);
         }
         [HttpPost]
-        public async Task<JsonResult> StockTransfer([FromBody] List<StockTransferVM> items)
+        public async Task<IActionResult> StockTransfer([FromBody] List<StockTransferVM> items)
         {
             try
             {
-                var warehouseid = 1;
+                var warehousecode = User.Identity.Name;
+                var warehouse = await _context.tblwarehouse.FirstOrDefaultAsync(w => w.WarehouseCode == warehousecode);
+                var warehouseid = warehouse?.Id ?? 1;
                 var ab =await _billingservice.SaveStockTransfer(items,warehouseid);
 
-                return Json(new { success = true });
+                return Ok(new { status = ab.Result,message=ab.Message });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Ok(new { success = false, message = ex.Message });
             }
         }
         public IActionResult AllStockTransferList()
         {
             return View();
         }
-        public async Task<IActionResult> GetAllStockTransferList(DateTime? fromDate,DateTime? toDate)
+        public async Task<IActionResult> GetAllStockTransferList(DateTime? fromDate, DateTime? toDate)
         {
             string warehousecode = User.Identity.Name;
-            var ab = await _homeservice.GetAllSendStockTransferList(warehousecode,fromDate,toDate);
-            return Ok(new { data = ab });
+            var data = await _homeservice.GetAllSendStockTransferList(warehousecode, fromDate, toDate);
+            return Ok(new { data = data });
         }
         [HttpGet]
         public IActionResult StockAdjustment()
@@ -63,6 +74,22 @@ namespace PointOfSale.Controllers
                 SelectWarehouse = _selectItemService.SelectedWarehouseItem()
             };
             return View(model);
+        }
+        public IActionResult AllStockAdjustmentList()
+        {
+            return View();
+        }
+        public async Task<IActionResult> GetAllStockAdjustmentList(DateTime? fromDate, DateTime? toDate)
+        {
+            string warehousecode = User.Identity.Name;
+            var data = await _billingservice.GetAllStockAdjustmentList(warehousecode, fromDate, toDate);
+            return Ok(new { data = data });
+        }
+        [HttpPost]
+        public async Task<JsonResult> SaveStockTransfer([FromBody] ShopToWarehouseTransferRequest request)
+        {
+            var result = await _billingservice.ShopToWarehouseTransferAsync(request);
+            return Json(new { success = result.Result, message = result.Message });
         }
         //[HttpGet]
         //public IActionResult GetShopProducts(int shopId)
@@ -175,5 +202,7 @@ namespace PointOfSale.Controllers
         //    }
         //}
     }
+
+
 }
 

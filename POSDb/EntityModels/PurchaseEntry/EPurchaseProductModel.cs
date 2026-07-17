@@ -13,5 +13,6 @@ namespace POSDb.EntityModels.PurchaseEntry
         public string? ProductName { get; set; }
         public int CategoryId { get; set; }
         public int Warehouseid { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

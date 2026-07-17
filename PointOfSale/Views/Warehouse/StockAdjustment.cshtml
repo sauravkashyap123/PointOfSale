@@ -48,7 +48,6 @@
         margin: 0 auto;
     }
 
-    /* Title */
     .sa-title {
         display: flex;
         align-items: center;
@@ -89,7 +88,6 @@
         margin-top: 1px;
     }
 
-    /* Card */
     .sa-card {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -129,7 +127,6 @@
         padding: 1.25rem 1.5rem;
     }
 
-    /* Form */
     .sa-form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -171,7 +168,6 @@
             box-shadow: 0 0 0 3px rgba(24,24,27,.1);
         }
 
-    /* Load button */
     .sa-btn-load {
         height: 40px;
         padding: 0 20px;
@@ -208,7 +204,11 @@
             transform: scale(.98);
         }
 
-    /* Search */
+        .sa-btn-load:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
     .sa-search-wrap {
         position: relative;
         margin-bottom: 14px;
@@ -249,7 +249,6 @@
             box-shadow: 0 0 0 3px rgba(24,24,27,.08);
         }
 
-    /* Table */
     .sa-table-wrap {
         overflow-x: auto;
         border-radius: var(--radius-md);
@@ -339,7 +338,6 @@
         color: var(--ink-2);
     }
 
-    /* Empty state */
     .sa-empty {
         padding: 2.5rem;
         text-align: center;
@@ -364,7 +362,6 @@
         font-size: 13px;
     }
 
-    /* Save row */
     .sa-save-row {
         display: flex;
         align-items: center;
@@ -426,7 +423,6 @@
             transform: none;
         }
 
-    /* Toast */
     .sa-toast {
         position: fixed;
         bottom: 28px;
@@ -472,7 +468,6 @@
             flex-shrink: 0;
         }
 
-    /* Spinner */
     .sa-spinner {
         display: inline-block;
         width: 16px;
@@ -517,13 +512,13 @@
         <div class="sa-card">
             <div class="sa-card-head">
                 <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /></svg>
-                <span>Shop → Warehouse Transfer Setup</span>
+                <span>Shop &rarr; Warehouse Transfer Setup</span>
             </div>
             <div class="sa-card-body">
 
                 <div class="sa-form-row">
                     <div class="sa-field">
-                        <label for="sourceId">Source — Shop</label>
+                        <label for="sourceId">Source &mdash; Shop</label>
                         <select class="sa-select" id="sourceId">
                             <option value="">-- Shop Select Karein --</option>
                             @foreach (var item in Model.selectshop)
@@ -533,9 +528,10 @@
                         </select>
                     </div>
                     <div class="sa-field">
-                        <label for="destId">Destination — Warehouse</label>
+                        <label for="destId">Destination &mdash; Warehouse</label>
                         <select class="sa-select" id="destId">
                             <option value="">-- Warehouse Select Karein --</option>
+                            <option value="0">Admin / Main Warehouse</option>
                             @foreach (var item in Model.SelectWarehouse)
                             {
                                 <option value="@item.Value">@item.Text</option>
@@ -612,11 +608,12 @@
                             <th>#</th>
                             <th>Product</th>
                             <th>Unit</th>
+                            <th>Available Stock</th>
                             <th>Transfer Qty</th>
                         </tr>
                     </thead>
                     <tbody id="summaryTbody">
-                        <tr><td colspan="4"><div class="sa-summary-empty">Koi item select nahi kiya</div></td></tr>
+                        <tr><td colspan="5"><div class="sa-summary-empty">Koi item select nahi kiya</div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -640,221 +637,226 @@
 
     // ── Load Products ─────────────────────────────────────────────────────────
     function loadProducts() {
-    var shopId      = $('#sourceId').val();
-    var warehouseId = $('#destId').val();
+        var shopId = $('#sourceId').val();
+        var warehouseId = $('#destId').val();
 
-    if (!shopId)      { showToast('Shop select karein.', 'error'); return; }
-    if (!warehouseId) { showToast('Warehouse select karein.', 'error'); return; }
+        if (!shopId) { showToast('Shop select karein.', 'error'); return; }
+        if (warehouseId === '') { showToast('Warehouse select karein.', 'error'); return; }
 
-    var $btn = $('#btnLoad');
-    $btn.html('<span class="sa-spinner"></span> Loading...').prop('disabled', true);
+        var $btn = $('#btnLoad');
+        var loadingHtml = '<span class="sa-spinner"></span> Loading...';
+        var originalHtml = $btn.html();
+        $btn.html(loadingHtml).prop('disabled', true);
 
-    $.get('/Warehouse/GetShopProducts?shopId=' + shopId, function (data) {
-    renderProductTable(data);
-    $('#cardProducts').show();
-    $('#cardSummary').show();
-    renderSummary();
-    })
-    .fail(function () {
-    showToast('Products load karne mein error aaya.', 'error');
-    })
-    .always(function () {
-    $btn.html('<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.6"/></svg> Products Load Karo')
-    .prop('disabled', false);
-    });
+        $.get('/Billing/GetShopWiseAllProducts?shopId=' + shopId)
+            .done(function (data) {
+                renderProductTable(data);
+                $('#cardProducts').show();
+                $('#cardSummary').show();
+                renderSummary();
+            })
+            .fail(function () {
+                showToast('Products load karne mein error aaya.', 'error');
+            })
+            .always(function () {
+                $btn.html(originalHtml).prop('disabled', false);
+            });
     }
 
     // ── Render Product Table ──────────────────────────────────────────────────
     function renderProductTable(products) {
-    var $tbody = $('#productTbody').empty();
-    $('#chkAll').prop('checked', false).prop('indeterminate', false);
+        var $tbody = $('#productTbody').empty();
+        $('#chkAll').prop('checked', false).prop('indeterminate', false);
 
-    if (!products || products.length === 0) {
-    $tbody.append('<tr><td colspan="7"><div class="sa-empty">Is shop mein koi product available nahi hai.</div></td></tr>');
-    return;
-    }
+        if (!products || products.length === 0) {
+            $tbody.append('<tr><td colspan="7"><div class="sa-empty">Is shop mein koi product available nahi hai.</div></td></tr>');
+            return;
+        }
 
-    $.each(products, function (i, p) {
-    $tbody.append(`
-    <tr data-id="${p.productId}"
-    data-name="${escHtml(p.productName)}"
-    data-unit="${escHtml(p.unitName)}"
-    data-avail="${p.availableQty}">
-    <td><input type="checkbox" class="sa-cb row-cb" onchange="onRowCheck(this)" /></td>
-    <td style="color:var(--ink-3);font-family:var(--mono);font-size:12px">${i + 1}</td>
-    <td style="font-weight:500">${escHtml(p.productName)}</td>
-    <td style="color:var(--ink-2)">${escHtml(p.categoryName)}</td>
-    <td style="color:var(--ink-2)">${escHtml(p.unitName)}</td>
-    <td><span class="qty-badge">${parseFloat(p.availableQty).toLocaleString('en-IN')}</span></td>
-    <td>
-    <input type="number" class="sa-qty-input qty-inp"
-    min="0.001" max="${p.availableQty}" step="0.001"
-    placeholder="0" disabled
-    oninput="renderSummary()" />
-    </td>
-    </tr>`);
-    });
+        $.each(products, function (i, p) {
+            var stockQty = p.stockQuantity || 0;
+            var isOutOfStock = stockQty <= 0;
+
+            $tbody.append(`
+                <tr data-id="${p.id}"
+                    data-name="${escHtml(p.productName)}"
+                    data-unit="${escHtml(p.unitName)}"
+                    data-stockquantity="${stockQty}">
+                    <td><input type="checkbox" class="sa-cb row-cb" onchange="onRowCheck(this)" ${isOutOfStock ? 'disabled' : ''} /></td>
+                    <td style="color:var(--ink-3);font-family:var(--mono);font-size:12px">${i + 1}</td>
+                    <td style="font-weight:500">${escHtml(p.productName)}</td>
+                    <td style="color:var(--ink-2)">${escHtml(p.categoryName)}</td>
+                    <td style="color:var(--ink-2)">${escHtml(p.unitName)}</td>
+                    <td><span class="qty-badge" style="${isOutOfStock ? 'color:var(--red);border-color:var(--red)' : ''}">${parseFloat(stockQty).toLocaleString('en-IN')}</span></td>
+                    <td>
+                        <input type="number" class="sa-qty-input qty-inp"
+                               min="0.001" max="${stockQty}" step="0.001"
+                               placeholder="0" disabled
+                               oninput="renderSummary()" />
+                    </td>
+                </tr>`);
+        });
     }
 
     // ── Search Filter ─────────────────────────────────────────────────────────
     function filterProducts() {
-    var q = $('#productSearch').val().toLowerCase();
-    $('#productTbody tr').each(function () {
-    var name = ($(this).data('name') || '').toLowerCase();
-    $(this).toggle(!q || name.includes(q));
-    });
+        var q = $('#productSearch').val().toLowerCase();
+        $('#productTbody tr').each(function () {
+            var name = ($(this).data('name') || '').toLowerCase();
+            $(this).toggle(!q || name.includes(q));
+        });
     }
 
     // ── Checkbox Logic ────────────────────────────────────────────────────────
     function toggleAll(chk) {
-    $('#productTbody .row-cb').each(function () {
-    $(this).prop('checked', chk.checked);
-    var $row = $(this).closest('tr');
-    $row.toggleClass('row-selected', chk.checked);
-    $row.find('.qty-inp').prop('disabled', !chk.checked);
-    });
-    renderSummary();
+        $('#productTbody .row-cb').each(function () {
+            $(this).prop('checked', chk.checked);
+            var $row = $(this).closest('tr');
+            $row.toggleClass('row-selected', chk.checked);
+            $row.find('.qty-inp').prop('disabled', !chk.checked);
+        });
+        renderSummary();
     }
 
     function onRowCheck(chk) {
-    var $row = $(chk).closest('tr');
-    $row.toggleClass('row-selected', chk.checked);
-    $row.find('.qty-inp').prop('disabled', !chk.checked);
+        var $row = $(chk).closest('tr');
+        $row.toggleClass('row-selected', chk.checked);
+        $row.find('.qty-inp').prop('disabled', !chk.checked);
 
-    var total   = $('#productTbody .row-cb').length;
-    var checked = $('#productTbody .row-cb:checked').length;
-    $('#chkAll')
-    .prop('indeterminate', checked > 0 && checked < total)
-    .prop('checked', checked === total && total > 0);
+        var total = $('#productTbody .row-cb').length;
+        var checked = $('#productTbody .row-cb:checked').length;
+        $('#chkAll')
+            .prop('indeterminate', checked > 0 && checked < total)
+            .prop('checked', checked === total && total > 0);
 
-    renderSummary();
+        renderSummary();
     }
 
-    // ── Summary ───────────────────────────────────────────────────────────────
     function renderSummary() {
-    var items  = getSelectedItems();
-    var $tbody = $('#summaryTbody').empty();
-    var $btn   = $('#btnSave');
+        var items = getSelectedItems();
+        var $tbody = $('#summaryTbody').empty();
+        var $btn = $('#btnSave');
 
-    if (items.length === 0) {
-    $tbody.append('<tr><td colspan="4"><div class="sa-summary-empty">Koi item select nahi kiya</div></td></tr>');
-    $btn.prop('disabled', true);
-    $('#selectedCount').text('0');
-    return;
-    }
+        if (items.length === 0) {
+            $tbody.append('<tr><td colspan="5"><div class="sa-summary-empty">Koi item select nahi kiya</div></td></tr>');
+            $btn.prop('disabled', true);
+            $('#selectedCount').text('0');
+            return;
+        }
 
-    var allHaveQty = true;
-    $.each(items, function (i, it) {
-    if (!it.quantity || it.quantity <= 0) allHaveQty = false;
-    $tbody.append(`
-    <tr>
-    <td style="color:var(--ink-3);font-family:var(--mono);font-size:12px">${i + 1}</td>
-    <td style="font-weight:500">${escHtml(it.productName)}</td>
-    <td style="color:var(--ink-2)">${escHtml(it.unitName)}</td>
-    <td style="font-family:var(--mono);font-weight:500">
-    ${it.quantity > 0
-    ? parseFloat(it.quantity).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 3 })
-    : '<span style="color:var(--ink-3)">—</span>'}
-    </td>
-    </tr>`);
-    });
+        var allHaveQty = true;
+        $.each(items, function (i, it) {
+            if (!it.quantity || it.quantity <= 0) allHaveQty = false;
+            $tbody.append(`
+                <tr>
+                    <td style="color:var(--ink-3);font-family:var(--mono);font-size:12px">${i + 1}</td>
+                    <td style="font-weight:500">${escHtml(it.productName)}</td>
+                    <td style="color:var(--ink-2)">${escHtml(it.unitName)}</td>
+                    <td><span class="qty-badge">${parseFloat(it.stockQuantity).toLocaleString('en-IN')}</span></td>
+                    <td style="font-family:var(--mono);font-weight:500">
+                        ${it.quantity > 0
+                            ? parseFloat(it.quantity).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 3 })
+                            : '<span style="color:var(--ink-3)">—</span>'}
+                    </td>
+                </tr>`);
+        });
 
-    $('#selectedCount').text(items.length);
-    $btn.prop('disabled', !allHaveQty);
+        $('#selectedCount').text(items.length);
+        $btn.prop('disabled', !allHaveQty);
     }
 
     function getSelectedItems() {
-    var items = [];
-    $('#productTbody .row-cb:checked').each(function () {
-    var $row = $(this).closest('tr');
-    items.push({
-    productId:   parseInt($row.data('id')),
-    productName: $row.data('name'),
-    unitName:    $row.data('unit'),
-    availQty:    parseFloat($row.data('avail')),
-    quantity:    parseFloat($row.find('.qty-inp').val()) || 0
-    });
-    });
-    return items;
+        var items = [];
+        $('#productTbody .row-cb:checked').each(function () {
+            var $row = $(this).closest('tr');
+            items.push({
+                productId: parseInt($row.data('id')),
+                productName: $row.data('name'),
+                unitName: $row.data('unit'),
+                stockQuantity: parseFloat($row.data('stockquantity')),
+                quantity: parseFloat($row.find('.qty-inp').val()) || 0
+            });
+        });
+        return items;
     }
 
     // ── Save Transfer ─────────────────────────────────────────────────────────
     function saveTransfer() {
-    var items = getSelectedItems();
+        var items = getSelectedItems();
 
-    if (items.length === 0) { showToast('Koi product select nahi kiya.', 'error'); return; }
+        if (items.length === 0) { showToast('Koi product select nahi kiya.', 'error'); return; }
 
-    var invalid = items.filter(function (it) { return it.quantity <= 0; });
-    if (invalid.length > 0) {
-    showToast('"' + invalid[0].productName + '" ki quantity fill karein.', 'error');
-    return;
-    }
+        var invalid = items.filter(function (it) { return it.quantity <= 0; });
+        if (invalid.length > 0) {
+            showToast('"' + invalid[0].productName + '" ki quantity fill karein.', 'error');
+            return;
+        }
 
-    var overQty = items.filter(function (it) { return it.quantity > it.availQty; });
-    if (overQty.length > 0) {
-    showToast('"' + overQty[0].productName + '" ki quantity available stock se zyada hai.', 'error');
-    return;
-    }
+        var overQty = items.filter(function (it) { return it.quantity > it.stockQuantity; });
+        if (overQty.length > 0) {
+            showToast('"' + overQty[0].productName + '" ki quantity available stock se zyada hai.', 'error');
+            return;
+        }
 
-    var payload = {
-    transferType:    'ShopToWarehouse',
-    fromShopId:      parseInt($('#sourceId').val()),
-    toWarehouseId:   parseInt($('#destId').val()),
-    fromWarehouseId: null,
-    toShopId:        null,
-    items: items.map(function (it) {
-    return { productId: it.productId, quantity: it.quantity };
-    })
-    };
+        var payload = {
+            transferType: 'ShopToWarehouse',
+            fromShopId: parseInt($('#sourceId').val()),
+            toWarehouseId: parseInt($('#destId').val()),
+            fromWarehouseId: null,
+            toShopId: null,
+            items: items.map(function (it) {
+                return { productId: it.productId, quantity: it.quantity };
+            })
+        };
 
-    var $btn    = $('#btnSave');
-    var savedHtml = $btn.html();
-    $btn.html('<span class="sa-spinner"></span> Saving...').prop('disabled', true);
+        var $btn = $('#btnSave');
+        var savedHtml = $btn.html();
+        $btn.html('<span class="sa-spinner"></span> Saving...').prop('disabled', true);
 
-    $.ajax({
-    url:         '/Warehouse/SaveStockTransfer',
-    type:        'POST',
-    contentType: 'application/json',
-    data:        JSON.stringify(payload),
-    success: function (res) {
-    if (res.success) {
-    showToast(res.message, 'success');
-    // Reset after success
-    setTimeout(function () {
-    $('#sourceId, #destId').val('');
-    $('#cardProducts, #cardSummary').hide();
-    $('#productTbody').empty();
-    renderSummary();
-    }, 1500);
-    } else {
-    showToast(res.message, 'error');
-    $btn.html(savedHtml).prop('disabled', false);
-    }
-    },
-    error: function () {
-    showToast('Server error aaya. Dobara try karein.', 'error');
-    $btn.html(savedHtml).prop('disabled', false);
-    }
-    });
+        $.ajax({
+            url: '/Warehouse/SaveStockTransfer',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (res) {
+                if (res.success) {
+                    showToast(res.message, 'success');
+                    setTimeout(function () {
+                        $('#sourceId, #destId').val('');
+                        $('#cardProducts, #cardSummary').hide();
+                        $('#productTbody').empty();
+                        renderSummary();
+                        $btn.html(savedHtml).prop('disabled', true);
+                    }, 1500);
+                } else {
+                    showToast(res.message, 'error');
+                    $btn.html(savedHtml).prop('disabled', false);
+                }
+            },
+            error: function () {
+                showToast('Server error aaya. Dobara try karein.', 'error');
+                $btn.html(savedHtml).prop('disabled', false);
+            }
+        });
     }
 
     // ── Toast ─────────────────────────────────────────────────────────────────
     var toastTimer;
     function showToast(msg, type) {
-    var icon = type === 'success'
-    ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
-    : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-    var $t = $('#saToast');
-    $t.html(icon + msg).removeClass('success error').addClass(type + ' show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { $t.removeClass('show'); }, 3500);
+        var icon = type === 'success'
+            ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+            : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+        var $t = $('#saToast');
+        $t.html(icon + msg).removeClass('success error').addClass(type + ' show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { $t.removeClass('show'); }, 3500);
     }
 
     // ── Helper ────────────────────────────────────────────────────────────────
     function escHtml(str) {
-    return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        return String(str)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
 </script>

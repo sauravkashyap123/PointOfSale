@@ -274,7 +274,7 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblSaleInvoice");
+                    b.ToTable("tblSaleInvoice", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.ESalesInvoiceDetail", b =>
@@ -302,7 +302,7 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblSaleDetailsInvoice");
+                    b.ToTable("tblSaleDetailsInvoice", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.EShop", b =>
@@ -315,6 +315,9 @@ namespace POSDb.Migrations
 
                     b.Property<string>("ContactNumber")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("OwnerName")
                         .HasColumnType("nvarchar(max)");
@@ -330,7 +333,7 @@ namespace POSDb.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.ToTable("tblShop");
+                    b.ToTable("tblShop", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.EShopSettingModel", b =>
@@ -358,7 +361,7 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblprintdata");
+                    b.ToTable("tblprintdata", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.EStaffModel", b =>
@@ -384,6 +387,9 @@ namespace POSDb.Migrations
                     b.Property<string>("Emailid")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Mobileno")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -405,7 +411,81 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblStaff");
+                    b.ToTable("tblStaff", (string)null);
+                });
+
+            modelBuilder.Entity("POSDb.EntityModels.EWarehouseStockHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("NewQuantity")
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<decimal>("PreviousQuantity")
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("QuantityChanged")
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<int?>("ReferenceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReferenceType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("RelatedShopId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("tblWarehousestockhistory", (string)null);
+                });
+
+            modelBuilder.Entity("POSDb.EntityModels.EWarehousestock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("tblWarehousestock", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EBaseModel", b =>
@@ -429,11 +509,41 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblProductBase");
+                    b.ToTable("tblProductBase", (string)null);
 
                     b.HasDiscriminator().HasValue("EBaseModel");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EBulkOrderDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("BulkOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BulkOrderId");
+
+                    b.ToTable("tblBulkOrderDetail", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.MithaiShop.ECart", b =>
@@ -479,7 +589,7 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblCart");
+                    b.ToTable("tblCart", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EShopStock", b =>
@@ -501,7 +611,7 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblshopstock");
+                    b.ToTable("tblshopstock", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EShopStockHistory", b =>
@@ -532,7 +642,7 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblshopstockHistory");
+                    b.ToTable("tblshopstockHistory", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EStock", b =>
@@ -551,7 +661,7 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblstock");
+                    b.ToTable("tblstock", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EStockHistory", b =>
@@ -568,6 +678,9 @@ namespace POSDb.Migrations
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("Remark")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("StockId")
                         .HasColumnType("int");
 
@@ -582,7 +695,7 @@ namespace POSDb.Migrations
 
                     b.HasIndex("StockId");
 
-                    b.ToTable("tblStockHistory");
+                    b.ToTable("tblStockHistory", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EStockTransfer", b =>
@@ -612,7 +725,7 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblStockTransfer");
+                    b.ToTable("tblStockTransfer", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EStockTransferDetail", b =>
@@ -637,7 +750,7 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblStockTransferDetails");
+                    b.ToTable("tblStockTransferDetails", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.POSModels.Models.EWarehouseModel", b =>
@@ -703,7 +816,7 @@ namespace POSDb.Migrations
                     b.HasIndex("WarehouseCode")
                         .IsUnique();
 
-                    b.ToTable("tblwarehouse");
+                    b.ToTable("tblwarehouse", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.PurchaseEntry.EPurchaseDetail", b =>
@@ -751,7 +864,7 @@ namespace POSDb.Migrations
 
                     b.HasIndex("PurchaseId");
 
-                    b.ToTable("tblpurchasedetail");
+                    b.ToTable("tblpurchasedetail", (string)null);
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.PurchaseEntry.EpurchaseEntry", b =>
@@ -783,7 +896,60 @@ namespace POSDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tblpurchaseentry");
+                    b.ToTable("tblpurchaseentry", (string)null);
+                });
+
+            modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EBulkOrder", b =>
+                {
+                    b.HasBaseType("POSDb.EntityModels.MithaiShop.EBaseModel");
+
+                    b.Property<decimal>("AdvanceAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ContactNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime>("DeliveryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ShopId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StaffId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasDiscriminator().HasValue("EBulkOrder");
                 });
 
             modelBuilder.Entity("POSDb.EntityModels.MithaiShop.ECategoryModel", b =>
@@ -799,6 +965,9 @@ namespace POSDb.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.HasDiscriminator().HasValue("ECategoryModel");
                 });
@@ -821,6 +990,9 @@ namespace POSDb.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsPieceWise")
                         .HasColumnType("bit");
@@ -845,10 +1017,13 @@ namespace POSDb.Migrations
                     b.Property<int>("UnitId")
                         .HasColumnType("int");
 
-                    b.ToTable("tblProductBase", t =>
+                    b.ToTable("tblProductBase", null, t =>
                         {
                             t.Property("Description")
                                 .HasColumnName("EProduct_Description");
+
+                            t.Property("IsActive")
+                                .HasColumnName("EProduct_IsActive");
                         });
 
                     b.HasDiscriminator().HasValue("EProduct");
@@ -875,7 +1050,7 @@ namespace POSDb.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("tblProductBase", t =>
+                    b.ToTable("tblProductBase", null, t =>
                         {
                             t.Property("SaleRate")
                                 .HasColumnName("EProductUnit_SaleRate");
@@ -919,13 +1094,16 @@ namespace POSDb.Migrations
                     b.Property<int>("UsedQuantity")
                         .HasColumnType("int");
 
-                    b.ToTable("tblProductBase", t =>
+                    b.ToTable("tblProductBase", null, t =>
                         {
                             t.Property("ProductId")
                                 .HasColumnName("EProduction_ProductId");
 
                             t.Property("Quantity")
                                 .HasColumnName("EProduction_Quantity");
+
+                            t.Property("Remarks")
+                                .HasColumnName("EProduction_Remarks");
                         });
 
                     b.HasDiscriminator().HasValue("EProduction");
@@ -935,6 +1113,9 @@ namespace POSDb.Migrations
                 {
                     b.HasBaseType("POSDb.EntityModels.MithaiShop.EBaseModel");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ShortName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -943,8 +1124,11 @@ namespace POSDb.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("tblProductBase", t =>
+                    b.ToTable("tblProductBase", null, t =>
                         {
+                            t.Property("IsActive")
+                                .HasColumnName("EUnit_IsActive");
+
                             t.Property("UnitName")
                                 .HasColumnName("EUnit_UnitName");
                         });
@@ -959,6 +1143,9 @@ namespace POSDb.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ProductName")
                         .HasColumnType("nvarchar(max)");
 
@@ -968,10 +1155,13 @@ namespace POSDb.Migrations
                     b.Property<int>("Warehouseid")
                         .HasColumnType("int");
 
-                    b.ToTable("tblProductBase", t =>
+                    b.ToTable("tblProductBase", null, t =>
                         {
                             t.Property("CategoryId")
                                 .HasColumnName("EPurchaseProductModel_CategoryId");
+
+                            t.Property("IsActive")
+                                .HasColumnName("EPurchaseProductModel_IsActive");
 
                             t.Property("ProductName")
                                 .HasColumnName("EPurchaseProductModel_ProductName");
@@ -1042,6 +1232,17 @@ namespace POSDb.Migrations
                     b.Navigation("Warehouse");
                 });
 
+            modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EBulkOrderDetail", b =>
+                {
+                    b.HasOne("POSDb.EntityModels.MithaiShop.EBulkOrder", "BulkOrder")
+                        .WithMany("Items")
+                        .HasForeignKey("BulkOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BulkOrder");
+                });
+
             modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EStockHistory", b =>
                 {
                     b.HasOne("POSDb.EntityModels.MithaiShop.EStock", "EStock")
@@ -1077,6 +1278,11 @@ namespace POSDb.Migrations
             modelBuilder.Entity("POSDb.EntityModels.PurchaseEntry.EpurchaseEntry", b =>
                 {
                     b.Navigation("PurchaseDetails");
+                });
+
+            modelBuilder.Entity("POSDb.EntityModels.MithaiShop.EBulkOrder", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

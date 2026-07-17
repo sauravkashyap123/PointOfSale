@@ -18,11 +18,13 @@ namespace POSModels.Models.PurchaseEntry
         public int WarehouseId { get; set; }
 
         public string? Remarks { get; set; }
+        public decimal? TotalAmount { get; set; }
 
         public List<SelectListItem>? selectedProductList { get; set; }
         public List<SelectListItem>? selectedunitlist { get; set; }
 
         public List<RawPurchaseDetailModel> Items { get; set; } = new();
+        public int ItemCount { get;  set; }
     }
     public class RawPurchaseDetailModel
     {

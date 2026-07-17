@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
@@ -10,6 +10,8 @@ using System;
 using System.Collections.Immutable;
 using System.Security;
 using System.Threading.Tasks;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace PointOfSale.Controllers
 {
@@ -42,9 +44,13 @@ namespace PointOfSale.Controllers
             //    .Select(p => p.Category)
             //    .Distinct().OrderBy(c => c).ToListAsync();
             //ViewBag.Cart = GetCart();
+          
+            string userid = User.Identity.Name;
+            int shopid = _billing.GetCurrentShopId(userid);
 
-                List<CategoryModel> catls = await _homeService.GetAllCategoryList();
-                List<Product> prols = await _homeService.GetAllProductList();
+            List<CategoryModel> catls = await _homeService.GetAllCategoryList();
+                //List<Product> prols = await _homeService.GetAllProductList();
+                List<Product> prols = await _homeService.GetShopwiseAllProductList(shopid);
                 List<ShopModel> shls=await _homeService.GetAllShopList();
                 ViewBag.Products = prols;
                 ViewBag.Shop = shls;
@@ -53,6 +59,24 @@ namespace PointOfSale.Controllers
                 var staffdetails = _billing.GetStaffDetails(User.Identity.Name);
             ViewBag.StaffName = staffdetails.Name;
             ViewBag.StaffShortName = GetShortName(staffdetails.Name);
+
+            // Fetch active shop details for print / header display
+            var printData = await _db.tblprintdata.FirstOrDefaultAsync(p => p.ShopId == shopid);
+            if (printData != null)
+            {
+                ViewBag.ShopName = printData.StoreName;
+                ViewBag.Address = printData.Address;
+                ViewBag.Mobileno = printData.MobileNo;
+                ViewBag.Gstnumber = printData.GSTNumber;
+            }
+            else
+            {
+                var shop = await _db.tblShop.FirstOrDefaultAsync(s => s.Id == shopid);
+                ViewBag.ShopName = shop?.ShopName ?? "Sri Sai Sweets";
+                ViewBag.Address = "Main Road, Jamshedpur";
+                ViewBag.Mobileno = shop?.ContactNumber ?? "+91 0000000000";
+                ViewBag.Gstnumber = "20XXXXXXXXXX";
+            }
 
             // --- Short Name Generation Logic ---
            
@@ -92,6 +116,22 @@ namespace PointOfSale.Controllers
         {
             List<Product> prols = await _homeService.GetAllProductList();
             return Json(prols);
+        }
+        public async Task<IActionResult> GetShopWiseAllProducts(int? shopId)
+        {
+            if (shopId > 0)
+            {
+                List<Product> prols = await _homeService.GetShopwiseAllProductList(shopId.Value);
+                return Ok(prols);
+            }
+            else
+            {
+                string userid = User.Identity.Name;
+                int shopid = _billing.GetCurrentShopId(userid);
+
+                List<Product> prols = await _homeService.GetShopwiseAllProductList(shopid);
+                return Ok(prols);
+            }
         }
         // ── CART API ──────────────────────────────────────────────
         [HttpPost]
@@ -223,11 +263,10 @@ namespace PointOfSale.Controllers
 
             ViewBag.InvoiceNumber = invoiceNumber;
 
-            (string Mobilno, string Gstnumber, string address, string shopname) = _billing.GetPrintDataShopDetails(User.Identity.Name);
-            ViewBag.Mobileno = Mobilno;
-            ViewBag.Gstnumber = Gstnumber;
-            ViewBag.Address = address;
-            ViewBag.ShopName = shopname;
+            ViewBag.Mobileno = invoice.PrintMobileno;
+            ViewBag.Gstnumber = invoice.GstNumber;
+            ViewBag.Address = invoice.PrintAddress;
+            ViewBag.ShopName = invoice.ShopName;
             return View(invoice);
         }
 
@@ -289,9 +328,9 @@ namespace PointOfSale.Controllers
         //}
 
         public IActionResult ViewStock()
-            {
-                return View();
-            }
+        {
+            return View();
+        }
             public async Task<IActionResult> AllStockList()
             {
                 var ab =await _billing.getAllStockList();
@@ -349,5 +388,19 @@ namespace PointOfSale.Controllers
                 var ab =await _billing.GetAllItemShopSaleList(shopid);
                 return Ok(new { data = ab });
             }
+
+            [HttpPost]
+            public async Task<IActionResult> CreateBulkOrder([FromBody] BulkOrderModel model)
+            {
+                if (model == null) return BadRequest("Invalid bulk order data.");
+
+                string username = User.Identity.Name;
+                int shopid = _billing.GetCurrentShopId(username);
+                var staff = _billing.GetStaffDetails(username);
+                int staffid = staff?.Id ?? 0;
+
+                var result = await _billing.CreateBulkOrderAsync(model, shopid, staffid);
+                return Json(new { success = result.Result, message = result.Message });
+            }
         }
-    }
+    }     

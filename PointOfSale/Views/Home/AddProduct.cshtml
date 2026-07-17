@@ -1,4 +1,4 @@
-﻿@* @model POSModels.Models.MithaiShop.Product
+@* @model POSModels.Models.MithaiShop.Product
 
 @{
     ViewData["Title"] = "Create Product";
@@ -29,8 +29,14 @@
                     <input type="hidden" asp-for="Id" />
                     <div class="field code-field">
                         <label asp-for="ProductCode">Product code <span class="req">*</span></label>
-                        <input asp-for="ProductCode" class="form-control" placeholder="e.g. MTH-001" />
+                        <div style="display: flex; gap: 8px;">
+                            <input asp-for="ProductCode" id="productCodeInput" class="form-control" placeholder="e.g. MTH-001" style="flex: 1;" />
+                            <button type="button" class="btn btn-secondary" onclick="generateRandomBarcode()" style="background:#0C447C;color:#fff;border:none;border-radius:8px;padding:0 14px;font-size:12px;cursor:pointer;font-weight:600;">Generate</button>
+                        </div>
                         <span asp-validation-for="ProductCode" class="text-danger"></span>
+                        <div style="margin-top: 8px; text-align: center; display: none;" id="barcodePreviewContainer">
+                            <svg id="barcodePreview"></svg>
+                        </div>
                     </div>
 
                     <div class="field">
@@ -515,6 +521,44 @@
     </form>
 </div>
 <script src="~/js/product.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script>
+    function generateRandomBarcode() {
+        var randCode = "SSS" + Math.floor(100000000 + Math.random() * 900000000);
+        document.getElementById('productCodeInput').value = randCode;
+        updateBarcodePreview(randCode);
+    }
+
+    function updateBarcodePreview(val) {
+        if (val && val.trim().length > 0) {
+            document.getElementById("barcodePreviewContainer").style.display = "block";
+            try {
+                JsBarcode("#barcodePreview", val, {
+                    format: "CODE128",
+                    width: 1.5,
+                    height: 40,
+                    displayValue: true,
+                    fontSize: 12
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        } else {
+            document.getElementById("barcodePreviewContainer").style.display = "none";
+        }
+    }
+
+    document.getElementById("productCodeInput").addEventListener('input', function() {
+        updateBarcodePreview(this.value);
+    });
+
+    window.addEventListener('load', function() {
+        var existingVal = document.getElementById("productCodeInput").value;
+        if (existingVal) {
+            updateBarcodePreview(existingVal);
+        }
+    });
+</script>
 <style>
     @@keyframes toastIn {
     from {

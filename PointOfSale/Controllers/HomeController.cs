@@ -1,6 +1,7 @@
 using BarcodeStandard;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using POSDb.EntityModels;
 using POSModels.Models;
@@ -23,25 +24,25 @@ namespace PointOfSale.Controllers
         private readonly IHomeService _homeservice;
         private readonly ISelectItemService _selectitemservice;
         private readonly ILoginViewModels _loginview;
+        public readonly ISelectItemService _selectlistitem;
+        public readonly IBillingService _billing;
 
-        public HomeController(ILogger<HomeController> logger, IHomeService homeService, ISelectItemService selectitemservice, ILoginViewModels loginview)
+        public HomeController(ILogger<HomeController> logger, IHomeService homeService, ISelectItemService selectitemservice, ILoginViewModels loginview, ISelectItemService selectlistitem, IBillingService billing)
         {
             _logger = logger;
             _homeservice = homeService;
             _selectitemservice = selectitemservice;
-            _loginview = loginview; 
+            _loginview = loginview;
+            _selectlistitem = selectlistitem;
+            _billing = billing;
         }
-
         public IActionResult Index()
         {
-            GeneralModel gm = new GeneralModel();
             var ab = _homeservice.GetAllDashboardData();
-            
             ViewBag.OperatorName = User.Identity.Name;
             ViewBag.OperatorRole = "Admin";
-            return View(gm);
+            return View(ab);
         }
-
         public IActionResult AddWarehouse()
         {
             return View();
@@ -57,11 +58,16 @@ namespace PointOfSale.Controllers
             var ab = await _homeservice.GetAllWareHouseList();
             return Ok(new { data = ab });
         }
+        [HttpDelete]
+        public IActionResult DeleteWarehouse(int id)
+        {
+            AllResponseMessage resp = _homeservice.DeleteOneWarehouse(id);
+            return Ok(new { status = resp.Result, message = resp.Message });
+        }
         public IActionResult Privacy()
         {
             return View();
         }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -84,6 +90,12 @@ namespace PointOfSale.Controllers
         {
             var ab = await _homeservice.GetAllShopList();
             return Ok(new { data = ab });
+        }
+        [HttpDelete]
+        public IActionResult DeleteShop(int id)
+        {
+            AllResponseMessage resp =  _homeservice.DeleteOneShop(id);
+            return Ok(new { status = resp.Result, message = resp.Message });
         }
         public IActionResult AddCategory()
         {
@@ -114,7 +126,12 @@ namespace PointOfSale.Controllers
             List<CategoryModel> fg = await _homeservice.GetAllCategoryList();
             return Ok(new {data = fg });
         }
-
+        [HttpDelete]
+        public IActionResult DeleteCategory(int id)
+        {
+            AllResponseMessage resp = _homeservice.DeleteOneCategory(id);
+            return Ok(new { status = resp.Result, message = resp.Message });
+        }
         public IActionResult AddUnit()
         {
             return View();
@@ -131,7 +148,18 @@ namespace PointOfSale.Controllers
             List<Unit> list = _homeservice.GetUnitList();
             return Ok(new { data = list });
         }
+        [HttpDelete]
+        public IActionResult DeleteUnit(int id)
+        {
+            AllResponseMessage resp = _homeservice.DeleteOneUnit(id);
+            return Ok(new { status = resp.Result, message = resp.Message });
+        }
 
+        public IActionResult ChangeUnitStatus(int id)
+        {
+            AllResponseMessage resp = _homeservice.ChangeUnitStatus(id);
+            return Ok(new { status = resp.Result, message = resp.Message });
+        }
         public IActionResult AddPurchase()
         {
             return View();
@@ -149,8 +177,6 @@ namespace PointOfSale.Controllers
                 model.SelectedCategoryList = _selectitemservice.SelectCategory();
                 return View(model);
             }
-           
-
             model.SelectUnitList = _selectitemservice.SelectUnit();
             model.SelectedCategoryList = _selectitemservice.SelectCategory();
             return View(model);
@@ -215,6 +241,11 @@ namespace PointOfSale.Controllers
             ps.productList = await _homeservice.GetAllProductList();
             return View(ps);
         }
+        public IActionResult DeleteProduct(int id)
+        {
+            AllResponseMessage resp = _homeservice.DeleteOneProduct(id);
+            return Ok(new { status = resp.Result, message = resp.Message });
+        }
         [HttpGet]
         public IActionResult GetProductUnit(int productId)
         {
@@ -231,7 +262,7 @@ namespace PointOfSale.Controllers
         public async Task<IActionResult> AddProduction(Production pd)
         {
             AllResponseMessage resp = await _homeservice.SaveProduction(pd);
-            return Ok(new { Status = resp.Result, message = resp.Message });
+            return Ok(new { status = resp.Result, message = resp.Message });
         }
         public async Task<IActionResult> ProductionList()
         {
@@ -242,11 +273,31 @@ namespace PointOfSale.Controllers
         
         // Staff Creation
 
-        public IActionResult CreateStaff()
+        public IActionResult CreateStaff(int id=0)
         {
+            
             StaffModel sf = new StaffModel();
             sf.selectedshoplist = _selectitemservice.SelectShopList();
             return View(sf);
+        }
+        public IActionResult EditStaff(int id = 0)
+        {
+            StaffModel sm = _homeservice.GetAllStaffList().FirstOrDefault(c => c.Id == id);
+            sm.selectedshoplist = _selectitemservice.SelectShopList();
+                
+            return View(sm);
+        }
+        [HttpDelete]
+        public ActionResult DeleteStaff(int id)
+        {
+            AllResponseMessage resp = _homeservice.DeleteOneStaff(id);
+            return Ok(new { status = resp.Result, message = resp.Message });
+        }
+        [HttpGet]
+        public ActionResult EnabledStaff(int id)
+        {
+            AllResponseMessage resp = _homeservice.EnabledOneStaff(id);
+            return Ok(new { status = resp.Result, message = resp.Message });
         }
         [HttpPost]
         public async Task<IActionResult> CreateStaff(StaffModel sm)
@@ -258,6 +309,22 @@ namespace PointOfSale.Controllers
         {
             List<StaffModel> lsm = _homeservice.GetAllStaffList();
             return View(lsm);
+        }
+        public IActionResult Reports()
+        {
+            List<SelectListItem>? selectshop = _selectlistitem.SelectShopList();
+            return View(selectshop);
+        }
+        public async Task<IActionResult> AllItemShopSaleList(int shopid)
+        {
+            var ab = await _billing.GetAllItemShopSaleList(shopid);
+            return Ok(new { data = ab });
+        }
+
+        public async Task<IActionResult> BulkOrders()
+        {
+            var orders = await _billing.GetAllBulkOrdersAsync();
+            return View(orders);
         }
     }
 }

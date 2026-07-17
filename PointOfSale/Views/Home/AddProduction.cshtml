@@ -182,7 +182,7 @@
 
             <div class="grid">
 
-                <div class="form-group">
+              @*   <div class="form-group">
                     <label>Production No</label>
                     <input asp-for="ProductionNo" class="form-control" placeholder="Enter Production No" />
                 </div>
@@ -190,7 +190,7 @@
                 <div class="form-group">
                     <label>Production Date</label>
                     <input asp-for="ProductionDate" type="date" class="form-control" />
-                </div>
+                </div> *@
 
                 <div class="form-group">
                     <label>Product</label>
@@ -207,15 +207,15 @@
                     <input asp-for="Quantity" type="number" step="0.01" class="form-control" />
                 </div>
 
-                <div class="form-group">
+              @*   <div class="form-group">
                     <label>Cost Amount</label>
                     <input asp-for="CostAmount" type="number" step="0.01" class="form-control" />
-                </div>
+                </div> *@
 
-                <div class="form-group">
+              @*   <div class="form-group">
                     <label>Expiry Date</label>
                     <input asp-for="ExpiryDate" type="date" class="form-control" />
-                </div>
+                </div> *@
 
                 <div class="form-group full">
                     <label>Remarks</label>
@@ -232,71 +232,100 @@
         </form>
     </div>
 </div>
+
+<!-- SWEETALERT2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- JQUERY -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
 <!-- DATATABLE JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
 <script>
     $(document).ready(function () {
+
         // Product Unit Change
         $("#ProductId").change(function () {
-
             var productId = $(this).val();
 
             if (!productId) {
-                $("#unitname").text("");
+                $("#unitname").text("Quantity");
                 return;
             }
+
             $.ajax({
                 url: '/Home/GetProductUnit',
                 type: 'GET',
                 data: { productId: productId },
                 success: function (res) {
-                    $("#unitname").text("Quantity/" + res);
+                    $("#unitname").text("Quantity / " + res);
                 },
                 error: function () {
-                    $("#unitname").text("");
+                    $("#unitname").text("Quantity");
                 }
             });
         });
 
         // Form Submit
-        $("#productionForm").submit(function (e) {
-
+        $("#productionForm").on("submit", function (e) {
             e.preventDefault();
+            const form = this;
 
-            var formData = new FormData(this);
+            Swal.fire({
+                title: 'Production Save karo?',
+                text: 'Kya aap yeh production entry save karna chahte hain?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0C447C',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Haan, Save karo',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const formData = new FormData(form);
 
-            $.ajax({
-                url: $(this).attr("action"),
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                beforeSend: function () {
-                    $(".btn-save").prop("disabled", true).text("Saving...");
-                },
-                success: function (response) {
-
-                    if (response.result) {
-                        alert(response.message);
-
-                        $("#productionForm")[0].reset();
-                        $("#unitname").text("Quantity");
-                    }
-                    else {
-                        alert(response.message);
-                    }
-                },
-                error: function () {
-                    alert("Something went wrong.");
-                },
-                complete: function () {
-                    $(".btn-save").prop("disabled", false).text("Save Production");
+                    $.ajax({
+                        url: $(form).attr("action"),
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function () {
+                            $(".btn-save").prop("disabled", true).text("Saving...");
+                        },
+                        success: function (response) {
+                            if (response.status) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Done!',
+                                    text: response.message || 'Production successfully save ho gaya.',
+                                    confirmButtonColor: '#0C447C'
+                                }).then(() => {
+                                    $("#productionForm")[0].reset();
+                                    $("#unitname").text("Quantity");
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error!',
+                                    text: response.message || 'Kuch galat ho gaya.',
+                                    confirmButtonColor: '#0C447C'
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Server Error',
+                                text: 'Request process nahi ho saki. Dobara try karo.',
+                                confirmButtonColor: '#0C447C'
+                            });
+                        },
+                        complete: function () {
+                            $(".btn-save").prop("disabled", false).text("Save Production");
+                        }
+                    });
                 }
             });
-
         });
 
     });

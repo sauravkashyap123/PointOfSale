@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +48,7 @@ namespace POSModels.ViewModels
 
                 // Role input format normalize karein
                 string requestRole = lm.Role?.ToLower();
-                if (requestRole != "admin" && requestRole != "staff" && requestRole != "warehouse")
+                if (requestRole != "admin" && requestRole != "staff" && requestRole != "warehouse manager")
                 {
                     resp.Result = false;
                     resp.Message = "Invalid Role selected";
@@ -57,10 +57,10 @@ namespace POSModels.ViewModels
 
                 // 2. User Find (_userManager using Name/Mobile)
                 var user = await _userManager.FindByNameAsync(lm.Username);
-                if (user == null)
+                if (user == null || user.LockoutEnabled==false)
                 {
                     resp.Result = false;
-                    resp.Message = "User Not Found";
+                    resp.Message = "User Not Found or User Locked";
                     return resp;
                 }
 
@@ -110,6 +110,11 @@ namespace POSModels.ViewModels
                 {
                     resp.redirect = "/Billing/Index"; 
                 }
+                else if (userRoles.Any(r => r.ToLower().Equals("Warehouse Manager", StringComparison.OrdinalIgnoreCase)))
+                {
+                    resp.redirect = "/Warehouse/Dashboard"; 
+                }
+                
                
                 // 6. Common Success Return Block
                 resp.Result = true;
@@ -119,7 +124,8 @@ namespace POSModels.ViewModels
                 {
                     { 1, user.Id ?? "" },
                     { 2, user.FullName ?? "" },
-                    { 3, user.PhoneNumber ?? "" }
+                    { 3, user.PhoneNumber ?? "" },
+                    { 4, userRoles.First() ?? "" }
                 };
 
                 return resp;
@@ -152,10 +158,10 @@ namespace POSModels.ViewModels
                 // 🔹 User find (अगर Mobile को UserName में store किया है)
                 var user = await _userManager.FindByNameAsync(StaffCode);
 
-                if (user == null)
+                if (user == null || user.LockoutEnabled==false)
                 {
                     resp.Result = false;
-                    resp.Message = "User Not Found";
+                    resp.Message = "User Not Found or User Locked";
                     return resp;
                 }
 
@@ -184,7 +190,8 @@ namespace POSModels.ViewModels
             new Claim(ClaimTypes.Name, user.UserName ?? ""),
             new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? ""),
-             new Claim("FullName", user.FullName ?? "")
+            new Claim("FullName", user.FullName ?? ""),
+            new Claim(ClaimTypes.Role, "staff")
         };
 
                 // 🔥 Identity + Principal
@@ -224,7 +231,6 @@ namespace POSModels.ViewModels
             {
                 AllResponseMessage resp = new AllResponseMessage();
 
-                // 🔹 Validation first (IMPORTANT)
                 if (rm == null || string.IsNullOrEmpty(rm.StaffCode) ||
                     string.IsNullOrEmpty(rm.Mobileno) || string.IsNullOrEmpty(rm.Password))
                 {
@@ -233,18 +239,105 @@ namespace POSModels.ViewModels
                     return resp;
                 }
 
-                // 🔹 StaffCode exist check (EF optimized)
-                bool staffCodeExist = await _context.tblStaff
+                // ================= UPDATE ===================
+                if (rm.Id > 0)
+                {
+                    var staff = await _context.tblStaff
+                        .FirstOrDefaultAsync(x => x.Id == rm.Id);
+
+                    if (staff == null)
+                    {
+                        resp.Result = false;
+                        resp.Message = "Staff not found";
+                        return resp;
+                    }
+
+                    // Duplicate StaffCode check except current record
+                    bool staffCodeExist = await _context.tblStaff
+                        .AnyAsync(x => x.StaffCode == rm.StaffCode && x.Id != rm.Id);
+
+                    if (staffCodeExist)
+                    {
+                        resp.Result = false;
+                        resp.Message = "Staff Code Already Exist";
+                        return resp;
+                    }
+
+                    // Identity User
+                    var user = await _userManager.FindByNameAsync(staff.StaffCode);
+
+                    if (user == null)
+                    {
+                        resp.Result = false;
+                        resp.Message = "Identity user not found";
+                        return resp;
+                    }
+
+                    // Username changed
+                    if (user.UserName != rm.StaffCode)
+                    {
+                        var userExist = await _userManager.FindByNameAsync(rm.StaffCode);
+
+                        if (userExist != null)
+                        {
+                            resp.Result = false;
+                            resp.Message = "User already exists with this Staff Code";
+                            return resp;
+                        }
+
+                        user.UserName = rm.StaffCode;
+                    }
+
+                    user.FullName = rm.Name;
+                    user.PhoneNumber = rm.Mobileno;
+                    user.Email = rm.Email;
+
+                    var updateUser = await _userManager.UpdateAsync(user);
+
+                    if (!updateUser.Succeeded)
+                    {
+                        resp.Result = false;
+                        resp.Message = string.Join(", ", updateUser.Errors.Select(x => x.Description));
+                        return resp;
+                    }
+
+                    // Password Update
+                    var passwordHasher = new PasswordHasher<ApplicationUser>();
+                    user.PasswordHash = passwordHasher.HashPassword(user, rm.Password);
+
+                    await _userManager.UpdateAsync(user);
+
+                    // Update Staff Table
+                    staff.Name = rm.Name;
+                    staff.Address = rm.Address;
+                    staff.AadharCardNo = rm.AadharCardNo;
+                    staff.StaffCode = rm.StaffCode;
+                    staff.Mobileno = rm.Mobileno;
+                    staff.DOB = rm.DOB;
+                    staff.Password = rm.Password;
+                    staff.Emailid = rm.Email;
+                    staff.Shopid = rm.Shopid;
+
+                    _context.tblStaff.Update(staff);
+                    await _context.SaveChangesAsync();
+
+                    resp.Result = true;
+                    resp.Message = "Staff Updated Successfully";
+                    return resp;
+                }
+
+                // ================= INSERT ===================
+
+                bool codeExist = await _context.tblStaff
                     .AnyAsync(x => x.StaffCode == rm.StaffCode);
 
-                if (staffCodeExist)
+                if (codeExist)
                 {
                     resp.Result = false;
                     resp.Message = "Staff Code Already Exist";
                     return resp;
                 }
 
-                // 🔹 Identity user exist check
                 var existingUser = await _userManager.FindByNameAsync(rm.StaffCode);
 
                 if (existingUser != null)
@@ -254,8 +347,7 @@ namespace POSModels.ViewModels
                     return resp;
                 }
 
-                // 🔹 Create Identity User
-                var user = new ApplicationUser
+                var newUser = new ApplicationUser
                 {
                     UserName = rm.StaffCode,
                     PhoneNumber = rm.Mobileno,
@@ -264,7 +356,7 @@ namespace POSModels.ViewModels
                     Password = rm.Password
                 };
 
-                var result = await _userManager.CreateAsync(user, rm.Password );
+                var result = await _userManager.CreateAsync(newUser, rm.Password);
 
                 if (!result.Succeeded)
                 {
@@ -273,62 +365,34 @@ namespace POSModels.ViewModels
                     return resp;
                 }
 
-                // 🔥 ROLE ASSIGNMENT
-                var roleResult = await _userManager.AddToRoleAsync(user, "Staff");
+                await _userManager.AddToRoleAsync(newUser, "Staff");
 
-                if (!roleResult.Succeeded)
-                {
-                    resp.Result = false;
-                    resp.Message = "User created but role assignment failed";
-                    return resp;
-                }
-
-                // 🔹 Save in your custom Staff table
                 EStaffModel es = new EStaffModel
                 {
                     Name = rm.Name,
                     Address = rm.Address,
-                    DOJ = DateTime.Now,   // FIXED (was undefined currentdate)
+                    DOJ = DateTime.Now,
                     AadharCardNo = rm.AadharCardNo,
                     StaffCode = rm.StaffCode,
                     Mobileno = rm.Mobileno,
                     DOB = rm.DOB,
-                    Password = rm.Password ,
-                    // ⚠️ better: store hash if needed
-                    Emailid=rm.Email,
-                    Shopid=rm.Shopid
+                    Password = rm.Password,
+                    Emailid = rm.Email,
+                    Shopid = rm.Shopid
                 };
 
                 _context.tblStaff.Add(es);
                 await _context.SaveChangesAsync();
 
-                // 🔹 Claims
-                var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.FullName ?? ""),
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? ""),
-            new Claim(ClaimTypes.Role, "Staff")
-        };
-
-                var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
-                var principal = new ClaimsPrincipal(identity);
-
-                await _httpContextAccessor.HttpContext.SignInAsync(
-                    IdentityConstants.ApplicationScheme,
-                    principal
-                );
-
-                // 🔹 Response
                 resp.Result = true;
                 resp.Message = "Staff Created Successfully";
 
                 resp.Extra = new Dictionary<int, string>
         {
-            { 1, user.Id ?? "" },
-            { 2, user.FullName ?? "" },
-            { 3, user.PhoneNumber ?? "" },
-            { 4, "Staff" }
+            {1,newUser.Id},
+            {2,newUser.FullName},
+            {3,newUser.PhoneNumber},
+            {4,"Staff"}
         };
 
                 return resp;

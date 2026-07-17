@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -31,7 +31,7 @@ namespace POSModels.ViewModels
         {
             try
             {
-                var ab = await _context.tblwarehouse
+                var ab = await _context.tblwarehouse.Where(x=>x.IsActive == true)
                     .Select(x => new WarehouseModel
                     {
                         Address = x.Address,
@@ -54,13 +54,45 @@ namespace POSModels.ViewModels
                 return new List<WarehouseModel>();
             }
         }
+        public AllResponseMessage DeleteOneWarehouse(int id)
+        {
+            try
+            {
+                var ab = (from d in _context.tblwarehouse where d.Id == id select d).FirstOrDefault();
+                if (ab != null)
+                {
+                    ab.IsActive = false;
+                    _context.tblwarehouse.Update(ab);
+                    _context.SaveChanges();
+                    return new AllResponseMessage
+                    {
+                        Result = true,
+                        Message = "Warehouse Deleted Successfully"
+                    };
+
+                }
+                else
+                {
+                    return new AllResponseMessage
+                    {
+                        Result = false,
+                        Message = "Warehouse Not Found"
+                    };
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public async Task<List<ShopModel>> GetAllShopList()
         {
             var data = await (
                 from s in _context.tblShop
                 join w in _context.tblwarehouse
                 on s.WarehouseId equals w.Id
-
+                where s.IActive==true
                 select new ShopModel
                 {
                     Id = s.Id,
@@ -76,6 +108,76 @@ namespace POSModels.ViewModels
             return data;
         }
 
+       
+        public AllResponseMessage DeleteOneShop(int id)
+        {
+            try
+            {
+                var ab = (from d in _context.tblShop where d.Id == id select d).FirstOrDefault();
+                if (ab != null)
+                {
+                    ab.IActive = false;
+                    _context.tblShop.Update(ab);
+                    _context.SaveChanges();
+                    return new AllResponseMessage
+                    {
+                        Result = true,
+                        Message = "Shop Deleted Successfully"
+                    };
+
+                }
+                else
+                {
+                    return new AllResponseMessage
+                    {
+                        Result = false,
+                        Message = "Shop Not Found with this ID"
+                    };
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public AllResponseMessage ChangeUnitStatus(int id)
+        {
+            try
+            {
+                var ab = (from d in _context.tblShop where d.Id == id select d).FirstOrDefault();
+                if (ab != null)
+                {
+                    if(ab.IActive==false)  
+                        ab.IActive = true;
+                    else
+                        ab.IActive = false;
+
+                    _context.tblShop.Update(ab);
+                    _context.SaveChanges();
+                    return new AllResponseMessage
+                    {
+                        Result = true,
+                        Message = "Unit Status Change Successfully"
+                    };
+
+                }
+                else
+                {
+                    return new AllResponseMessage
+                    {
+                        Result = false,
+                        Message = "Unit Not Found with this ID"
+                    };
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public async Task<AllResponseMessage> SaveShop(ShopModel model)
         {
             try
@@ -213,6 +315,7 @@ namespace POSModels.ViewModels
 
                 entity.CategoryName = model.CategoryName;
                 entity.CategoryCode = model.CategoryCode;
+                entity.IsActive = true;
 
                 if (model.Id == 0)
                     await _context.tblCategory.AddAsync(entity);
@@ -255,7 +358,7 @@ namespace POSModels.ViewModels
         {
             try
             {
-                return await _context.tblCategory
+                return await _context.tblCategory.Where(x=>x.IsActive==true)
                 .Select(x => new CategoryModel
                 {
                     Id = x.Id,
@@ -270,6 +373,28 @@ namespace POSModels.ViewModels
                 throw;
             }
             
+        }
+
+        public AllResponseMessage DeleteOneCategory(int id)
+        {
+            try
+            {
+                var ab = (from d in _context.tblCategory where d.Id == id select d).FirstOrDefault();
+                if (ab != null)
+                {
+                    ab.IsActive = false;
+                    _context.tblCategory.Update(ab);
+                    _context.SaveChanges();
+                    return new AllResponseMessage { Result = true, Message = "Delete Category Successfully" };
+                }
+                else
+                    return new AllResponseMessage { Result = false, Message = "Data Not Found" };
+            }
+            catch (Exception)
+            {
+
+                return new AllResponseMessage { Result = false, Message = "Some Error OCcured" };
+            }
         }
 
 
@@ -289,6 +414,7 @@ namespace POSModels.ViewModels
                     {
                         existingUnit.UnitName = um.UnitName;
                         existingUnit.ShortName = um.ShortName;
+                        existingUnit.IsActive = true;
 
                         _context.tblUnit.Update(existingUnit);
 
@@ -310,6 +436,7 @@ namespace POSModels.ViewModels
 
                     eu.UnitName = um.UnitName;
                     eu.ShortName = um.ShortName;
+                    eu.IsActive = true;
 
                     await _context.tblUnit.AddAsync(eu);
 
@@ -332,7 +459,7 @@ namespace POSModels.ViewModels
         {
             try
             {
-                var ab = (from d in _context.tblUnit
+                var ab = (from d in _context.tblUnit where d.IsActive == true
                           select new Unit
                           {
                               UnitName= d.UnitName,
@@ -345,6 +472,38 @@ namespace POSModels.ViewModels
             {
 
                 return new List<Unit>();
+            }
+        }
+        public AllResponseMessage DeleteOneUnit(int id)
+        {
+            try
+            {
+                var ab = (from d in _context.tblUnit where d.Id == id select d).FirstOrDefault();
+                if (ab != null)
+                {
+                    ab.IsActive = false;
+                    _context.tblUnit.Update(ab);
+                    _context.SaveChanges();
+                    return new AllResponseMessage
+                    {
+                        Result = true,
+                        Message = "Unit Deleted Successfully"
+                    };
+
+                }
+                else
+                {
+                    return new AllResponseMessage
+                    {
+                        Result = false,
+                        Message = "Unit Not Found with this ID"
+                    };
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
 
@@ -427,6 +586,38 @@ namespace POSModels.ViewModels
           
         }
 
+        public AllResponseMessage DeleteOneProduct(int id)
+        {
+            try
+            {
+                var ab = (from d in _context.tblProduct where d.Id == id select d).FirstOrDefault();
+                if (ab != null)
+                {
+                    ab.IsActive= false;
+                    _context.tblProduct.Update(ab);
+                    _context.SaveChanges();
+                    return new AllResponseMessage
+                    {
+                        Result = true,
+                        Message = "Product Deleted Successfully"
+                    };
+                }
+                else
+                {
+                    return new AllResponseMessage
+                    {
+                        Result = false,
+                        Message = "Product Not Found with this ID"
+                    };
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<List<SelectListItem>?> GetSelectedProductList()
         {
             try
@@ -450,8 +641,8 @@ namespace POSModels.ViewModels
         {
             try
             {
-                var prolist =await (from d in _context.tblProduct
-                               join c in _context.tblCategory on d.CategoryId equals c.Id
+                var prolist =await (from d in _context.tblProduct where d.IsActive == true
+                                    join c in _context.tblCategory on d.CategoryId equals c.Id
                                join u in _context.tblUnit on d.UnitId equals u.Id
                                     join s in _context.tblstock
                                     on d.Id equals s.ProductId into stockGroup
@@ -485,7 +676,44 @@ namespace POSModels.ViewModels
                 return new List<Product> { };
             }
         }
-
+        public async Task<List<Product>?> GetShopwiseAllProductList(int shopid)
+        {
+            try
+            {
+                var prolist = await (from d in _context.tblProduct
+                                     join c in _context.tblCategory on d.CategoryId equals c.Id
+                                     join u in _context.tblUnit on d.UnitId equals u.Id
+                                     join s in _context.tblshopstock.Where(x => x.ShopId == shopid)
+                                         on d.Id equals s.ProductId into stockGroup
+                                     from s in stockGroup.DefaultIfEmpty()
+                                     where d.IsActive == true
+                                     select new Product
+                                     {
+                                         ProductCode = d.ProductCode,
+                                         ProductName = d.ProductName,
+                                         CategoryName = c.CategoryName,
+                                         CategoryId = c.Id,
+                                         UnitName = u.UnitName,
+                                         GSTPercent = d.GSTPercent,
+                                         PurchaseRate = d.PurchaseRate,
+                                         SaleRate = d.SaleRate,
+                                         ExpiryDays = d.ExpiryDays,
+                                         CreatedDate = d.CreatedDate,
+                                         ImageUrl = d.ImageUrl,
+                                         Description = d.Description,
+                                         Id = d.Id,
+                                         UnitId = d.UnitId,
+                                         IsWeightMachine = d.IsWeightMachine,
+                                         IsPieceWise = d.IsPieceWise,
+                                         StockQuantity = s != null ? s.Quantity : 0,
+                                     }).ToListAsync();
+                return prolist;
+            }
+            catch (Exception)
+            {
+                return new List<Product> { };
+            }
+        }
         public Product GetProductDetails(int id)
         {
             try
@@ -537,19 +765,32 @@ namespace POSModels.ViewModels
 
             try
             {
-                var productionexist = await _context.tblProduction
-                    .AnyAsync(d => d.ProductionNo == pd.ProductionNo);
+                //var productionexist = await _context.tblProduction
+                //    .AnyAsync(d => d.ProductionNo == pd.ProductionNo);
 
-                if (productionexist)
-                {
-                    resp.Result = false;
-                    resp.Message = "Production no already exist";
-                    return resp;
-                }
+                //if (productionexist)
+                //{
+                //    resp.Result = false;
+                //    resp.Message = "Production no already exist";
+                //    return resp;
+                //}
+                //var productionno = await _context.tblProduction.OrderByDescending(x => x.Id).FirstOrDefaultAsync();
+                //string prevprodno = productionno.ProductionNo;
+                //if (productionno.ProductionNo == null)
+                //{
+                //    prevprodno = "PN0001";
+                //}
+
+                //int number = int.Parse(prevprodno.Substring(2));
+                //string next = $"PN{(number + 1):D4}";
+                // Format: PN + YearMonthDayHourMinuteSecond (e.g., PN202606271453)
+                string nextProductionNo = $"PN{DateTime.Now:yyyyMMddHHmmss}";
+
+                // Output Example: PN20260627145322 (27 June 2026, 2:53:22 PM)
 
                 EProduction ep = new EProduction
                 {
-                    ProductionNo = pd.ProductionNo,
+                    ProductionNo = nextProductionNo,
                     ProductionDate = pd.ProductionDate,
                     ProductId = pd.ProductId,
                     Remarks = pd.Remarks,
@@ -663,6 +904,7 @@ namespace POSModels.ViewModels
             {
                 var ab = (from d in _context.tblStaff
                           join s in _context.tblShop on d.Shopid equals s.Id
+                          
                           select new StaffModel
                           {
                               Name=d.Name,
@@ -674,7 +916,10 @@ namespace POSModels.ViewModels
                               DOB=d.DOB,
                               Address=d.Address,
                               StaffCode=d.StaffCode,
-                              ShopName=s.ShopName
+                              ShopName=s.ShopName,
+                              Shopid = s.Id,
+                              Id =d.Id,
+                              IsActive=d.IsActive
                           }).ToList();
                 return ab;
             }
@@ -684,56 +929,146 @@ namespace POSModels.ViewModels
                 return new List<StaffModel> { };
             }
         }
+        public AllResponseMessage DeleteOneStaff(int id)
+        {
+            try
+            {
+                var staff = _context.tblStaff.FirstOrDefault(d => d.Id == id);
+                if (staff != null)
+                {
+                    staff.IsActive = false;
+                    _context.tblStaff.Update(staff);
 
+                    var user = _context.Users.FirstOrDefault(x=>x.UserName==staff.StaffCode);
+                    if (user != null)
+                    {
+                        user.LockoutEnabled = false;
+                        user.LockoutEnd = DateTimeOffset.MaxValue;
+                        _context.Users.Update(user);
+                    }
+
+                    _context.SaveChanges();
+                    return new AllResponseMessage
+                    {
+                        Result = true,
+                        Message = "Staff deleted successfully"
+                    };
+                }
+                else
+                {
+                    return new AllResponseMessage
+                    {
+                        Result = false,
+                        Message = "Staff not found with this ID"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new AllResponseMessage
+                {
+                    Result = false,
+                    Message = "Error: " + ex.Message
+                };
+            }
+        }
+        public AllResponseMessage EnabledOneStaff(int id)
+        {
+            try
+            {
+                var staff = _context.tblStaff.FirstOrDefault(d => d.Id == id);
+                if (staff != null)
+                {
+                    staff.IsActive = true;
+                    _context.tblStaff.Update(staff);
+
+                    var user = _context.Users.FirstOrDefault(x=>x.UserName==staff.StaffCode);
+                    if (user != null)
+                    {
+                        user.LockoutEnabled = true;  // lockout system active
+                        user.LockoutEnd = null;       // but abhi locked nahi hai
+                        _context.Users.Update(user);
+                    }
+
+                    _context.SaveChanges();
+                    return new AllResponseMessage
+                    {
+                        Result = true,
+                        Message = "Staff enabled successfully"
+                    };
+                }
+                else
+                {
+                    return new AllResponseMessage
+                    {
+                        Result = false,
+                        Message = "Staff not found with this ID"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new AllResponseMessage
+                {
+                    Result = false,
+                    Message = "Error: " + ex.Message
+                };
+            }
+        }
         public Task<AllResponseMessage> SaveWarehouse(WarehouseModel wm)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<dynamic> GetAllSendStockTransferList(
-     string warehousecode,
-     DateTime? fromDate,
-     DateTime? toDate)
+        public async Task<IEnumerable<object>> GetAllSendStockTransferList(
+      string warehousecode,
+      DateTime? fromDate,
+      DateTime? toDate)
         {
-            var query =
-                from d in _context.tblStockTransfer
-                join wa in _context.tblwarehouse on d.FromShopId equals wa.Id
-                join sh in _context.tblShop on d.ToShopId equals sh.Id
-                join s in _context.tblStockTransferDetails on d.Id equals s.TransferId
-                join p in _context.tblProduct on s.ProductId equals p.Id
-                join u in _context.tblUnit on p.UnitId equals u.Id
-                join c in _context.tblCategory on p.CategoryId equals c.Id
-                where d.TransactionType == "Issue"
-                   && (wa.WarehouseCode == warehousecode || warehousecode=="Admin")
-                select new
+            var query = from d in _context.tblStockTransfer
+                        join wa in _context.tblwarehouse on d.FromShopId equals wa.Id
+                        join sh in _context.tblShop on d.ToShopId equals sh.Id
+                        join s in _context.tblStockTransferDetails on d.Id equals s.TransferId
+                        join p in _context.tblProduct on s.ProductId equals p.Id
+                        join u in _context.tblUnit on p.UnitId equals u.Id
+                        join c in _context.tblCategory on p.CategoryId equals c.Id
+                        select new
+                        {
+                            warehousename = wa.WarehouseName,
+                            warehouseCode = wa.WarehouseCode,
+                            shopName = sh.ShopName,
+                            productName = p.ProductName,
+                            unitName = u.UnitName,
+                            categoryName = c.CategoryName,
+                            transactionType = d.TransactionType,
+                            transferDate = d.TransferDate,
+                            quantity = s.Quantity,
+                            transferId = s.TransferId
+                        };
+
+            if (!string.IsNullOrEmpty(warehousecode))
+            {
+                var isWarehouseExists = await _context.tblwarehouse.AnyAsync(w => w.WarehouseCode == warehousecode);
+                if (isWarehouseExists)
                 {
-                    Warehousename = wa.WarehouseName,
-                    ShopName = sh.ShopName,
-                    ProductName = p.ProductName,
-                    UnitName = u.UnitName,
-                    CategoryName = c.CategoryName,
-                    TransactionType = d.TransactionType,
-                    TransferDate = d.TransferDate,
-                    Quantity = s.Quantity,
-                    TransferId = s.TransferId
-                };
+                    query = query.Where(x => x.warehouseCode == warehousecode);
+                }
+            }
 
             if (fromDate.HasValue)
-                query = query.Where(x => x.TransferDate.Date >= fromDate.Value.Date);
+                query = query.Where(x => x.transferDate.Date >= fromDate.Value.Date);
 
             if (toDate.HasValue)
-                query = query.Where(x => x.TransferDate.Date <= toDate.Value.Date);
+                query = query.Where(x => x.transferDate.Date <= toDate.Value.Date);
 
             return await query
-                .OrderByDescending(x => x.TransferDate)
+                .OrderByDescending(x => x.transferDate)
                 .ToListAsync();
         }
 
-
-
         public GeneralModel GetAllDashboardData()
         {
-            GeneralModel gm=new GeneralModel();
+            GeneralModel gm = new GeneralModel();
             try
             {
                 var ab = (from d in _context.tblwarehouse select d).ToList();
@@ -741,23 +1076,110 @@ namespace POSModels.ViewModels
                 var cd = (from d in _context.tblProduct select d).ToList();
                 var de = (from d in _context.tblStaff select d).ToList();
                 var ef = (from d in _context.tblCategory select d).ToList();
-               
 
                 gm.TotalShop = bc.Count();
                 gm.TotalWarehouse = ab.Count();
                 gm.TotalProduct = cd.Count();
                 gm.TotalStaff = de.Count();
                 gm.TotalCategory = ef.Count();
-                return gm;
 
+                // Dynamic Dashboard Metrics
+                var today = DateTime.Today;
+
+                gm.TotalRevenue = _context.tblSaleInvoice.Any() ? _context.tblSaleInvoice.Sum(x => x.TotalAmount) : 0.00m;
+                gm.TotalOrders = _context.tblSaleInvoice.Count();
+                
+                gm.TodaySales = _context.tblSaleInvoice.Where(x => x.InvoiceDate.Date == today).Any() 
+                                ? _context.tblSaleInvoice.Where(x => x.InvoiceDate.Date == today).Sum(x => x.TotalAmount) 
+                                : 0.00m;
+
+                var stockValueQuery = (from s in _context.tblstock
+                                       join p in _context.tblProduct on s.ProductId equals p.Id
+                                       select s.Quantity * p.SaleRate);
+                gm.TotalStockValue = stockValueQuery.Any() ? stockValueQuery.Sum() : 0.00m;
+
+                gm.LowStockAlerts = _context.tblstock.Any(x => x.Quantity <= 10) ? _context.tblstock.Count(x => x.Quantity <= 10) : 0;
+                gm.ActiveShops = _context.tblShop.Count(x => x.IActive);
+                gm.ActiveUsers = _context.tblStaff.Count(x => x.IsActive);
+
+                // Recent Activities Generator
+                var recentInvoices = _context.tblSaleInvoice
+                    .OrderByDescending(x => x.InvoiceDate)
+                    .Take(3)
+                    .ToList();
+                foreach (var inv in recentInvoices)
+                {
+                    gm.RecentActivities.Add(new RecentActivityModel
+                    {
+                        Title = $"Order #{inv.InvoiceNumber} generated",
+                        Description = $"Amount: ₹{inv.TotalAmount:N2} · Cust: {inv.CustomerName ?? "Cash"}",
+                        TimeAgo = GetTimeAgo(inv.InvoiceDate),
+                        Icon = "✅",
+                        IconClass = "ic-green"
+                    });
+                }
+
+                var recentTransfers = _context.tblStockTransfer
+                    .OrderByDescending(x => x.TransferDate)
+                    .Take(2)
+                    .ToList();
+                foreach (var st in recentTransfers)
+                {
+                    gm.RecentActivities.Add(new RecentActivityModel
+                    {
+                        Title = $"Stock Transfer #{st.Id} sent",
+                        Description = $"Date: {st.TransferDate:dd-MM-yyyy}",
+                        TimeAgo = GetTimeAgo(st.TransferDate),
+                        Icon = "🏭",
+                        IconClass = "ic-blue"
+                    });
+                }
+
+                var recentProductions = _context.tblProduction
+                    .OrderByDescending(x => x.ProductionDate)
+                    .Take(2)
+                    .ToList();
+                foreach (var prod in recentProductions)
+                {
+                    var prodName = _context.tblProduct.Where(x => x.Id == prod.ProductId).Select(z => z.ProductName).FirstOrDefault() ?? "Product";
+                    gm.RecentActivities.Add(new RecentActivityModel
+                    {
+                        Title = $"Production Batch #{prod.ProductionNo} completed",
+                        Description = $"{prodName} · Qty: {prod.Quantity}",
+                        TimeAgo = GetTimeAgo(prod.ProductionDate),
+                        Icon = "⚙️",
+                        IconClass = "ic-purple"
+                    });
+                }
+
+                // If activities are still empty, inject a default welcome activity
+                if (gm.RecentActivities.Count == 0)
+                {
+                    gm.RecentActivities.Add(new RecentActivityModel
+                    {
+                        Title = "Welcome to Sri Sai Sweets POS System",
+                        Description = "Database is set up and all modules are ready for operation.",
+                        TimeAgo = "Just now",
+                        Icon = "👤",
+                        IconClass = "ic-blue"
+                    });
+                }
+
+                return gm;
             }
             catch (Exception)
             {
-
-                return new GeneralModel();
+                return gm;
             }
         }
 
-
+        private static string GetTimeAgo(DateTime dt)
+        {
+            var span = DateTime.Now - dt;
+            if (span.TotalMinutes < 1) return "Just now";
+            if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
+            if (span.TotalHours < 24) return $"{(int)span.TotalHours}h ago";
+            return $"{(int)span.TotalDays}d ago";
+        }
     }
 }

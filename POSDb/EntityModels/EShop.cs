@@ -19,6 +19,7 @@ namespace POSDb.EntityModels
 
         // ✅ Foreign Key
         public int WarehouseId { get; set; }
+        public bool IActive { get; set; } = true;
 
         // ✅ Navigation Property
         public EWarehouseModel Warehouse { get; set; }

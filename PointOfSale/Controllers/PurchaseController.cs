@@ -63,9 +63,28 @@ namespace PointOfSale.Controllers
 
             return View(rawPurchaseModel);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> PurchaseEntry(RawPurchaseModel model)
+        {
+            AllResponseMessage resp = _purchaseservice.SavePurchaseEntry(model);
+
+            if (resp.Result==true)
+                TempData["Success"] = resp.Message;
+            else
+                TempData["Error"] = resp.Message;
+
+            return RedirectToAction("PurchaseEntry");
+        }
         public IActionResult AllPurchaseEntryList()
         {
-            return View();
+            List<RawPurchaseModel> ab = _purchaseservice.GetAllPurchaseEntryList();
+            return View(ab);
+        }
+        public IActionResult AllPurchaseEntryDetailList(int id)
+        {
+            var ab = _purchaseservice.GetAllPurchaseEntryDetailList(id);
+            return Ok(new { data = ab });
         }
         public IActionResult ViewStock()
         {

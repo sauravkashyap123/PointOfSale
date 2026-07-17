@@ -1,6 +1,7 @@
-﻿using POSDb.EntityModels;
+using POSDb.EntityModels;
 using POSModels.Models;
 using POSModels.Models.MithaiShop;
+using POSModels.Models.WarehouseStockTransfer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,8 +18,10 @@ namespace POSModels.Services
         public (List<CartModel> ls, bool status) GetAllClearCart(int staffid);
         public Task<List<ShopSaleListVM>> GetAllItemShopSaleList(int shopid);
         public List<ShopSettingModel> GetAllPrintDataContent();
+        
         public Task<List<dynamic>> getAllStockList();
         public List<CartModel> GetCart(int productId,int staffid);
+        public int GetCurrentShopId(string? userid);
         public string GetGenerateBillNo();
         public Task<InvoicePrintModel?> GetInvoiceAllDetailsById(int invoiceId, string invoiceNumber);
         public ShopSettingModel GetPrintDataById(int value);
@@ -31,5 +34,10 @@ namespace POSModels.Services
         public Task<AllResponseMessage> SaveCart(int productId, int qty,int staffid,int shopid);
         public Task<AllResponseMessage> SaveStockTransfer(List<StockTransferVM> items, int warehouseid);
         public AllResponseMessage SaveUpdatedCart(int productId, int qty, int staffid,string type);
+        public Task<AllResponseMessage> ShopToWarehouseTransferAsync(ShopToWarehouseTransferRequest request);
+
+        public Task<List<StockAdjustmentListDto>> GetAllStockAdjustmentList(string? warehousecode, DateTime? fromDate, DateTime? toDate);
+        public Task<AllResponseMessage> CreateBulkOrderAsync(BulkOrderModel model, int shopid, int staffid);
+        public Task<List<BulkOrderModel>> GetAllBulkOrdersAsync();
     }
 }

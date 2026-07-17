@@ -314,7 +314,6 @@
         }
 </style>
 
-
 <div class="pu-page">
 
     <!-- ===== TOP BAR ===== -->
@@ -326,7 +325,7 @@
         <span class="pu-status-badge">Draft</span>
     </div>
 
-    <form method="post" asp-action="AddPurchase">
+    <form method="post" asp-controller="Purchase" asp-action="PurchaseEntry">
 
         <!-- ===== PURCHASE DETAILS ===== -->
         <div class="section-card">
@@ -349,12 +348,12 @@
                         <input type="date" class="form-control" asp-for="PurchaseDate" />
                     </div>
 
-                    <div class="f-group">
+                   @*  <div class="f-group">
                         <label>Warehouse</label>
-                        <select class="form-control" asp-for="WarehouseId">
+                        <select class="form-control" asp-for="WarehouseId" asp-items="@Model.War">
                             <option value="">Select warehouse</option>
                         </select>
-                    </div>
+                    </div> *@
 
                     <div class="f-group">
                         <label>Remarks</label>

@@ -1,4 +1,4 @@
-﻿@model POSModels.Models.InvoicePrintModel
+@model POSModels.Models.InvoicePrintModel
 
 @{
     Layout = null;
@@ -163,16 +163,38 @@
             <span>@Model.InvoiceDate.ToString("dd-MM-yyyy hh:mm tt")</span>
         </div>
 
+        @{
+            var cleanCustomerName = "Walk In";
+            if (!string.IsNullOrWhiteSpace(Model.CustomerName))
+            {
+                var trimmed = Model.CustomerName.Trim();
+                if (trimmed != "—" && trimmed != "-")
+                {
+                    cleanCustomerName = Model.CustomerName;
+                }
+            }
+
+            var cleanMobileNo = "";
+            if (!string.IsNullOrWhiteSpace(Model.MobileNo))
+            {
+                var trimmed = Model.MobileNo.Trim();
+                if (trimmed != "—" && trimmed != "-")
+                {
+                    cleanMobileNo = Model.MobileNo;
+                }
+            }
+        }
+
         <div class="row">
             <span>Customer</span>
-            <span>@Model.CustomerName</span>
+            <span>@cleanCustomerName</span>
         </div>
 
-        @if (!string.IsNullOrEmpty(Model.MobileNo))
+        @if (!string.IsNullOrEmpty(cleanMobileNo))
         {
             <div class="row">
                 <span>Mobile</span>
-                <span>@Model.MobileNo</span>
+                <span>@cleanMobileNo</span>
             </div>
         }
 
@@ -231,7 +253,7 @@
 
             <div class="row">
                 <span>Gross Amount</span>
-                <span>₹ @Model.GrossAmount.ToString("N2")</span>
+                <span>Rs. @Model.GrossAmount.ToString("N2")</span>
             </div>
 
             <div class="row">
@@ -239,7 +261,7 @@
                     Discount (@Model.DiscountPercent%)
                 </span>
                 <span>
-                    ₹ @Model.DiscountAmount.ToString("N2")
+                    Rs. @Model.DiscountAmount.ToString("N2")
                 </span>
             </div>
 
@@ -247,7 +269,7 @@
 
             <div class="row grand-total">
                 <span>NET TOTAL</span>
-                <span>₹ @Model.TotalAmount.ToString("N2")</span>
+                <span>Rs. @Model.TotalAmount.ToString("N2")</span>
             </div>
 
         </div>

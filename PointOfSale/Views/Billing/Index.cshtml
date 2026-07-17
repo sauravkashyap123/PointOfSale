@@ -1,4 +1,4 @@
-﻿@using System.Text.Json
+@using System.Text.Json
 @{
     ViewData["Title"] = "Billing";
     var allproducts = ViewBag.Products as List<POSModels.Models.MithaiShop.Product> ?? new ();
@@ -274,11 +274,11 @@ header{background:var(--dark);padding:0 20px;height:58px;display:flex;align-item
   <div class="h-div"></div>
   <div class="store-chip">
     <i class="ti ti-building-store"></i>
-    <span>My Sweet &amp; Retail Store</span>
+    <span>@(ViewBag.ShopName ?? "My Sweet & Retail Store")</span>
   </div>
 
   <div class="h-right">
-    <button class="h-btn" title="Bulk Order" onclick="alert('Bulk Order module')">
+    <button class="h-btn" title="Bulk Order" onclick="openBulkOrderModal()">
       <i class="ti ti-truck-delivery"></i><span>Bulk Order</span>
     </button>
     <button class="h-btn" title="Stock" onclick="alert('Stock module')">
@@ -295,6 +295,9 @@ header{background:var(--dark);padding:0 20px;height:58px;display:flex;align-item
                 <span class="acc-name">@ViewBag.StaffName</span>
       <i class="ti ti-chevron-down" style="font-size:12px;color:var(--muted);margin-left:2px"></i>
     </div>
+    <div class="acc-wrap">
+      <a href="/Account/Logout" class="" style="color:white;">Logout</a>        
+    </div>
   </div>
 </header>
 
@@ -305,9 +308,9 @@ header{background:var(--dark);padding:0 20px;height:58px;display:flex;align-item
     <input type="text" id="searchInput" placeholder="Search products by name or SKU..." oninput="filterProducts()">
     <i class="ti ti-x" style="cursor:pointer;font-size:15px;color:var(--muted)" onclick="clearSearch()" title="Clear"></i>
   </div>
-  <button class="scan-btn" title="Scan Barcode">
-    <i class="ti ti-barcode"></i><span>Scan</span>
-  </button>
+        <button class="scan-btn" title="Scan Barcode" onclick="openScanner()">
+            <i class="ti ti-barcode"></i><span>Scan</span>
+        </button>
   <button class="filter-btn active" id="catBtn" onclick="toggleFilter('cat')" title="Categories">
     <i class="ti ti-layout-grid"></i><span>Categories</span>
   </button>
@@ -452,9 +455,9 @@ header{background:var(--dark);padding:0 20px;height:58px;display:flex;align-item
   <div class="bill-modal">
     <div class="bill-print" id="billPrint">
       <div class="bill-top">
-        <div class="bill-logo">Shop<span>Flow</span></div>
-        <div class="bill-store">My Sweet &amp; Retail Store</div>
-        <div class="bill-store">123 Market Street · Tel: +91 98765 43210</div>
+        <div class="bill-logo">@(ViewBag.ShopName ?? "Sri Sai Sweets")</div>
+        <div class="bill-store">@(ViewBag.Address ?? "Main Road, Jamshedpur")</div>
+        <div class="bill-store">Tel: @(ViewBag.Mobileno ?? "+91 0000000000")@(!string.IsNullOrEmpty(ViewBag.Gstnumber) ? " · GSTIN: " + ViewBag.Gstnumber : "")</div>
         <div class="bill-meta" id="billMeta"></div>
       </div>
       <div class="bill-items-head">
@@ -473,6 +476,54 @@ header{background:var(--dark);padding:0 20px;height:58px;display:flex;align-item
     <div class="bill-actions">
       <button class="btn-close-bill" onclick="closeBill()"><i class="ti ti-x"></i> Close</button>
       <button class="btn-print-bill" onclick="printBill()"><i class="ti ti-printer"></i> Print Bill</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BULK ORDER MODAL ═══ -->
+<div class="modal-overlay" id="bulkOrderModal" style="display:none" onclick="closeBulkOrderOutside(event)">
+  <div class="bill-modal" style="width: 420px; padding: 20px; background: #fff; border-radius: 16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+      <h3 style="font-size:16px; font-weight:700; color:var(--dark); display:flex; align-items:center; gap:6px;"><i class="ti ti-truck-delivery" style="color:var(--or); font-size:20px;"></i>Create Bulk Order</h3>
+      <button onclick="closeBulkOrderModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted);">&times;</button>
+    </div>
+    
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label style="font-size:12px; font-weight:600; color:var(--text);">Customer Name <span style="color:var(--red)">*</span></label>
+        <input type="text" id="boCustomerName" placeholder="e.g. Rakesh Sharma" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; outline:none;" />
+      </div>
+      
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label style="font-size:12px; font-weight:600; color:var(--text);">Customer Contact <span style="color:var(--red)">*</span></label>
+        <input type="text" id="boContactNumber" placeholder="e.g. 9876543210" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; outline:none;" />
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label style="font-size:12px; font-weight:600; color:var(--text);">Delivery Date &amp; Time <span style="color:var(--red)">*</span></label>
+        <input type="datetime-local" id="boDeliveryDate" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; outline:none;" />
+      </div>
+
+      <div style="display:flex; gap:12px;">
+        <div style="flex:1; display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:12px; font-weight:600; color:var(--text);">Total Amount (Rs)</label>
+          <input type="text" id="boTotalAmount" readonly style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; background:#f8fafc; font-weight:700; color:var(--or2); text-align:center;" />
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:4px;">
+          <label style="font-size:12px; font-weight:600; color:var(--text);">Advance Paid <span style="color:var(--red)">*</span></label>
+          <input type="number" id="boAdvanceAmount" min="0" placeholder="e.g. 500" style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; text-align:center; outline:none;" />
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <label style="font-size:12px; font-weight:600; color:var(--text);">Remarks / Event Details</label>
+        <textarea id="boRemarks" placeholder="Optional - wedding party, custom packaging requests..." style="width:100%; height:60px; padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-size:13px; resize:none; outline:none; font-family:var(--font);"></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
+      <button onclick="closeBulkOrderModal()" style="flex:1; padding:10px; border-radius:8px; border:1.5px solid var(--border); background:none; cursor:pointer; font-size:13px; font-weight:600; color:var(--muted);">Cancel</button>
+      <button onclick="submitBulkOrder()" style="flex:1; padding:10px; border-radius:8px; border:none; background:var(--or); color:#fff; cursor:pointer; font-size:13px; font-weight:600;">Save Bulk Order</button>
     </div>
   </div>
 </div>
