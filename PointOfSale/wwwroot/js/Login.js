@@ -1,4 +1,4 @@
-﻿// ── GLOBALS & CONFIGURATION ──
+// ── GLOBALS & CONFIGURATION ──
 const ROLE_CFG = {
     staff: {
         title: 'Point of Sale',
@@ -205,7 +205,7 @@ async function doPinLogin() {
     clearAlert();
 
     try {
-        const response = await fetch('Account/PinLogin', {
+        const response = await fetch('/Account/PinLogin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ Username: id, Pin: pinBuf, Role: currentRole })

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -21,5 +21,7 @@ namespace POSDb.EntityModels
         public string? Address { get; set; }
 
         public int ShopId { get; set; }
+
+        public bool IsActive { get; set; } = true;
     }
 }

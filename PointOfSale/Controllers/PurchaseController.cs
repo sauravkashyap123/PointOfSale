@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using POSModels.Models;
 using POSModels.Models.PurchaseEntry;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PointOfSale.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "admin,Admin")]
     public class PurchaseController : Controller
     {
         private readonly IHomeService _homeservice;

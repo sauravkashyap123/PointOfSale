@@ -1,4 +1,4 @@
-﻿var table;
+var table;
 var allData = [];
 
 function loadData() {
@@ -357,17 +357,24 @@ $(document).on("click", ".btn-print-invoice", function () {
         + '</div>'
         + '<div class="bill-footer">Thank you for your purchase!<br>' + (info.shopName || 'MithaiShop') + '</div>';
 
-    var html = '<!DOCTYPE html><html><head><title>Invoice ' + invoice + '</title><style>' + css + '</style></head><body>' + content + '</body></html>';
+    var html = '<!DOCTYPE html><html><head><title>Invoice ' + invoice + '</title><style>' + css + '</style></head><body>' + content 
+             + '<script>'
+             + 'window.onload = function() { '
+             + '  setTimeout(function() { '
+             + '    window.print(); '
+             + '    try { window.close(); } catch(e) {} '
+             + '  }, 300); '
+             + '};'
+             + '</script>'
+             + '</body></html>';
 
     var blob = new Blob([html], { type: 'text/html' });
     var url = URL.createObjectURL(blob);
     var w = window.open(url, '_blank', 'width=420,height=650');
-
     if (w) {
-        w.onload = function () {
-            w.print();
+        setTimeout(function() {
             URL.revokeObjectURL(url);
-        };
+        }, 10000);
     }
 });
 

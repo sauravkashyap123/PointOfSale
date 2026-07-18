@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = "~/Views/Shared/_SideLayout.cshtml";
 }
 @model POSModels.Models.ShopSettingModel
@@ -344,13 +344,14 @@
 
                 <div class="row">
                 
-                    <input type="hidden" id="Id" name="Id" value="0" />
+                    <input type="hidden" id="Id" name="Id" value="@Model.Id" />
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Store Name</label>
                         <input type="text"
                                id="StoreName"
                                name="StoreName"
+                               value="@Model.StoreName"
                                class="form-control"
                                placeholder="Enter Store Name" />
                     </div>
@@ -359,6 +360,7 @@
                         <label class="form-label">Shop</label>
                         <select id="ShopId"
                                 name="ShopId"
+                                asp-for="ShopId"
                                 asp-items="Model.selectshoplist"
                                 class="form-select">
                             <option value="">-- Select Shop --</option>
@@ -370,6 +372,7 @@
                         <input type="text"
                                id="GSTNumber"
                                name="GSTNumber"
+                               value="@Model.GSTNumber"
                                class="form-control"
                                placeholder="Enter GST Number" />
                     </div>
@@ -379,6 +382,7 @@
                         <input type="text"
                                id="MobileNo"
                                name="MobileNo"
+                               value="@Model.MobileNo"
                                class="form-control"
                                maxlength="10"
                                placeholder="Enter Mobile Number" />
@@ -390,7 +394,7 @@
                                   name="Address"
                                   class="form-control"
                                   rows="3"
-                                  placeholder="Enter Store Address"></textarea>
+                                  placeholder="Enter Store Address">@Model.Address</textarea>
                     </div>
                 </div>
 
@@ -426,8 +430,15 @@
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 
 <script>
-
-   
+    $(document).ready(function () {
+        if ($("#Id").val() !== "0") {
+            $("#editBadge").show();
+            $("#btnCancel").show();
+        } else {
+            $("#editBadge").hide();
+            $("#btnCancel").hide();
+        }
+    });
 
     $("#storeSettingsForm").on("submit", function (e) {
         e.preventDefault();
@@ -455,7 +466,7 @@
                 if (response.status) {
                     alert(response.message);
                     resetForm();                    
-                    window.location.href = "/Billing/PrintBillData";
+                    window.location.href = "/Billing/AllPrintDataContent";
                 } else {
                     alert(response.message);
                 }
@@ -467,7 +478,7 @@
     });
 
     $("#btnCancel").on("click", function () {
-        resetForm();
+        window.location.href = "/Billing/AllPrintDataContent";
     });
 
     function resetForm() {
@@ -476,7 +487,4 @@
         $("#editBadge").hide();         // Hide edit badge
         $("#btnCancel").hide();         // Hide cancel button
     }
-
-  
-
 </script>

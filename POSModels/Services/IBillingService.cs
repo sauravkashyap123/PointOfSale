@@ -39,5 +39,6 @@ namespace POSModels.Services
         public Task<List<StockAdjustmentListDto>> GetAllStockAdjustmentList(string? warehousecode, DateTime? fromDate, DateTime? toDate);
         public Task<AllResponseMessage> CreateBulkOrderAsync(BulkOrderModel model, int shopid, int staffid);
         public Task<List<BulkOrderModel>> GetAllBulkOrdersAsync();
+        public AllResponseMessage DeletePrintData(int id);
     }
 }

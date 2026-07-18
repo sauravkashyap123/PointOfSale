@@ -2,6 +2,7 @@
     Layout = "~/Views/Shared/_SideLayout.cshtml";
     ViewBag.Title = "Warehouse Dashboard";
 }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
     .db-container {
@@ -181,22 +182,48 @@
         <div class="stat-card">
             <div class="stat-icon icon-blue"><i class="ti ti-packages"></i></div>
             <div class="stat-info">
-                <span class="stat-num">Active</span>
-                <span class="stat-label">Inventory Tracked</span>
+                <span class="stat-num" id="activeStockVal">—</span>
+                <span class="stat-label">Items In Stock</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon icon-green"><i class="ti ti-transfer"></i></div>
             <div class="stat-info">
-                <span class="stat-num">Transfers</span>
-                <span class="stat-label">Shop Replenishments</span>
+                <span class="stat-num" id="totalTransfersVal">—</span>
+                <span class="stat-label">Stock Transfers Logged</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon icon-purple"><i class="ti ti-adjustments"></i></div>
             <div class="stat-info">
-                <span class="stat-num">Adjusted</span>
-                <span class="stat-label">Stock Adjustments</span>
+                <span class="stat-num" id="totalAdjustmentsVal">—</span>
+                <span class="stat-label">Stock Adjustments Logged</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANALYTICS SECTION -->
+    <div style="margin-bottom: 32px;">
+        <h2 class="section-title">Warehouse Analytics</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <!-- Stock Levels Chart -->
+            <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <h3 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i class="ti ti-chart-bar" style="font-size: 18px; color: #7c3aed;"></i> Top Stock Items
+                </h3>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="whStockChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Transfer Destinations Chart -->
+            <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <h3 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i class="ti ti-chart-donut" style="font-size: 18px; color: #10b981;"></i> Transfers to Shop Outlets
+                </h3>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="whTransfersChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -261,3 +288,75 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch('/Warehouse/GetWarehouseDashboardData')
+            .then(res => res.json())
+            .then(data => {
+                // Populate KPI Stats
+                document.getElementById('activeStockVal').textContent = data.activeStockItems;
+                document.getElementById('totalTransfersVal').textContent = data.totalTransfers;
+                document.getElementById('totalAdjustmentsVal').textContent = data.totalAdjustments;
+
+                // Update subtitle if needed
+                var subtitle = document.querySelector('.db-subtitle');
+                if (subtitle && data.warehouseName) {
+                    subtitle.textContent = "Manage stock transfers and adjustments for " + data.warehouseName + ".";
+                }
+
+                // Render Top Stock Items Chart (Horizontal Bar Chart)
+                var stockCtx = document.getElementById('whStockChart').getContext('2d');
+                new Chart(stockCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.stock.labels.length > 0 ? data.stock.labels : ['No Stock Items'],
+                        datasets: [{
+                            label: 'Stock Quantity',
+                            data: data.stock.values.length > 0 ? data.stock.values : [0],
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 4,
+                            barThickness: 15
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'Segoe UI', size: 11 } } },
+                            y: { grid: { display: false }, ticks: { font: { family: 'Segoe UI', size: 11 } } }
+                        }
+                    }
+                });
+
+                // Render Transfer destinations (Doughnut Chart)
+                var transfersCtx = document.getElementById('whTransfersChart').getContext('2d');
+                new Chart(transfersCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.destinations.labels.length > 0 ? data.destinations.labels : ['No Transfers'],
+                        datasets: [{
+                            data: data.destinations.values.length > 0 ? data.destinations.values : [1],
+                            backgroundColor: data.destinations.values.length > 0 
+                                ? ['#10b981', '#6366f1', '#f59e0b', '#ec4899', '#ef4444', '#06b6d4'] 
+                                : ['#e2e8f0'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 10, font: { family: 'Segoe UI', size: 10 } }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error("Error loading warehouse dashboard data:", err));
+    });
+</script>

@@ -44,7 +44,7 @@ namespace PointOfSale.Controllers
                 {
                     result = true,
                     message = resp.Message,
-                    redirect = Url.Action("Index", "Home")
+                    redirect = resp.redirect ?? Url.Action("Index", "Home")
                 });
             }
 

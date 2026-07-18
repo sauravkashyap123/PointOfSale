@@ -1,4 +1,4 @@
-﻿
+
 let cart = [];
 
 $(document).ready(function () {
@@ -451,17 +451,15 @@ async function processBill() {
         showToast(data.message);
 
 
-        setTimeout(() => {
+        var printUrl = '/Billing/PrintBill?invoiceId=' +
+            data.invoiceId +
+            '&invoiceNumber=' +
+            encodeURIComponent(data.invoiceNumber);
 
-            window.open(
-                '/Billing/PrintBill?invoiceId=' +
-                data.invoiceId +
-                '&invoiceNumber=' +
-                encodeURIComponent(data.invoiceNumber),
-                '_blank'
-            );
-
-        }, 2000);
+        var printWindow = window.open(printUrl, '_blank');
+        if (!printWindow) {
+            showToast('Popup blocked! Please allow popups for this site.', true);
+        }
     }
     else {
 

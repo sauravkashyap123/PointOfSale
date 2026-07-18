@@ -39,7 +39,7 @@ namespace POSModels.ViewModels
             try
             {
                 // 1. Initial Validation (Null & Empty Check)
-                if (lm == null || string.IsNullOrEmpty(lm.Username) || (string.IsNullOrEmpty(lm.Password)))
+                if (lm == null || string.IsNullOrEmpty(lm.Username) || (string.IsNullOrEmpty(lm.Password) && string.IsNullOrEmpty(lm.Pin)))
                 {
                     resp.Result = false;
                     resp.Message = "Username and credentials are required";
@@ -48,6 +48,11 @@ namespace POSModels.ViewModels
 
                 // Role input format normalize karein
                 string requestRole = lm.Role?.ToLower();
+                if (requestRole == "warehouse")
+                {
+                    requestRole = "warehouse manager";
+                }
+
                 if (requestRole != "admin" && requestRole != "staff" && requestRole != "warehouse manager")
                 {
                     resp.Result = false;
@@ -65,7 +70,7 @@ namespace POSModels.ViewModels
                 }
 
                 // 3. Credentials Check (Password ya PIN jo bhi input ho)
-                string secretToVerify = !string.IsNullOrEmpty(lm.Password)?lm.Password:lm.Password;
+                string secretToVerify = !string.IsNullOrEmpty(lm.Password) ? lm.Password : lm.Pin;
                 var result = await _signinuser.CheckPasswordSignInAsync(user, secretToVerify, false);
                 if (!result.Succeeded)
                 {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using POSDb.Data;
@@ -6,6 +7,7 @@ using POSModels.Services;
 
 namespace PointOfSale.Controllers
 {
+    [Authorize(Roles = "admin,Admin")]
     public class ReportsController : Controller
     {
         private readonly IReportService _reportService;

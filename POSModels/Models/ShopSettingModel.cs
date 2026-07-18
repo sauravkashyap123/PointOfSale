@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,5 +22,6 @@ namespace POSModels.Models
 
         public int ShopId { get; set; }
         public List<SelectListItem>? selectshoplist { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

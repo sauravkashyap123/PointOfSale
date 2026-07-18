@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link href="~/css/homedashboard.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
 <div class="dash">
@@ -110,6 +111,46 @@
                     <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--purple)"></div></div>
                 </div>
 
+            </div>
+        </div>
+
+        <!-- ANALYTICS SECTION -->
+        <div class="analytics-section" style="margin-bottom: 28px;">
+            <div class="sec-head">
+                <h3>Visual Analytics</h3>
+                <span style="font-size: 13px; color: #64748b;">Live performance graphs</span>
+            </div>
+            
+            <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 15px;">
+                <!-- Sales Trend -->
+                <div class="chart-card" style="background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                    <div style="font-weight: 600; font-size: 15px; margin-bottom: 12px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size:18px;">📈</span> Sales Revenue (Last 7 Days)
+                    </div>
+                    <div style="position: relative; height: 260px;">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Stock Category -->
+                <div class="chart-card" style="background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                    <div style="font-weight: 600; font-size: 15px; margin-bottom: 12px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size:18px;">📂</span> Stock by Category
+                    </div>
+                    <div style="position: relative; height: 260px; display: flex; justify-content: center; align-items: center;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Products -->
+                <div class="chart-card" style="background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                    <div style="font-weight: 600; font-size: 15px; margin-bottom: 12px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size:18px;">⭐️</span> Top Selling Products
+                    </div>
+                    <div style="position: relative; height: 260px;">
+                        <canvas id="productsChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -359,4 +400,98 @@
     }
     tick();
     setInterval(tick, 1000);
+
+    // Dashboard Charts Initialization
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch('/Home/GetDashboardChartData')
+            .then(res => res.json())
+            .then(data => {
+                // Initialize Sales Chart
+                var salesCtx = document.getElementById('salesChart').getContext('2d');
+                var salesGradient = salesCtx.createLinearGradient(0, 0, 0, 240);
+                salesGradient.addColorStop(0, 'rgba(37, 99, 235, 0.22)');
+                salesGradient.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+
+                new Chart(salesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.sales.labels,
+                        datasets: [{
+                            label: 'Revenue (₹)',
+                            data: data.sales.values,
+                            borderColor: '#2563eb',
+                            borderWidth: 2.5,
+                            backgroundColor: salesGradient,
+                            fill: true,
+                            tension: 0.35,
+                            pointBackgroundColor: '#2563eb',
+                            pointHoverRadius: 6,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } },
+                            x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } }
+                        }
+                    }
+                });
+
+                // Initialize Category Stock Chart
+                var categoryCtx = document.getElementById('categoryChart').getContext('2d');
+                new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.categoryStock.labels.length > 0 ? data.categoryStock.labels : ['No Stock'],
+                        datasets: [{
+                            data: data.categoryStock.values.length > 0 ? data.categoryStock.values : [1],
+                            backgroundColor: data.categoryStock.values.length > 0 
+                                ? ['#7c3aed', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#ef4444', '#3b82f6']
+                                : ['#e2e8f0'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 10, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                            }
+                        }
+                    }
+                });
+
+                // Initialize Top Products Chart
+                var productsCtx = document.getElementById('productsChart').getContext('2d');
+                new Chart(productsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.topProducts.labels.length > 0 ? data.topProducts.labels : ['No Sales'],
+                        datasets: [{
+                            label: 'Quantity Sold',
+                            data: data.topProducts.values.length > 0 ? data.topProducts.values : [0],
+                            backgroundColor: '#7c3aed',
+                            borderRadius: 4,
+                            barThickness: 15
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } },
+                            y: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } }
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error("Error loading dashboard charts:", err));
+    });
 </script>

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using POSDb.Data;
 using POSDb.EntityModels;
 using POSModels.Models;
 using POSModels.Models.MithaiShop;
@@ -12,12 +13,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace PointOfSale.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "admin,Admin")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -26,8 +28,9 @@ namespace PointOfSale.Controllers
         private readonly ILoginViewModels _loginview;
         public readonly ISelectItemService _selectlistitem;
         public readonly IBillingService _billing;
+        private readonly ApplicationDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger, IHomeService homeService, ISelectItemService selectitemservice, ILoginViewModels loginview, ISelectItemService selectlistitem, IBillingService billing)
+        public HomeController(ILogger<HomeController> logger, IHomeService homeService, ISelectItemService selectitemservice, ILoginViewModels loginview, ISelectItemService selectlistitem, IBillingService billing, ApplicationDbContext context)
         {
             _logger = logger;
             _homeservice = homeService;
@@ -35,6 +38,7 @@ namespace PointOfSale.Controllers
             _loginview = loginview;
             _selectlistitem = selectlistitem;
             _billing = billing;
+            _context = context;
         }
         public IActionResult Index()
         {
@@ -42,6 +46,62 @@ namespace PointOfSale.Controllers
             ViewBag.OperatorName = User.Identity.Name;
             ViewBag.OperatorRole = "Admin";
             return View(ab);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDashboardChartData()
+        {
+            try
+            {
+                // 1. Sales Revenue Over Time (Last 7 Days)
+                var last7Days = Enumerable.Range(0, 7)
+                    .Select(i => DateTime.Today.AddDays(-i))
+                    .OrderBy(d => d)
+                    .ToList();
+
+                var salesDataRaw = await _context.tblSaleInvoice
+                    .Where(x => x.InvoiceDate >= last7Days.First())
+                    .GroupBy(x => x.InvoiceDate.Date)
+                    .Select(g => new { Date = g.Key, Total = g.Sum(x => x.TotalAmount) })
+                    .ToListAsync();
+
+                var salesLabels = last7Days.Select(d => d.ToString("dd MMM")).ToList();
+                var salesValues = last7Days.Select(d => salesDataRaw.FirstOrDefault(s => s.Date == d)?.Total ?? 0.00m).ToList();
+
+                // 2. Stock Distribution by Category
+                var stockCategoryRaw = await (from s in _context.tblstock
+                                              join p in _context.tblProduct on s.ProductId equals p.Id
+                                              join c in _context.tblCategory on p.CategoryId equals c.Id
+                                              group s.Quantity by c.CategoryName into g
+                                              select new { Category = g.Key, Stock = g.Sum() })
+                                              .ToListAsync();
+
+                var categoryLabels = stockCategoryRaw.Select(x => x.Category).ToList();
+                var categoryValues = stockCategoryRaw.Select(x => x.Stock).ToList();
+
+                // 3. Top Selling Products
+                var topProductsRaw = await (from d in _context.tblSaleDetailsInvoice
+                                            join p in _context.tblProduct on d.ProductId equals p.Id
+                                            group d.Quantity by p.ProductName into g
+                                            orderby g.Sum() descending
+                                            select new { Product = g.Key, Qty = g.Sum() })
+                                            .Take(5)
+                                            .ToListAsync();
+
+                var topProductLabels = topProductsRaw.Select(x => x.Product).ToList();
+                var topProductValues = topProductsRaw.Select(x => x.Qty).ToList();
+
+                return Json(new
+                {
+                    sales = new { labels = salesLabels, values = salesValues },
+                    categoryStock = new { labels = categoryLabels, values = categoryValues },
+                    topProducts = new { labels = topProductLabels, values = topProductValues }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
         public IActionResult AddWarehouse()
         {

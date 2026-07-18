@@ -649,7 +649,7 @@ namespace POSModels.ViewModels
 
                 // Get Shop print data
                 var printData = await _context.tblprintdata
-                    .FirstOrDefaultAsync(p => p.ShopId == dbInvoice.shopid);
+                    .FirstOrDefaultAsync(p => p.ShopId == dbInvoice.shopid && p.IsActive);
 
                 if (printData != null)
                 {
@@ -705,7 +705,8 @@ namespace POSModels.ViewModels
                             GSTNumber = d.GSTNumber,
                             MobileNo = d.MobileNo,
                             Address = d.Address,
-                            ShopId = d.ShopId
+                            ShopId = d.ShopId,
+                            IsActive = d.IsActive
                         }).FirstOrDefault();
                 return ab;
             }
@@ -759,6 +760,7 @@ namespace POSModels.ViewModels
                     esm.StoreName = ssm.StoreName;
                     esm.GSTNumber = ssm.GSTNumber;
                     esm.MobileNo = ssm.MobileNo;
+                    esm.IsActive = true;
                     _context.tblprintdata.Update(esm);
                 }
                 else
@@ -769,7 +771,8 @@ namespace POSModels.ViewModels
                         Address = ssm.Address,
                         StoreName = ssm.StoreName,
                         GSTNumber = ssm.GSTNumber,
-                        MobileNo = ssm.MobileNo
+                        MobileNo = ssm.MobileNo,
+                        IsActive = true
                     };
                     _context.tblprintdata.Add(esm);
                 }
@@ -793,6 +796,7 @@ namespace POSModels.ViewModels
             {
                 var ab = (from d in _context.tblprintdata
                           join sh in _context.tblShop on d.ShopId equals sh.Id
+                          where d.IsActive
                           select new ShopSettingModel
                           {
                               GSTNumber=d.GSTNumber,
@@ -801,6 +805,7 @@ namespace POSModels.ViewModels
                               Address=d.Address,
                               Id=d.Id,
                               ShopName=sh.ShopName,
+                              IsActive=d.IsActive
                           }).ToList();
                 return ab;
             }
@@ -808,6 +813,38 @@ namespace POSModels.ViewModels
             {
 
                 return new List<ShopSettingModel>();
+            }
+        }
+
+        public AllResponseMessage DeletePrintData(int id)
+        {
+            try
+            {
+                var record = _context.tblprintdata.Find(id);
+                if (record != null)
+                {
+                    record.IsActive = false;
+                    _context.tblprintdata.Update(record);
+                    _context.SaveChanges();
+                    return new AllResponseMessage
+                    {
+                        Result = true,
+                        Message = "Store settings marked inactive successfully"
+                    };
+                }
+                return new AllResponseMessage
+                {
+                    Result = false,
+                    Message = "Record not found"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new AllResponseMessage
+                {
+                    Result = false,
+                    Message = "Error: " + ex.Message
+                };
             }
         }
 
@@ -851,7 +888,7 @@ namespace POSModels.ViewModels
                 if (id > 0)
                 {
                     var ab = (from d in _context.tblprintdata
-                              where d.ShopId == id
+                              where d.ShopId == id && d.IsActive
                               select new
                               {
                                   d.StoreName,

@@ -12,7 +12,7 @@ using System.Data;
 
 namespace PointOfSale.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "admin,Admin,Warehouse Manager,warehouse manager,Warehouse")]
     public class WarehouseController : Controller
     {
         private readonly ISelectItemService _selectItemService;
@@ -29,6 +29,67 @@ namespace PointOfSale.Controllers
         public IActionResult Dashboard()
         {
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWarehouseDashboardData()
+        {
+            try
+            {
+                var warehousecode = User.Identity?.Name;
+                var warehouse = await _context.tblwarehouse.FirstOrDefaultAsync(w => w.WarehouseCode == warehousecode);
+                if (warehouse == null)
+                {
+                    return BadRequest("Warehouse not found.");
+                }
+                var warehouseid = warehouse.Id;
+
+                // 1. Total warehouse stock items (Quantity > 0)
+                var activeStockItems = await _context.tblWarehousestock.CountAsync(x => x.WarehouseId == warehouseid && x.Quantity > 0);
+
+                // 2. Total transfers
+                var totalTransfers = await _context.tblStockTransfer.CountAsync(x => x.FromShopId == warehouseid);
+
+                // 3. Total adjustments (based on warehouse stock history)
+                var totalAdjustments = await _context.tblWarehousestockhistory.CountAsync(x => x.WarehouseId == warehouseid && (x.ReferenceType == "ShopToWarehouseTransfer" || x.Remarks.Contains("Adjustment") || x.Remarks.Contains("Adjust")));
+
+                // 4. Top stock items in this warehouse
+                var topStockRaw = await (from s in _context.tblWarehousestock
+                                         join p in _context.tblProduct on s.ProductId equals p.Id
+                                         where s.WarehouseId == warehouseid && s.Quantity > 0
+                                         orderby s.Quantity descending
+                                         select new { Product = p.ProductName, Qty = s.Quantity })
+                                         .Take(5)
+                                         .ToListAsync();
+
+                var stockLabels = topStockRaw.Select(x => x.Product).ToList();
+                var stockValues = topStockRaw.Select(x => x.Qty).ToList();
+
+                // 5. Transfer destinations
+                var transferDestinations = await (from t in _context.tblStockTransfer
+                                                   join sh in _context.tblShop on t.ToShopId equals sh.Id
+                                                   where t.FromShopId == warehouseid
+                                                   group t by sh.ShopName into g
+                                                   select new { Shop = g.Key, Count = g.Count() })
+                                                   .ToListAsync();
+
+                var destLabels = transferDestinations.Select(x => x.Shop).ToList();
+                var destValues = transferDestinations.Select(x => x.Count).ToList();
+
+                return Json(new
+                {
+                    activeStockItems = activeStockItems,
+                    totalTransfers = totalTransfers,
+                    totalAdjustments = totalAdjustments,
+                    warehouseName = warehouse.WarehouseName,
+                    stock = new { labels = stockLabels, values = stockValues },
+                    destinations = new { labels = destLabels, values = destValues }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
         public async Task<IActionResult> StockTransfer()
         {

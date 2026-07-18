@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace PointOfSale.Controllers
 {
-        //[Authorize]
+        [Authorize(Roles = "admin,Admin,staff,Staff")]
         public class BillingController : Controller
         {
             private readonly ApplicationDbContext _db;
@@ -61,7 +61,7 @@ namespace PointOfSale.Controllers
             ViewBag.StaffShortName = GetShortName(staffdetails.Name);
 
             // Fetch active shop details for print / header display
-            var printData = await _db.tblprintdata.FirstOrDefaultAsync(p => p.ShopId == shopid);
+            var printData = await _db.tblprintdata.FirstOrDefaultAsync(p => p.ShopId == shopid && p.IsActive);
             if (printData != null)
             {
                 ViewBag.ShopName = printData.StoreName;
@@ -274,34 +274,42 @@ namespace PointOfSale.Controllers
         [HttpGet]
         public async Task<IActionResult> SearchProducts(string q, string? category)
         {
-            var products = await _homeService.GetAllProductList();
+            string userid = User.Identity?.Name;
+            int shopid = 0;
+            if (!string.IsNullOrEmpty(userid))
+            {
+                shopid = _billing.GetCurrentShopId(userid);
+            }
+
+            var query = from d in _db.tblProduct
+                        join c in _db.tblCategory on d.CategoryId equals c.Id
+                        join u in _db.tblUnit on d.UnitId equals u.Id
+                        join s in _db.tblshopstock.Where(x => x.ShopId == shopid)
+                            on d.Id equals s.ProductId into stockGroup
+                        from s in stockGroup.DefaultIfEmpty()
+                        where d.IsActive == true
+                        select new
+                        {
+                            Id = d.Id,
+                            ProductName = d.ProductName,
+                            ProductCode = d.ProductCode,
+                            SaleRate = d.SaleRate,
+                            CategoryName = c.CategoryName,
+                            ImageUrl = d.ImageUrl,
+                            StockQuantity = s != null ? s.Quantity : 0
+                        };
 
             if (!string.IsNullOrWhiteSpace(category) && category != "Sab kuch")
             {
-                products = products
-                    .Where(p => p.CategoryName == category)
-                    .ToList();
+                query = query.Where(x => x.CategoryName == category);
             }
 
             if (!string.IsNullOrWhiteSpace(q))
             {
-                products = products
-                    .Where(p => p.ProductName.Contains(q, StringComparison.OrdinalIgnoreCase)
-                             || p.ProductCode.Contains(q, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                query = query.Where(x => x.ProductName.Contains(q) || x.ProductCode.Contains(q));
             }
 
-            var result = products.Select(p => new
-            {
-                p.Id,
-                p.ProductName,
-                p.ProductCode,
-                p.SaleRate,
-                p.CategoryName,
-                p.ImageUrl,
-                p.StockQuantity
-            }).ToList();
-
+            var result = await query.ToListAsync();
             return Ok(result);
         }
 
@@ -374,6 +382,12 @@ namespace PointOfSale.Controllers
             {
                 List<ShopSettingModel> ls = _billing.GetAllPrintDataContent();
                 return View(ls);
+            }
+
+            public IActionResult DeletePrintData(int id)
+            {
+                _billing.DeletePrintData(id);
+                return RedirectToAction("AllPrintDataContent");
             }
 
            // Shop Sales List
