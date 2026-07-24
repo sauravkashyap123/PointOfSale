@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using POSModels.Models;
@@ -9,34 +8,37 @@ namespace PointOfSale.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly ILoginViewModels _loginview;
-        public AccountController(ILoginViewModels loginview)
+        private readonly IAuthService _authService;
+
+        public AccountController(IAuthService authService)
         {
-            _loginview = loginview;
+            _authService = authService;
         }
+
         public IActionResult Login()
         {
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginModel lm)
         {
-            AllResponseMessage resp =await _loginview.AllUserLogin(lm);
-            if (resp.Extra.TryGetValue(4, out var extraItem))
+            AllResponseMessage resp = await _authService.AllUserLoginAsync(lm);
+            if (resp.Extra != null && resp.Extra.TryGetValue(4, out var extraItem))
             {
                 ViewBag.Role = extraItem;
             }
             else
             {
-                ViewBag.Role = "DefaultRole"; // Or handle the missing key as needed
+                ViewBag.Role = "DefaultRole";
             }
-            return Ok(new {result=resp.Result,message=resp.Message, redirect=resp.redirect});
+            return Ok(new { result = resp.Result, message = resp.Message, redirect = resp.redirect });
         }
 
         [HttpPost]
         public async Task<IActionResult> PinLogin([FromBody] LoginModel lm)
         {
-            AllResponseMessage resp = await _loginview.AllUserLogin(lm);
+            AllResponseMessage resp = await _authService.AllUserLoginAsync(lm);
 
             if ((bool)resp.Result)
             {
@@ -54,12 +56,10 @@ namespace PointOfSale.Controllers
                 message = resp.Message
             });
         }
+
         public async Task<IActionResult> Logout()
         {
-            //HttpContext.Session.Clear();
-
             await HttpContext.SignOutAsync();
-
             return RedirectToAction("Login", "Account");
         }
     }

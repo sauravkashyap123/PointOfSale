@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using POSDb.Data; // apna namespace
 using POSDb.EntityModels;
@@ -34,13 +34,19 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ILoginViewModels, LoginViewModels>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IHomeService, HomeViewModel>();
 builder.Services.AddScoped<ISelectItemService, SelectViewModel>();
 builder.Services.AddScoped<IPurchaseService, PurchaseViewModel>();
 builder.Services.AddScoped<IBillingService, BillingService>();
+builder.Services.AddScoped<ICachedProductService, CachedProductService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+
 builder.Services.AddControllersWithViews();
+builder.Services.AddServerSideBlazor();
+builder.Services.AddSignalR();
 builder.Services.AddHttpContextAccessor();
 
 
@@ -76,5 +82,7 @@ app.MapControllerRoute(
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.MapRazorPages();
+app.MapBlazorHub();
+app.MapHub<PointOfSale.Hubs.POSHub>("/posHub");
 
 app.Run();

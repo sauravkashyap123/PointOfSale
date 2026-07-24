@@ -172,8 +172,13 @@
 </style>
 
 <div class="db-container">
+    <!-- Interactive Blazor Live Inventory Dashboard -->
+    <div class="mb-6">
+        <component type="typeof(PointOfSale.Components.Pages.InventoryDashboard)" render-mode="ServerPrerendered" />
+    </div>
+
     <div class="db-header">
-        <h1 class="db-title">Warehouse Dashboard</h1>
+        <h1 class="db-title">Warehouse Dashboard Analytics</h1>
         <p class="db-subtitle">Welcome back, @User.Identity.Name! Manage stock transfers and alignments here.</p>
     </div>
 

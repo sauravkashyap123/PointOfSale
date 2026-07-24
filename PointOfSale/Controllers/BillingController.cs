@@ -20,16 +20,17 @@ namespace PointOfSale.Controllers
         {
             private readonly ApplicationDbContext _db;
             private readonly IBillingService _billing;
-            private const string CartSessionKey = "POS_CART";
             private readonly IHomeService _homeService;
             private readonly ISelectItemService _selectlistitem;
+            private readonly ICachedProductService? _cachedProductService;
 
-            public BillingController(ApplicationDbContext db, IBillingService billing,IHomeService homeService,ISelectItemService selectItemService)
+            public BillingController(ApplicationDbContext db, IBillingService billing, IHomeService homeService, ISelectItemService selectItemService, ICachedProductService? cachedProductService = null)
             {
                 _db = db;
                 _billing = billing;
                 _homeService = homeService;
                 _selectlistitem = selectItemService;
+                _cachedProductService = cachedProductService;
             }
 
             public async Task<IActionResult> Index()
@@ -60,13 +61,12 @@ namespace PointOfSale.Controllers
             ViewBag.StaffName = staffdetails.Name;
             ViewBag.StaffShortName = GetShortName(staffdetails.Name);
 
-            // Fetch active shop details for print / header display
             var printData = await _db.tblprintdata.FirstOrDefaultAsync(p => p.ShopId == shopid && p.IsActive);
             if (printData != null)
             {
                 ViewBag.ShopName = printData.StoreName;
-                ViewBag.Address = printData.Address;
                 ViewBag.Mobileno = printData.MobileNo;
+                ViewBag.Address = printData.Address;
                 ViewBag.Gstnumber = printData.GSTNumber;
             }
             else
@@ -78,10 +78,13 @@ namespace PointOfSale.Controllers
                 ViewBag.Gstnumber = "20XXXXXXXXXX";
             }
 
-            // --- Short Name Generation Logic ---
-           
-                return View();
-            }
+            return View();
+        }
+
+        public IActionResult Terminal()
+        {
+            return View();
+        }
 
         public string GetShortName(string name)
         {

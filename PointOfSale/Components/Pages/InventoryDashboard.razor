@@ -1,0 +1,171 @@
+@using Microsoft.AspNetCore.Components
+@using POSModels.Models
+@using POSModels.Services
+@using System.Threading.Tasks
+@inject IBillingService BillingService
+@inject ICachedProductService CachedProductService
+
+<div class="inventory-blazor-container font-sans text-slate-800 p-2">
+    <!-- Header -->
+    <div class="flex justify-between items-center bg-slate-800 text-white p-4 rounded-xl shadow mb-4">
+        <div>
+            <h3 class="text-lg font-bold">📦 Warehouse & Shop Real-Time Inventory Control</h3>
+            <p class="text-xs text-slate-400">Live Stock Monitoring & Instant Transfers</p>
+        </div>
+        <button class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition shadow" @onclick="LoadStockData">
+            🔄 Refresh Stock
+        </button>
+    </div>
+
+    <!-- Stock Search & Alert Filter -->
+    <div class="flex items-center space-x-3 mb-4">
+        <div class="relative flex-1">
+            <input type="text" 
+                   class="w-full pl-3 pr-4 py-2 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                   placeholder="Search Stock Item..." 
+                   @bind="SearchTerm" 
+                   @bind:event="oninput" />
+        </div>
+        <button class="text-xs font-bold px-3 py-2 rounded-lg border border-amber-300 bg-amber-50 text-amber-800" @onclick="ToggleLowStockFilter">
+            ⚠️ Low Stock Only (@LowStockCount)
+        </button>
+    </div>
+
+    <!-- Stock Table -->
+    <div class="bg-white rounded-xl shadow border border-slate-100 overflow-hidden">
+        @if (IsLoading)
+        {
+            <div class="py-12 text-center text-slate-400 text-xs">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto mb-2"></div>
+                <span>Loading Stock Data...</span>
+            </div>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 border-b border-slate-200 text-slate-600 uppercase font-bold text-[10px]">
+                            <th class="p-3">Product Name</th>
+                            <th class="p-3">Product Code</th>
+                            <th class="p-3 text-right">Available Stock</th>
+                            <th class="p-3 text-right">Sale Price</th>
+                            <th class="p-3 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach (var item in DisplayItems)
+                        {
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="p-3 font-semibold text-slate-800">@item.ProductName</td>
+                                <td class="p-3 font-mono text-slate-500">@item.ProductCode</td>
+                                <td class="p-3 text-right font-bold text-slate-900">@item.StockQty @item.UnitName</td>
+                                <td class="p-3 text-right font-semibold text-indigo-600">₹@item.SalePrice</td>
+                                <td class="p-3 text-center">
+                                    @if (item.StockQty <= 10)
+                                    {
+                                        <span class="px-2 py-0.5 bg-rose-100 text-rose-700 font-bold rounded-full text-[10px]">Low Stock</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 font-bold rounded-full text-[10px]">Normal</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string SearchTerm = "";
+    private bool FilterLowStock = false;
+    private bool IsLoading = true;
+
+    private class StockDisplayItem
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; } = "";
+        public string ProductCode { get; set; } = "";
+        public int StockQty { get; set; }
+        public decimal SalePrice { get; set; }
+        public string UnitName { get; set; } = "Pcs";
+    }
+
+    private List<StockDisplayItem> StockItems = new();
+
+    private IEnumerable<StockDisplayItem> DisplayItems =>
+        StockItems.Where(i => (string.IsNullOrWhiteSpace(SearchTerm) || i.ProductName.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) || i.ProductCode.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)) &&
+                              (!FilterLowStock || i.StockQty <= 10));
+
+    private int LowStockCount => StockItems.Count(i => i.StockQty <= 10);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStockData();
+    }
+
+    private async Task LoadStockData()
+    {
+        IsLoading = true;
+        try
+        {
+            var rawList = await CachedProductService.GetCachedStockListAsync();
+            StockItems = rawList.Select(r => new StockDisplayItem
+            {
+                ProductId = GetDynamicProp(r, "ProductId", 0),
+                ProductName = GetDynamicProp(r, "ProductName", "Item"),
+                ProductCode = GetDynamicProp(r, "ProductCode", "P-100"),
+                StockQty = GetDynamicProp(r, "StockQty", 50),
+                SalePrice = GetDynamicPropDecimal(r, "SalePrice", 100m),
+                UnitName = GetDynamicProp(r, "UnitName", "Pcs")
+            }).ToList();
+        }
+        catch { }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void ToggleLowStockFilter()
+    {
+        FilterLowStock = !FilterLowStock;
+    }
+
+    private string GetDynamicProp(object obj, string propName, string defaultVal)
+    {
+        try
+        {
+            var p = obj.GetType().GetProperty(propName);
+            var val = p?.GetValue(obj, null)?.ToString();
+            return string.IsNullOrEmpty(val) ? defaultVal : val;
+        }
+        catch { return defaultVal; }
+    }
+
+    private int GetDynamicProp(object obj, string propName, int defaultVal)
+    {
+        try
+        {
+            var p = obj.GetType().GetProperty(propName);
+            var val = p?.GetValue(obj, null);
+            return val != null ? Convert.ToInt32(val) : defaultVal;
+        }
+        catch { return defaultVal; }
+    }
+
+    private decimal GetDynamicPropDecimal(object obj, string propName, decimal defaultVal)
+    {
+        try
+        {
+            var p = obj.GetType().GetProperty(propName);
+            var val = p?.GetValue(obj, null);
+            return val != null ? Convert.ToDecimal(val) : defaultVal;
+        }
+        catch { return defaultVal; }
+    }
+}
